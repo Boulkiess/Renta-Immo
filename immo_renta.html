@@ -117,12 +117,22 @@ tr:nth-child(even) td{background:var(--s2)}
 .yb{font-size:10px;color:var(--muted);font-weight:700;padding-top:5px}
 .am-lg{display:flex;gap:10px;font-size:10px;color:var(--muted);margin-bottom:4px}
 .am-d{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:3px;vertical-align:middle}
+.exp-opt{display:block;width:100%;background:transparent;border:none;color:var(--text);font-family:inherit;font-size:11px;font-weight:600;padding:6px 10px;border-radius:5px;cursor:pointer;text-align:left;white-space:nowrap;transition:background .1s}
+.exp-opt:hover{background:var(--border)}
 </style>
 </head>
 <body>
 <div class="nav">
   <div class="nav-brand"><span>🏠</span><span>ImmoRenta</span><span class="badge">ANALYSE PRO v3</span></div>
   <div class="tabs" id="tabs"></div>
+  <div style="position:relative;flex-shrink:0;margin-left:6px" id="exp-wrap">
+    <button onclick="toggleExpMenu()" style="background:var(--border);border:1px solid var(--subtle);border-radius:6px;color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:4px">↓ Export <span id="exp-arr" style="font-size:9px;display:inline-block;transition:transform .15s">▾</span></button>
+    <div id="exp-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#0a1628;border:1px solid #334155;border-radius:8px;padding:4px;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.8)">
+      <button class="exp-opt" onclick="doExport('csv')">📊 CSV</button>
+      <button class="exp-opt" onclick="doExport('json')">{ } JSON</button>
+      <button class="exp-opt" onclick="doExport('yaml')">📄 YAML</button>
+    </div>
+  </div>
 </div>
 <div class="gs" id="gs"></div>
 <div class="layout">
@@ -469,6 +479,7 @@ document.addEventListener('click',e=>{
   const btn=e.target.closest('.ib');
   if(btn){e.stopPropagation();const k=btn.dataset.info;if(k===popKey){popEl.style.display='none';popKey=null;return;}showPop(k,btn);return;}
   if(popKey){popEl.style.display='none';popKey=null;}
+  if(_expOpen&&!e.target.closest('#exp-wrap')){_expOpen=false;document.getElementById('exp-menu').style.display='none';document.getElementById('exp-arr').style.transform='';}
 });
 // ══════════════════════════════════════════════════════════
 // FIELD DEFINITIONS
@@ -832,6 +843,189 @@ function calcTRIFromRes(res,h){
   if(h>30||h<1||!res.flux[h-1])return null;
   const flows=[-res.flux[0]?.le?0:0]; // placeholder, use compute's TRI instead
   return res[`tri${h}`]||null;
+}
+
+// ══════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════
+function buildExportData(){
+  const d={global:{...G},simulations:{}};
+  KEYS.forEach(k=>{
+    const p=sims[k],r=compute(p);
+    d.simulations[k]={
+      label:p.label,enabled:p.enabled,
+      inputs:{...p},
+      computed:{
+        coutTotal:r.ct,montantEmprunte:r.emp,
+        mensualite:Math.round(r.mens),assuranceMensuelle:Math.round(r.assM),
+        totalInterets:Math.round(r.totInt),totalAssurance:Math.round(r.totAss),
+        rendementBrut:p.mode==='loc'?+r.rendBrut.toFixed(4):null,
+        rendementNet:p.mode==='loc'?+r.rendNet.toFixed(4):null,
+        cashflowMensuel:Math.round(r.cfM),
+        breakevenAns:r.be,
+        tri10ans:r.tri10!=null?+(r.tri10*100).toFixed(4):null,
+        tri15ans:r.tri15!=null?+(r.tri15*100).toFixed(4):null,
+        tri20ans:r.tri20!=null?+(r.tri20*100).toFixed(4):null,
+        van:Math.round(r.van),moic:r.moic?+r.moic.toFixed(4):null,
+        flux:r.flux.map(f=>({
+          annee:f.yr,
+          ...(p.mode==='loc'?{loyersEncaisses:Math.round(f.le)}:{loyerEconomise:Math.round(f.le)}),
+          charges:Math.round(f.chg),annuitePlusAssurance:Math.round(f.ann),
+          ...(p.mode==='loc'?{impots:Math.round(f.imp)}:{}),
+          cfNet:Math.round(f.cfN),cfCumule:Math.round(f.cfC),
+          valeurBien:Math.round(f.vb),capitalRestant:Math.round(f.rest),
+          patrimoineNet:Math.round(f.patNet),reventeNette:Math.round(f.reventeNet),
+          bilanRevente:Math.round(f.bilanRevente),
+        })),
+        ...(r.altFinancier?{altLouerInvestir:r.altFinancier.map(af=>({
+          annee:af.yr,capitalFinancier:Math.round(af.capFin),totalInvesti:Math.round(af.totalInvesti),
+        }))}:{}),
+      }
+    };
+  });
+  return d;
+}
+
+function dlFile(name,content,type){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type}));
+  a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+function exportToCSV(d){
+  const lines=[];
+  const esc=v=>{const s=String(v??'');return(s.includes(',')||s.includes('"')||s.includes('\n'))?`"${s.replace(/"/g,'""')}"`  :s;};
+  const row=(...c)=>lines.push(c.map(esc).join(','));
+  const lbls=KEYS.map(k=>d.simulations[k].label);
+
+  row('## Paramètres globaux');row('Paramètre','Valeur','Unité');
+  row('Inflation',d.global.inflation,'%/an');
+  row('Régime fiscal',d.global.regime);
+  row('Horizon',d.global.horizon,'ans');
+  row("Taux d'actualisation (VAN)",d.global.tauxActu,'%');
+  row('Rdt placement alternatif (net)',d.global.rendAlt,'%');
+  row('');
+
+  row('## Paramètres des simulations');row('Paramètre',...lbls);
+  [
+    ['Mode',k=>d.simulations[k].inputs.mode==='loc'?'Locatif':'RP'],
+    ["Prix d'achat (€)",k=>d.simulations[k].inputs.prixAchat],
+    ['Frais notaire (€)',k=>d.simulations[k].inputs.fraisNotaire],
+    ['Travaux (€)',k=>d.simulations[k].inputs.travaux],
+    ["Frais agence achat (€)",k=>d.simulations[k].inputs.fraisAgence],
+    ['Apport (€)',k=>d.simulations[k].inputs.apport],
+    ["Taux intérêt (%)",k=>d.simulations[k].inputs.taux],
+    ['Durée (ans)',k=>d.simulations[k].inputs.duree],
+    ['Assurance emprunteur (%)',k=>d.simulations[k].inputs.assurance],
+    ['Reval. bien (%/an)',k=>d.simulations[k].inputs.revalBien],
+    ['Frais agence vente (%)',k=>d.simulations[k].inputs.fraisVente],
+    ['Loyer mensuel brut (€)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.loyer:''],
+    ['Taux vacance (%)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.vacance:''],
+    ['Taxe foncière (€/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.taxeFonciere:d.simulations[k].inputs.taxeFonciereRP],
+    ['Charges copro (€/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.chargesCopro:d.simulations[k].inputs.chargesCoproRP],
+    ['Assurance PNO/Hab (€/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.assurPNO:d.simulations[k].inputs.assurHab],
+    ['Gestion locative (%)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.fraisGestion:''],
+    ['Provision travaux (€/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.provision:d.simulations[k].inputs.provisionRP],
+    ['Reval. loyer (%/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.revalLoyer:d.simulations[k].inputs.revalLoyerRP],
+    ['TMI (%)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.tmi:''],
+    ['Prélèvements sociaux (%)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.ps:''],
+    ['Amort. bien (%/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.amortBien:''],
+    ['Amort. travaux (%/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.amortTravaux:''],
+    ['Impôt PV (%)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.impotPV:''],
+    ['PS PV (%)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.psPV:''],
+    ['Loyer actuel (€/mois)',k=>d.simulations[k].inputs.mode==='rp'?d.simulations[k].inputs.loyerActuel:''],
+  ].forEach(([l,fn])=>row(l,...KEYS.map(fn)));
+  row('');
+
+  row('## Résultats calculés');row('Indicateur',...lbls);
+  [
+    ["Coût total acq. (€)",k=>d.simulations[k].computed.coutTotal],
+    ['Montant emprunté (€)',k=>d.simulations[k].computed.montantEmprunte],
+    ['Mensualité+ass (€)',k=>d.simulations[k].computed.mensualite+d.simulations[k].computed.assuranceMensuelle],
+    ['Total intérêts (€)',k=>d.simulations[k].computed.totalInterets],
+    ['Total assurance (€)',k=>d.simulations[k].computed.totalAssurance],
+    ['Rendement brut (%)',k=>d.simulations[k].computed.rendementBrut??''],
+    ['Rendement net (%)',k=>d.simulations[k].computed.rendementNet??''],
+    ['CF mensuel (€)',k=>d.simulations[k].computed.cashflowMensuel??''],
+    ['Breakeven (ans)',k=>d.simulations[k].computed.breakevenAns??'>30'],
+    ['TRI 10a (%)',k=>d.simulations[k].computed.tri10ans??'N/C'],
+    ['TRI 15a (%)',k=>d.simulations[k].computed.tri15ans??'N/C'],
+    ['TRI 20a (%)',k=>d.simulations[k].computed.tri20ans??'N/C'],
+    ['VAN (€)',k=>d.simulations[k].computed.van],
+    ['MOIC',k=>d.simulations[k].computed.moic??''],
+  ].forEach(([l,fn])=>row(l,...KEYS.map(fn)));
+  row('');
+
+  KEYS.forEach(k=>{
+    const s=d.simulations[k],isLoc=s.inputs.mode==='loc';
+    row(`## Flux annuels — ${s.label}`);
+    row('Année',isLoc?'Loyers encaissés (€)':'Loyer économisé (€)',
+      'Charges (€)','Annuité+Ass (€)',...(isLoc?['Impôts (€)']:[]),
+      'CF net (€)','CF cumulé (€)','Valeur bien (€)',
+      'Capital restant (€)','Patrimoine net (€)','Revente nette (€)','Bilan revente (€)',
+      ...(s.computed.altLouerInvestir?['Alt. Louer+Investir (€)']:[]));
+    s.computed.flux.forEach((f,i)=>{
+      row(f.annee,isLoc?f.loyersEncaisses:f.loyerEconomise,
+        f.charges,f.annuitePlusAssurance,...(isLoc?[f.impots]:[]),
+        f.cfNet,f.cfCumule,f.valeurBien,f.capitalRestant,
+        f.patrimoineNet,f.reventeNette,f.bilanRevente,
+        ...(s.computed.altLouerInvestir?[s.computed.altLouerInvestir[i]?.capitalFinancier??'']:[]));
+    });
+    row('');
+  });
+  return lines.join('\n');
+}
+
+function toYAML(val,depth=0){
+  const pad='  '.repeat(depth);
+  if(val===null||val===undefined)return'null';
+  if(typeof val==='boolean')return String(val);
+  if(typeof val==='number')return isFinite(val)?String(val):'null';
+  if(typeof val==='string'){
+    const nq=val===''||['true','false','null','yes','no'].includes(val.toLowerCase())||
+      /^[\d\-]/.test(val)||/[\n:#\[\]{},&*?|<>=!%@`"']/.test(val);
+    return nq?JSON.stringify(val):val;
+  }
+  if(Array.isArray(val)){
+    if(!val.length)return'[]';
+    return val.map(item=>{
+      if(item!==null&&typeof item==='object'){
+        const inner=toYAML(item,depth+1);
+        const ipad='  '.repeat(depth+1);
+        const nl=inner.indexOf('\n');
+        const first=nl>=0?inner.slice(0,nl):inner;
+        const rest=nl>=0?inner.slice(nl):'';
+        return`${pad}- ${first.slice(ipad.length)}${rest}`;
+      }
+      return`${pad}- ${toYAML(item,0)}`;
+    }).join('\n');
+  }
+  const entries=Object.entries(val);
+  if(!entries.length)return'{}';
+  return entries.map(([k,v])=>{
+    if(v!==null&&typeof v==='object'){
+      if(Array.isArray(v)&&!v.length)return`${pad}${k}: []`;
+      if(!Array.isArray(v)&&!Object.keys(v).length)return`${pad}${k}: {}`;
+      return`${pad}${k}:\n${toYAML(v,depth+1)}`;
+    }
+    return`${pad}${k}: ${toYAML(v,0)}`;
+  }).join('\n');
+}
+
+let _expOpen=false;
+function toggleExpMenu(){
+  _expOpen=!_expOpen;
+  document.getElementById('exp-menu').style.display=_expOpen?'block':'none';
+  document.getElementById('exp-arr').style.transform=_expOpen?'rotate(180deg)':'';
+}
+function doExport(fmt){
+  toggleExpMenu();
+  const d=buildExportData();
+  const ts=new Date().toISOString().slice(0,10);
+  if(fmt==='json')dlFile(`immorenta_${ts}.json`,JSON.stringify(d,null,2),'application/json');
+  else if(fmt==='csv')dlFile(`immorenta_${ts}.csv`,exportToCSV(d),'text/csv');
+  else if(fmt==='yaml')dlFile(`immorenta_${ts}.yaml`,toYAML(d),'text/yaml');
 }
 
 // ══════════════════════════════════════════════════════════
