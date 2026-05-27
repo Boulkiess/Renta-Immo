@@ -133,6 +133,8 @@ tr:nth-child(even) td{background:var(--s2)}
       <button class="exp-opt" onclick="doExport('yaml')">📄 YAML</button>
     </div>
   </div>
+  <button onclick="document.getElementById('imp-in').click()" style="background:var(--border);border:1px solid var(--subtle);border-radius:6px;color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;padding:4px 10px;cursor:pointer;flex-shrink:0;margin-left:4px">↑ Import</button>
+  <input type="file" id="imp-in" accept=".json,.yaml,.yml,.csv" style="display:none" onchange="handleImport(this)">
 </div>
 <div class="gs" id="gs"></div>
 <div class="layout">
@@ -1011,6 +1013,165 @@ function toYAML(val,depth=0){
     }
     return`${pad}${k}: ${toYAML(v,0)}`;
   }).join('\n');
+}
+
+// ── Import ────────────────────────────────────────────────
+function parseCSVRow(line){
+  const cells=[];let cell='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){if(inQ&&line[i+1]==='"'){cell+='"';i++;}else inQ=!inQ;}
+    else if(c===','&&!inQ){cells.push(cell);cell='';}
+    else cell+=c;
+  }
+  cells.push(cell);return cells;
+}
+
+function parseCSVSections(text){
+  const sections={};let sec=null;
+  for(const raw of text.split('\n')){
+    const t=raw.trim();if(!t)continue;
+    if(t.startsWith('##')){sec=t.replace(/^##\s*/,'').trim();sections[sec]={headers:[],rows:[]};continue;}
+    if(!sec)continue;
+    const cells=parseCSVRow(raw).map(c=>c.trim());
+    if(!cells.some(c=>c))continue;
+    if(!sections[sec].headers.length)sections[sec].headers=cells;
+    else sections[sec].rows.push(cells);
+  }
+  return sections;
+}
+
+function yScalar(s){
+  s=s.trim();
+  if(!s||s==='null'||s==='~')return null;
+  if(s==='true')return true;if(s==='false')return false;
+  const n=Number(s);if(!isNaN(n)&&s!=='')return n;
+  if((s[0]==='"'||s[0]==="'")&&s[s.length-1]===s[0]){try{return JSON.parse(s);}catch(e){return s.slice(1,-1);}}
+  return s;
+}
+
+function parseYAMLFlat(text){
+  const flat={},stack=[];let skipTo=-1;
+  for(const line of text.split('\n')){
+    if(/^\s*(#.*)?$/.test(line))continue;
+    const li=line.search(/\S/),tr=line.trim();
+    while(stack.length&&stack[stack.length-1].i>=li)stack.pop();
+    if(skipTo>=0&&li>skipTo)continue;
+    skipTo=-1;
+    if(tr.startsWith('- ')){skipTo=li;continue;}
+    const ci=tr.indexOf(':');if(ci<0)continue;
+    const k=tr.slice(0,ci).trim(),vs=tr.slice(ci+1).trim();
+    if(vs&&!vs.startsWith('#'))flat[[...stack.map(s=>s.k),k].join('.')]=yScalar(vs);
+    stack.push({k,i:li});
+  }
+  return flat;
+}
+
+function restoreFromJSON(data){
+  if(!data||typeof data!=='object')throw new Error('Structure invalide');
+  const g=data.global||{};
+  if(g.inflation!=null)G.inflation=+g.inflation;
+  if(g.regime)G.regime=String(g.regime);
+  if(g.horizon!=null)G.horizon=+g.horizon;
+  if(g.tauxActu!=null)G.tauxActu=+g.tauxActu;
+  if(g.rendAlt!=null)G.rendAlt=+g.rendAlt;
+  const sData=data.simulations||{};
+  KEYS.forEach(k=>{
+    const s=sData[k];if(!s)return;
+    if(s.label!=null)sims[k].label=String(s.label);
+    if(s.enabled!=null)sims[k].enabled=s.enabled===true||s.enabled==='true';
+    const inp=s.inputs||{};
+    Object.keys(mkDef('loc')).forEach(f=>{
+      if(inp[f]==null)return;
+      if(f==='mode'||f==='label')sims[k][f]=String(inp[f]);
+      else if(f==='enabled')sims[k][f]=inp[f]===true||inp[f]==='true';
+      else{const n=parseFloat(inp[f]);if(!isNaN(n))sims[k][f]=n;}
+    });
+  });
+}
+
+function restoreFromYAML(flat){
+  if(flat['global.inflation']!=null)G.inflation=+flat['global.inflation'];
+  if(flat['global.regime'])G.regime=String(flat['global.regime']);
+  if(flat['global.horizon']!=null)G.horizon=+flat['global.horizon'];
+  if(flat['global.tauxActu']!=null)G.tauxActu=+flat['global.tauxActu'];
+  if(flat['global.rendAlt']!=null)G.rendAlt=+flat['global.rendAlt'];
+  KEYS.forEach(k=>{
+    const lbl=flat[`simulations.${k}.label`],en=flat[`simulations.${k}.enabled`];
+    if(lbl!=null)sims[k].label=String(lbl);
+    if(en!=null)sims[k].enabled=en===true||en==='true';
+    Object.keys(mkDef('loc')).forEach(f=>{
+      const v=flat[`simulations.${k}.inputs.${f}`];if(v==null)return;
+      if(f==='mode'||f==='label')sims[k][f]=String(v);
+      else if(f==='enabled')sims[k][f]=v===true||v==='true';
+      else{const n=parseFloat(v);if(!isNaN(n))sims[k][f]=n;}
+    });
+  });
+}
+
+function restoreFromCSV(sections){
+  const gSec=sections['Paramètres globaux'];
+  if(gSec){for(const r of gSec.rows){
+    const[p,v]=r,n=parseFloat(v);
+    if(p==='Inflation')G.inflation=n;
+    else if(p==='Régime fiscal')G.regime=v;
+    else if(p==='Horizon')G.horizon=n;
+    else if(p==="Taux d'actualisation (VAN)")G.tauxActu=n;
+    else if(p==='Rdt placement alternatif (net)')G.rendAlt=n;
+  }}
+  const sSec=sections['Paramètres des simulations'];if(!sSec)return;
+  KEYS.forEach((k,i)=>{const lbl=sSec.headers[i+1];if(lbl)sims[k].label=lbl;});
+  const fm={
+    'Mode':(p,v)=>{p.mode=v==='Locatif'?'loc':v==='RP'?'rp':v;},
+    "Prix d'achat (€)":(p,v)=>{p.prixAchat=+v;},
+    'Frais notaire (€)':(p,v)=>{p.fraisNotaire=+v;},
+    'Travaux (€)':(p,v)=>{p.travaux=+v;},
+    "Frais agence achat (€)":(p,v)=>{p.fraisAgence=+v;},
+    'Apport (€)':(p,v)=>{p.apport=+v;},
+    "Taux intérêt (%)":(p,v)=>{p.taux=+v;},
+    'Durée (ans)':(p,v)=>{p.duree=+v;},
+    'Assurance emprunteur (%)':(p,v)=>{p.assurance=+v;},
+    'Reval. bien (%/an)':(p,v)=>{p.revalBien=+v;},
+    'Frais agence vente (%)':(p,v)=>{p.fraisVente=+v;},
+    'Loyer mensuel brut (€)':(p,v)=>{if(v)p.loyer=+v;},
+    'Taux vacance (%)':(p,v)=>{if(v)p.vacance=+v;},
+    'Taxe foncière (€/an)':(p,v)=>{if(!v)return;p.mode==='loc'?(p.taxeFonciere=+v):(p.taxeFonciereRP=+v);},
+    'Charges copro (€/an)':(p,v)=>{if(!v)return;p.mode==='loc'?(p.chargesCopro=+v):(p.chargesCoproRP=+v);},
+    'Assurance PNO/Hab (€/an)':(p,v)=>{if(!v)return;p.mode==='loc'?(p.assurPNO=+v):(p.assurHab=+v);},
+    'Gestion locative (%)':(p,v)=>{if(v)p.fraisGestion=+v;},
+    'Provision travaux (€/an)':(p,v)=>{if(!v)return;p.mode==='loc'?(p.provision=+v):(p.provisionRP=+v);},
+    'Reval. loyer (%/an)':(p,v)=>{if(!v)return;p.mode==='loc'?(p.revalLoyer=+v):(p.revalLoyerRP=+v);},
+    'TMI (%)':(p,v)=>{if(v)p.tmi=+v;},
+    'Prélèvements sociaux (%)':(p,v)=>{if(v)p.ps=+v;},
+    'Amort. bien (%/an)':(p,v)=>{if(v)p.amortBien=+v;},
+    'Amort. travaux (%/an)':(p,v)=>{if(v)p.amortTravaux=+v;},
+    'Impôt PV (%)':(p,v)=>{if(v)p.impotPV=+v;},
+    'PS PV (%)':(p,v)=>{if(v)p.psPV=+v;},
+    'Loyer actuel (€/mois)':(p,v)=>{if(v)p.loyerActuel=+v;},
+  };
+  for(const row of sSec.rows){
+    const fn=fm[row[0]];if(!fn)continue;
+    KEYS.forEach((k,i)=>{const v=row[i+1];if(v!=null&&v!=='')fn(sims[k],v);});
+  }
+}
+
+function handleImport(input){
+  const file=input.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const text=e.target.result;
+      if(ext==='json')restoreFromJSON(JSON.parse(text));
+      else if(ext==='yaml'||ext==='yml')restoreFromYAML(parseYAMLFlat(text));
+      else if(ext==='csv')restoreFromCSV(parseCSVSections(text));
+      else throw new Error('Format non supporté : '+ext);
+      KEYS.forEach(k=>{openGrp[k]=sims[k].mode==='loc'?'Exploitation':'Résidence principale';renderPanel(k);});
+      buildGS();renderLegend();rebuildShell();scheduleRedraw();
+    }catch(err){alert('Erreur importation :\n'+err.message);}
+    finally{input.value='';}
+  };
+  reader.readAsText(file,'UTF-8');
 }
 
 let _expOpen=false;
