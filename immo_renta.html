@@ -156,7 +156,9 @@ const I={
 inflation:{t:"Inflation (IPC)",b:"Utilisé pour relativiser les performances en euros constants. N'affecte pas les flux nominaux calculés."},
 regime:{t:"Régime fiscal locatif",b:"<b>LMNP Réel</b> : amortissements déductibles (bien + travaux).<br><b>Micro-BIC</b> : abattement 50%.<br><b>Foncier nu réel</b> : charges réelles, sans amortissement."},
 tauxActu:{t:"Taux d'actualisation (VAN)",b:"Taux utilisé pour calculer la Valeur Actuelle Nette. Représente le coût d'opportunité du capital — typiquement le rendement attendu d'un placement alternatif."},
-rendAlt:{t:"Rendement placement alternatif",b:"Rendement annuel moyen du placement financier (ETF/bourse) utilisé dans le scénario 'Louer + Investir'. Historiquement ~7-8% brut pour un ETF World sur longue période, ~5-6% net après impôts et inflation."},
+rendAlt:{t:"Rendement ETF / placement alternatif",b:"Rendement annuel net du portefeuille ETF. Utilisé pour capitaliser le surplus mensuel investi dans <b>tous les scénarios</b> (loc, RP, ETF pur). Historiquement ~7-8% brut ETF World, ~5-6% net après impôts et inflation."},
+budgetMensuel:{t:"Budget mensuel logement+investissement",b:"Enveloppe mensuelle fixe disponible pour se loger <b>et</b> investir. Le surplus non consommé par les coûts réels (mensualité, loyer perso, charges…) est automatiquement investi en ETF. Permet une comparaison équitable entre tous les scénarios sur la même base de sacrifice mensuel."},
+investirSurplus:{t:"Investir le surplus en ETF",b:"Si activé : chaque mois, la différence entre le budget mensuel et les sorties réelles est investie en ETF au taux 'Rdt placement alternatif'.<br>Cela normalise la comparaison : chaque scénario utilise la même enveloppe mensuelle, l'argent non dépensé en immo va en ETF.<br>Le tiret représente le scénario <b>ETF pur</b> : même apport + même surplus investi sans aucun achat immobilier."},
 prixAchat:{t:"Prix d'achat net vendeur",b:"Prix payé au vendeur, hors frais.",code:"Rendement brut = Loyer×12 / Coût total"},
 fraisNotaire:{t:"Frais de notaire",b:"7-8% dans l'ancien, 2-3% dans le neuf."},
 travaux:{t:"Travaux de rénovation",b:"En LMNP Réel, amortissables sur plusieurs années.",code:"Amort. travaux = Travaux × Taux amort."},
@@ -192,7 +194,7 @@ provisionRP:{t:"Provision travaux RP",b:"Budget annuel pour l'entretien. ~1% de 
 // ══════════════════════════════════════════════════════════
 // GLOBALS
 // ══════════════════════════════════════════════════════════
-const G={inflation:2,regime:'lmnp',horizon:20,tauxActu:3,rendAlt:6,loyerPerso:900,revalLoyerPerso:2};
+const G={inflation:2,regime:'lmnp',horizon:20,tauxActu:3,rendAlt:6,loyerPerso:900,revalLoyerPerso:2,budgetMensuel:2500,investirSurplus:true};
 const COL={A:'#6C9AFF',B:'#FF9D5C',C:'#5CEFB0'};
 const KEYS=['A','B','C'];
 
@@ -247,14 +249,17 @@ function compute(p){
 
   const ab=p.prixAchat*(p.amortBien/100),at=p.travaux*(p.amortTravaux/100);
   const flux=[];let cfC=0;
-  // IRR cashflows: initial = -apport, then annual CF, last year += revente net
   const irrFlows=[-p.apport];
+  const rAlt=G.rendAlt/100;
+  let etfCap=0,etfPurCap=p.apport;
+  const etfPur=[];
 
   for(let yr=1;yr<=30;yr++){
     const mi=Math.min(yr*12,amort.length)-1;
     const rest=amort[mi]?.rest??0;
     const ann=yr<=p.duree?mens*12:0,asp=yr<=p.duree?assM*12:0;
     const vb=p.prixAchat*Math.pow(1+p.revalBien/100,yr);
+    const loyerPersoAnn=G.loyerPerso*12*Math.pow(1+G.revalLoyerPerso/100,yr-1);
 
     let cfN,le=0,chg=0,imp=0;
 
@@ -263,34 +268,42 @@ function compute(p){
       le=lb*(1-p.vacance/100);
       chg=p.taxeFonciere+p.chargesCopro+p.assurPNO+p.provision+lb*(p.fraisGestion/100);
       imp=impLoc(le,chg,ab,at,p.tmi,p.ps);
-      const loyerPersoAnn=G.loyerPerso*12*Math.pow(1+G.revalLoyerPerso/100,yr-1);
       cfN=le-chg-ann-asp-imp-loyerPersoAnn;
     } else {
-      // RP: "revenu" = loyer économisé, charges = taxe foncière + copro + assur + provision
-      const loyerEcon=G.loyerPerso*12*Math.pow(1+G.revalLoyerPerso/100,yr-1);
       chg=p.taxeFonciereRP+p.chargesCoproRP+p.assurHab+p.provisionRP;
-      cfN=loyerEcon-chg-ann-asp; // no tax on RP
-      le=loyerEcon;
+      cfN=loyerPersoAnn-chg-ann-asp;
+      le=loyerPersoAnn;
     }
     cfC+=cfN;
+
+    // Sortie réelle de trésorerie (hors notion de loyer économisé)
+    const realOutAnn=p.mode==='loc'?-cfN:chg+ann+asp;
+    const surplusAnn=Math.max(0,G.budgetMensuel*12-realOutAnn);
+    etfCap=etfCap*(1+rAlt)+(G.investirSurplus?surplusAnn:0);
+
+    // ETF pur : même apport investi + surplus (budget - loyer perso) chaque année
+    const surplusEtfPur=Math.max(0,G.budgetMensuel*12-loyerPersoAnn);
+    etfPurCap=etfPurCap*(1+rAlt)+(G.investirSurplus?surplusEtfPur:0);
+    etfPur.push({yr,cap:etfPurCap,surplus:surplusEtfPur});
 
     // Revente
     const pr=(p.prixAchat+p.travaux)*Math.pow(1+p.revalBien/100,yr);
     const fa=pr*(p.fraisVente/100);
     const pvB=Math.max(0,pr-p.prixAchat-p.travaux);
     let iPV=0;
-    if(p.mode==='loc') iPV=pvB*((p.impotPV+p.psPV)/100); // RP: exonérée
+    if(p.mode==='loc') iPV=pvB*((p.impotPV+p.psPV)/100);
     const reventeNet=pr-rest-fa-iPV;
     const bilanRevente=reventeNet+cfC-p.apport;
+    const patTotal=(vb-rest)+etfCap;
 
     flux.push({yr,le,chg,ann:ann+asp,imp,cfN,cfC,vb,rest,
       patNet:vb-rest+cfC-p.apport,
+      patTotal,etfPoche:etfCap,
       reventeNet,bilanRevente,pr});
 
     irrFlows.push(cfN);
   }
 
-  // Compute TRI at horizons by adding revente net to last flow
   function calcTRI(horizon){
     if(horizon>30||horizon<1)return null;
     const flows=[...irrFlows.slice(0,horizon+1)];
@@ -309,32 +322,6 @@ function compute(p){
   const cfM=p.mode==='loc'?p.loyer-mens-assM-G.loyerPerso:G.loyerPerso-mens-assM;
   const be=flux.findIndex(f=>f.cfC>=0);
 
-  // Scénario "Louer + Investir" (only for RP mode)
-  let altFinancier=null;
-  if(p.mode==='rp'){
-    const r=G.rendAlt/100;
-    const mensualiteRP=mens+assM;
-    altFinancier=[];
-    let capFin=p.apport; // apport investi dès le départ
-    let totalInvesti=p.apport;
-    let loyersCumules=0;
-    for(let yr=1;yr<=30;yr++){
-      // Chaque mois de l'année
-      for(let m=0;m<12;m++){
-        const loyerMois=G.loyerPerso*Math.pow(1+G.revalLoyerPerso/100,(yr-1));
-        loyersCumules+=loyerMois;
-        // Delta = mensualité RP - loyer actuel : si positif, on investit la différence
-        const delta=Math.max(0,mensualiteRP-loyerMois);
-        capFin=capFin*(1+r/12)+delta;
-        totalInvesti+=delta;
-      }
-      altFinancier.push({yr,capFin,loyersCumules,totalInvesti,
-        patrimoineNet:capFin, // pas de dette, le loyer est un coût opérationnel
-      });
-    }
-  }
-
-  // VAN
   function calcVAN(horizon){
     const r=G.tauxActu/100;
     let van=-p.apport;
@@ -347,7 +334,7 @@ function compute(p){
   }
 
   return{ct,emp,mens,assM,totInt,totAss,rendBrut,rendNet,cfM,
-    be:be>=0?be+1:null,flux,amort,altFinancier,
+    be:be>=0?be+1:null,flux,amort,etfPur,
     tri10:calcTRI(10),tri15:calcTRI(15),tri20:calcTRI(20),
     van:calcVAN(G.horizon),
     moic:flux[G.horizon-1]?(flux[G.horizon-1].bilanRevente+p.apport)/p.apport:0,
@@ -374,13 +361,13 @@ function irr(flows,guess=0.1,maxIter=100,tol=1e-7){
   return null;
 }
 
-// crossover year: when RP patrimoine > alt financier patrimoine
+// crossover year: when patTotal (immo + ETF poche) surpasses etfPur
 function crossoverYear(res){
-  if(!res.altFinancier)return null;
+  if(!res.etfPur||!G.investirSurplus)return null;
   for(let i=0;i<30;i++){
-    const rpPat=res.flux[i]?.patNet;
-    const altPat=res.altFinancier[i]?.patrimoineNet;
-    if(rpPat!=null&&altPat!=null&&rpPat>=altPat)return i+1;
+    const immo=res.flux[i]?.patTotal;
+    const etf=res.etfPur[i]?.cap;
+    if(immo!=null&&etf!=null&&immo>=etf)return i+1;
   }
   return null;
 }
@@ -555,8 +542,8 @@ function renderPanel(key){
     kpis=[
       ['Mensualité',fmtE(res.mens+res.assM)],
       ['Effort/mois',fmtE(res.mens+res.assM-G.loyerPerso),res.mens+res.assM>G.loyerPerso],
-      [`Patrim. ${G.horizon}a`,fmtE(res.flux[G.horizon-1]?.patNet)],
-      ['Croisement',cross?`Année ${cross}`:'> 30 ans'],
+      [`Patrim. tot. ${G.horizon}a`,fmtE(res.flux[G.horizon-1]?.patTotal)],
+      ['vs ETF pur',cross?`An ${cross}`:(G.investirSurplus?'> 30 ans':'—')],
     ];
   }
 
@@ -618,8 +605,8 @@ function updateKpiChips(key,res){
     chips[0].textContent=fmtE(res.mens+res.assM);
     const effort=res.mens+res.assM-G.loyerPerso;
     chips[1].textContent=fmtE(effort);chips[1].style.color=effort>0?'var(--red)':col;
-    chips[2].textContent=fmtE(res.flux[G.horizon-1]?.patNet);
-    chips[3].textContent=cross?`Année ${cross}`:'> 30 ans';
+    chips[2].textContent=fmtE(res.flux[G.horizon-1]?.patTotal);
+    chips[3].textContent=cross?`An ${cross}`:(G.investirSurplus?'> 30 ans':'—');
   }
 }
 
@@ -645,6 +632,9 @@ function buildGS(){
     <div class="gd"></div>
     <div class="gf"><span class="gl">Loyer actuel payé</span><button class="ib" data-info="loyerPerso">?</button><input class="gi" type="number" min="0" max="5000" step="50" value="${G.loyerPerso}" oninput="G.loyerPerso=+this.value;KEYS.forEach(k=>renderPanel(k));scheduleRedraw()"><span class="gu">€/mois</span></div>
     <div class="gf"><span class="gl">Reval. loyer</span><button class="ib" data-info="revalLoyerPerso">?</button><input class="gi" type="number" min="0" max="5" step="0.1" value="${G.revalLoyerPerso}" oninput="G.revalLoyerPerso=+this.value;scheduleRedraw()"><span class="gu">%/an</span></div>
+    <div class="gd"></div>
+    <div class="gf"><span class="gl">Budget mensuel</span><button class="ib" data-info="budgetMensuel">?</button><input class="gi" type="number" min="500" max="20000" step="100" value="${G.budgetMensuel}" oninput="G.budgetMensuel=+this.value;scheduleRedraw();renderLegend()" style="width:62px"><span class="gu">€/mois</span></div>
+    <div class="gf" style="gap:6px"><span class="gl">Surplus→ETF</span><button class="ib" data-info="investirSurplus">?</button><label class="tgl"><input type="checkbox" ${G.investirSurplus?'checked':''} onchange="G.investirSurplus=this.checked;KEYS.forEach(k=>renderPanel(k));renderLegend();scheduleRedraw()"><div class="track"></div><div class="knob"></div></label></div>
   `;
 }
 
@@ -666,9 +656,9 @@ function renderLegend(){
       <div class="ll" style="background:${on?col:'#475569'}"></div>
       <span style="color:${on?col:'#475569'}">${modeTag} ${p.label}</span>
     </div>`;
-    // For RP mode, also show the alt line
-    if(p.mode==='rp'&&on){
-      h+=`<div class="li" style="cursor:default"><div class="ll" style="background:${col};opacity:.4;border:1px dashed ${col}"></div><span style="color:${col};opacity:.5;font-size:10px">Louer+Investir (${p.label})</span></div>`;
+    // ETF pur reference line (when surplus toggle is active)
+    if(G.investirSurplus&&on){
+      h+=`<div class="li" style="cursor:default"><div class="ll" style="background:${col};opacity:.4;border:1px dashed ${col}"></div><span style="color:${col};opacity:.5;font-size:10px">ETF pur — ${p.label}</span></div>`;
     }
   });
   h+=`<span style="font-size:9px;color:var(--muted);margin-left:auto">Cliquer pour masquer/afficher</span>`;
@@ -682,11 +672,11 @@ function rebuildShell(){
   const area=document.getElementById('area');
   if(curTab==='charts'){
     area.innerHTML=`
-      <div class="cc"><div class="ct">💰 Cash-flow cumulé / Patrimoine financier — 30 ans</div>
-        <div class="cs">Pour le locatif : somme des CF nets annuels. Pour la RP : économie de loyer − charges − mensualité. Les courbes en pointillés montrent le scénario alternatif "Louer + Investir" pour les simulations RP.</div>
+      <div class="cc"><div class="ct">💰 Cash-flow immobilier cumulé — 30 ans</div>
+        <div class="cs">Flux nets cumulés de la seule poche immobilière. Locatif : loyers − charges − mensualité − impôts − loyer perso. RP : loyer économisé − charges − mensualité (notion comptable).</div>
         <canvas id="c1" data-h="230"></canvas></div>
-      <div class="cc" style="margin-top:10px"><div class="ct">🏦 Patrimoine net — 30 ans</div>
-        <div class="cs">Locatif : valeur bien − dette + CF cumulé − apport. RP : idem + PV exonérée. Pointillés : capital financier du scénario "Louer + Investir".</div>
+      <div class="cc" style="margin-top:10px"><div class="ct">🏦 Patrimoine total — 30 ans</div>
+        <div class="cs">Équité immobilière + portefeuille ETF constitué avec le surplus mensuel (budget − sorties réelles). Les <b>pointillés</b> = scénario ETF pur : même apport + surplus du budget investi sans achat. Base de comparaison équitable sur même enveloppe mensuelle.</div>
         <canvas id="c2" data-h="230"></canvas></div>
       <div class="cc" style="margin-top:10px"><div class="ct">📊 Cash-flow net annuel (après impôts)</div>
         <div class="cs">Le saut en fin de prêt est <strong>normal</strong> : les mensualités s'arrêtent, le CF bondit du montant de l'annuité disparue.</div>
@@ -698,7 +688,7 @@ function rebuildShell(){
     area.innerHTML=`<div class="cc" id="kpi-card"></div>`;
   } else if(curTab==='revente'){
     area.innerHTML=`<div class="cc"><div class="ct">🏷️ Bilan net selon l'année de revente</div>
-      <div class="cs">Gain total en poche si vous revendez cette année-là. RP exonérée d'impôt sur PV. Les pointillés montrent le scénario "Louer + Investir" pour les RP.</div>
+      <div class="cs">Gain net immo si vous revendez cette année (revente − dette − impôt PV + CF cumulés − apport). RP exonérée d'impôt sur PV. Pointillés = ETF pur de référence (même apport + budget investi) pour comparaison sur base égale.</div>
       <canvas id="cr" data-h="260"></canvas></div>
     <div class="cc" style="margin-top:10px"><div class="ct">📋 Détail par année clé</div><div id="rev-t"></div></div>`;
   } else if(curTab==='amort'){
@@ -731,22 +721,16 @@ function redraw(){
   const hide=k=>!sims[k].enabled;
 
   if(curTab==='charts'){
-    // Chart 1: CF cumulé + alt financier (dashed)
-    let ds1=[];
-    KEYS.forEach(k=>{
-      ds1.push({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.cfC),hide:hide(k),label:sims[k].label});
-      if(sims[k].mode==='rp'&&RES[k].altFinancier){
-        ds1.push({color:COL[k],data:yrs.map(i=>RES[k].altFinancier[i-1]?.patrimoineNet-sims[k].apport),hide:hide(k),dashed:true,label:`Louer+Investir (${sims[k].label})`});
-      }
-    });
+    // Chart 1: CF immobilier cumulé (immo-only, no ETF)
+    const ds1=KEYS.map(k=>({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.cfC),hide:hide(k),label:sims[k].label}));
     drawLine('c1',ds1,yrs);attachHover('c1',ds1.map(d=>d.label));
 
-    // Chart 2: Patrimoine net + alt financier
+    // Chart 2: Patrimoine total (immo equity + ETF poche) + ETF pur (dashed)
     let ds2=[];
     KEYS.forEach(k=>{
-      ds2.push({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.patNet),hide:hide(k),label:sims[k].label});
-      if(sims[k].mode==='rp'&&RES[k].altFinancier){
-        ds2.push({color:COL[k],data:yrs.map(i=>RES[k].altFinancier[i-1]?.patrimoineNet),hide:hide(k),dashed:true,label:`Louer+Investir (${sims[k].label})`});
+      ds2.push({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.patTotal),hide:hide(k),label:sims[k].label});
+      if(G.investirSurplus&&sims[k].enabled){
+        ds2.push({color:COL[k],data:yrs.map(i=>RES[k].etfPur[i-1]?.cap),hide:false,dashed:true,label:`ETF pur — ${sims[k].label}`});
       }
     });
     drawLine('c2',ds2,yrs);attachHover('c2',ds2.map(d=>d.label));
@@ -771,30 +755,35 @@ function redraw(){
       ...(KEYS.some(k=>sims[k].mode==='loc')?[
         ["Rendement brut (loc.)",k=>sims[k].mode==='loc'?fmtP(RES[k].rendBrut):'—'],
         ["Rendement net (loc.)",k=>sims[k].mode==='loc'?fmtP(RES[k].rendNet):'—'],
-        ["CF mensuel brut",k=>fmtE(RES[k].cfM)],
+        ["CF mensuel net (loc.)",k=>sims[k].mode==='loc'?fmtE(RES[k].cfM):'—'],
       ]:[]),
       ...(KEYS.some(k=>sims[k].mode==='rp')?[
         ["Effort mensuel (RP)",k=>sims[k].mode==='rp'?fmtE(RES[k].mens+RES[k].assM-G.loyerPerso):'—'],
-        ["Point de croisement (RP)",k=>sims[k].mode==='rp'?(()=>{const c=crossoverYear(RES[k]);return c?`Année ${c}`:'> 30 ans';})():'—'],
       ]:[]),
-      ["Breakeven CF cumulé",k=>RES[k].be?`An ${RES[k].be}`:'> 30 ans'],
-      [`TRI ${G.horizon} ans`,k=>fmtTRI(RES[k][`tri${G.horizon}`]||compute({...sims[k]}).flux.length>=G.horizon?calcTRIFromRes(RES[k],G.horizon):null)],
+      ["Breakeven CF immo cumulé",k=>RES[k].be?`An ${RES[k].be}`:'> 30 ans'],
       ["TRI 10 ans",k=>fmtTRI(RES[k].tri10)],
+      ["TRI 15 ans",k=>fmtTRI(RES[k].tri15)],
       ["TRI 20 ans",k=>fmtTRI(RES[k].tri20)],
       [`VAN (${G.tauxActu}%, ${G.horizon}a)`,k=>fmtE(RES[k].van)],
       [`MOIC ${G.horizon} ans`,k=>RES[k].moic?RES[k].moic.toFixed(2)+'×':'—'],
-      [`Patrimoine net ${G.horizon} ans`,k=>fmtE(RES[k].flux[G.horizon-1]?.patNet)],
-      ["Patrimoine net 30 ans",k=>fmtE(RES[k].flux[29]?.patNet)],
-      ...(KEYS.some(k=>sims[k].mode==='rp')?[
-        [`Alt. Louer+Investir ${G.horizon}a`,k=>sims[k].mode==='rp'&&RES[k].altFinancier?fmtE(RES[k].altFinancier[G.horizon-1]?.patrimoineNet):'—'],
-        [`Avantage RP vs Louer ${G.horizon}a`,k=>{if(sims[k].mode!=='rp'||!RES[k].altFinancier)return'—';const rp=RES[k].flux[G.horizon-1]?.patNet;const alt=RES[k].altFinancier[G.horizon-1]?.patrimoineNet;return fmtE(rp-alt);}],
+      [`Patrimoine immo net ${G.horizon}a`,k=>fmtE(RES[k].flux[G.horizon-1]?.patNet)],
+      [`Patrimoine total ${G.horizon}a ⬛`,k=>fmtE(RES[k].flux[G.horizon-1]?.patTotal)],
+      [`Patrimoine total 30a ⬛`,k=>fmtE(RES[k].flux[29]?.patTotal)],
+      ...(G.investirSurplus?[
+        [`ETF pur ${G.horizon}a ⬜`,k=>fmtE(RES[k].etfPur[G.horizon-1]?.cap)],
+        [`ETF pur 30a ⬜`,k=>fmtE(RES[k].etfPur[29]?.cap)],
+        [`Avantage vs ETF pur ${G.horizon}a`,k=>{
+          const tot=RES[k].flux[G.horizon-1]?.patTotal,etf=RES[k].etfPur[G.horizon-1]?.cap;
+          return(tot!=null&&etf!=null)?fmtE(tot-etf):'—';
+        }],
+        [`Croisement vs ETF pur`,k=>{const c=crossoverYear(RES[k]);return c?`Année ${c}`:'> 30 ans';}],
       ]:[]),
     ];
 
     let tbody='';rows.forEach(([lbl,vFn])=>{tbody+=`<tr><td class="td-lbl">${lbl}</td>`;KEYS.forEach(k=>{const on=sims[k].enabled;tbody+=`<td class="tr" style="color:${on?COL[k]:'#475569'}">${on?vFn(k):'—'}</td>`;});tbody+=`</tr>`;});
     document.getElementById('kpi-card').innerHTML=`
       <div class="ct">🎯 Tableau comparatif — Régime locatif : <span style="color:#fbbf24">${regime}</span></div>
-      <div class="cs">Survolez les lignes pour une explication. Le TRI intègre les flux réels + le produit net de revente.</div>
+      <div class="cs">⬛ Patrimoine total = équité immo + ETF du surplus mensuel (budget − sorties réelles). ⬜ ETF pur = même apport + même budget investi sans achat. Base de comparaison équitable.</div>
       <table><thead><tr><th>Indicateur</th>${KEYS.map(k=>`<th style="text-align:right;color:${COL[k]}">${sims[k].label}</th>`).join('')}</tr></thead><tbody>${tbody}</tbody></table>`;
   }
 
@@ -802,8 +791,8 @@ function redraw(){
     let ds=[];
     KEYS.forEach(k=>{
       ds.push({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.bilanRevente),hide:hide(k),label:sims[k].label});
-      if(sims[k].mode==='rp'&&RES[k].altFinancier&&sims[k].enabled){
-        ds.push({color:COL[k],data:yrs.map(i=>RES[k].altFinancier[i-1]?.patrimoineNet-sims[k].apport),hide:hide(k),dashed:true,label:`Louer+Investir (${sims[k].label})`});
+      if(G.investirSurplus&&sims[k].enabled){
+        ds.push({color:COL[k],data:yrs.map(i=>RES[k].etfPur[i-1]?.cap-sims[k].apport),hide:false,dashed:true,label:`ETF pur — ${sims[k].label}`});
       }
     });
     drawLine('cr',ds,yrs);attachHover('cr',ds.map(d=>d.label));
@@ -840,11 +829,7 @@ function redraw(){
   }
 }
 
-function calcTRIFromRes(res,h){
-  if(h>30||h<1||!res.flux[h-1])return null;
-  const flows=[-res.flux[0]?.le?0:0]; // placeholder, use compute's TRI instead
-  return res[`tri${h}`]||null;
-}
+
 
 // ══════════════════════════════════════════════════════════
 // EXPORT
@@ -875,12 +860,12 @@ function buildExportData(){
           ...(p.mode==='loc'?{impots:Math.round(f.imp)}:{}),
           cfNet:Math.round(f.cfN),cfCumule:Math.round(f.cfC),
           valeurBien:Math.round(f.vb),capitalRestant:Math.round(f.rest),
-          patrimoineNet:Math.round(f.patNet),reventeNette:Math.round(f.reventeNet),
+          patrimoineNet:Math.round(f.patNet),
+          patrimoineTotal:Math.round(f.patTotal),etfPoche:Math.round(f.etfPoche),
+          reventeNette:Math.round(f.reventeNet),
           bilanRevente:Math.round(f.bilanRevente),
         })),
-        ...(r.altFinancier?{altLouerInvestir:r.altFinancier.map(af=>({
-          annee:af.yr,capitalFinancier:Math.round(af.capFin),totalInvesti:Math.round(af.totalInvesti),
-        }))}:{}),
+        etfPur:r.etfPur.map(e=>({annee:e.yr,capitalEtf:Math.round(e.cap),surplusAnnuel:Math.round(e.surplus)})),
       }
     };
   });
@@ -908,6 +893,8 @@ function exportToCSV(d){
   row('Rdt placement alternatif (net)',d.global.rendAlt,'%');
   row('Loyer perso (€/mois)',d.global.loyerPerso,'€/mois');
   row('Reval. loyer perso (%/an)',d.global.revalLoyerPerso,'%/an');
+  row('Budget mensuel (€/mois)',d.global.budgetMensuel,'€/mois');
+  row('Investir surplus ETF',d.global.investirSurplus?'true':'false');
   row('');
 
   row('## Paramètres des simulations');row('Paramètre',...lbls);
@@ -965,14 +952,14 @@ function exportToCSV(d){
     row('Année',isLoc?'Loyers encaissés (€)':'Loyer économisé (€)',
       'Charges (€)','Annuité+Ass (€)',...(isLoc?['Impôts (€)']:[]),
       'CF net (€)','CF cumulé (€)','Valeur bien (€)',
-      'Capital restant (€)','Patrimoine net (€)','Revente nette (€)','Bilan revente (€)',
-      ...(s.computed.altLouerInvestir?['Alt. Louer+Investir (€)']:[]));
+      'Capital restant (€)','Patrimoine immo net (€)','Patrimoine total (€)','ETF poche (€)','Revente nette (€)','Bilan revente (€)',
+      'ETF pur (€)');
     s.computed.flux.forEach((f,i)=>{
       row(f.annee,isLoc?f.loyersEncaisses:f.loyerEconomise,
         f.charges,f.annuitePlusAssurance,...(isLoc?[f.impots]:[]),
         f.cfNet,f.cfCumule,f.valeurBien,f.capitalRestant,
-        f.patrimoineNet,f.reventeNette,f.bilanRevente,
-        ...(s.computed.altLouerInvestir?[s.computed.altLouerInvestir[i]?.capitalFinancier??'']:[]));
+        f.patrimoineNet,f.patrimoineTotal??'',f.etfPoche??'',f.reventeNette,f.bilanRevente,
+        s.computed.etfPur?.[i]?.capitalEtf??'');
     });
     row('');
   });
@@ -1077,6 +1064,8 @@ function restoreFromJSON(data){
   if(g.rendAlt!=null)G.rendAlt=+g.rendAlt;
   if(g.loyerPerso!=null)G.loyerPerso=+g.loyerPerso;
   if(g.revalLoyerPerso!=null)G.revalLoyerPerso=+g.revalLoyerPerso;
+  if(g.budgetMensuel!=null)G.budgetMensuel=+g.budgetMensuel;
+  if(g.investirSurplus!=null)G.investirSurplus=g.investirSurplus===true||g.investirSurplus==='true';
   const sData=data.simulations||{};
   KEYS.forEach(k=>{
     const s=sData[k];if(!s)return;
@@ -1100,6 +1089,8 @@ function restoreFromYAML(flat){
   if(flat['global.rendAlt']!=null)G.rendAlt=+flat['global.rendAlt'];
   if(flat['global.loyerPerso']!=null)G.loyerPerso=+flat['global.loyerPerso'];
   if(flat['global.revalLoyerPerso']!=null)G.revalLoyerPerso=+flat['global.revalLoyerPerso'];
+  if(flat['global.budgetMensuel']!=null)G.budgetMensuel=+flat['global.budgetMensuel'];
+  if(flat['global.investirSurplus']!=null)G.investirSurplus=flat['global.investirSurplus']===true||flat['global.investirSurplus']==='true';
   KEYS.forEach(k=>{
     const lbl=flat[`simulations.${k}.label`],en=flat[`simulations.${k}.enabled`];
     if(lbl!=null)sims[k].label=String(lbl);
@@ -1124,6 +1115,8 @@ function restoreFromCSV(sections){
     else if(p==='Rdt placement alternatif (net)')G.rendAlt=n;
     else if(p==='Loyer perso (€/mois)')G.loyerPerso=n;
     else if(p==='Reval. loyer perso (%/an)')G.revalLoyerPerso=n;
+    else if(p==='Budget mensuel (€/mois)')G.budgetMensuel=n;
+    else if(p==='Investir surplus ETF')G.investirSurplus=v==='true';
   }}
   const sSec=sections['Paramètres des simulations'];if(!sSec)return;
   KEYS.forEach((k,i)=>{const lbl=sSec.headers[i+1];if(lbl)sims[k].label=lbl;});
