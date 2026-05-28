@@ -12,26 +12,30 @@ const GrpHead = styled.button`
   &:hover { background: ${({ theme }) => theme.border}; }
 `;
 
-const Body = styled.div`padding: 6px 8px 8px; display: flex; flex-direction: column; gap: 5px;`;
+const Body = styled.div`padding: 4px 8px 8px; display: flex; flex-direction: column; gap: 4px;`;
 
-const Row = styled.div`display: flex; align-items: center; gap: 5px;`;
+const FieldWrap = styled.div`display: flex; flex-direction: column; gap: 2px;`;
+
+const LabelRow = styled.div`display: flex; align-items: center; gap: 4px;`;
 
 const FieldLabel = styled.span`
   font-size: 10px; color: ${({ theme }) => theme.muted};
-  width: 105px; min-width: 105px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;
 `;
 
-const RangeWrap = styled.div`flex: 1; min-width: 0;`;
+const InputRow = styled.div`display: flex; align-items: center; gap: 5px;`;
+
+const RangeWrap = styled.div`flex: 1; min-width: 0; display: flex; align-items: center;`;
 
 const NumIn = styled.input`
-  width: 54px; background: transparent; border: 1px solid ${({ theme }) => theme.border}; border-radius: 4px;
+  width: 52px; flex-shrink: 0; background: transparent;
+  border: 1px solid ${({ theme }) => theme.border}; border-radius: 4px;
   color: ${({ theme }) => theme.inputColor}; font-family: inherit; font-size: 10px; font-weight: 700;
   text-align: right; padding: 2px 4px; outline: none;
   &:focus { border-color: ${({ theme }) => theme.a}; }
 `;
 
-const Unit = styled.span`font-size: 9px; color: ${({ theme }) => theme.muted}; width: 14px; flex-shrink: 0;`;
+const Unit = styled.span`font-size: 9px; color: ${({ theme }) => theme.muted}; width: 12px; flex-shrink: 0; text-align: left;`;
 
 const unitFor = tp => tp === 'e' ? '€' : tp === '%' ? '%' : '';
 
@@ -51,28 +55,32 @@ export default function FieldGroup({ simKey, group, open, onToggle }) {
           {group.f.map(field => {
             const val = p[field.k] ?? field.mn;
             return (
-              <Row key={field.k}>
-                <FieldLabel title={t(`fields.${field.k}.label`, field.k)}>
-                  {t(`fields.${field.k}.label`, field.k)}
-                </FieldLabel>
-                <InfoButton tooltipKey={field.k} />
-                <RangeWrap>
-                  <input
-                    type="range"
+              <FieldWrap key={field.k}>
+                <LabelRow>
+                  <FieldLabel title={t(`fields.${field.k}.label`, field.k)}>
+                    {t(`fields.${field.k}.label`, field.k)}
+                  </FieldLabel>
+                  <InfoButton tooltipKey={field.k} />
+                </LabelRow>
+                <InputRow>
+                  <RangeWrap>
+                    <input
+                      type="range"
+                      min={field.mn} max={field.mx} step={field.st}
+                      value={val}
+                      style={{ width: '100%' }}
+                      onChange={e => updateSim(simKey, field.k, +e.target.value)}
+                    />
+                  </RangeWrap>
+                  <NumIn
+                    type="number"
                     min={field.mn} max={field.mx} step={field.st}
                     value={val}
-                    style={{ width: '100%' }}
-                    onChange={e => updateSim(simKey, field.k, +e.target.value)}
+                    onChange={e => { const v = +e.target.value; if (isFinite(v)) updateSim(simKey, field.k, v); }}
                   />
-                </RangeWrap>
-                <NumIn
-                  type="number"
-                  min={field.mn} max={field.mx} step={field.st}
-                  value={val}
-                  onChange={e => { const v = +e.target.value; if (isFinite(v)) updateSim(simKey, field.k, v); }}
-                />
-                <Unit>{unitFor(field.tp)}</Unit>
-              </Row>
+                  <Unit>{unitFor(field.tp)}</Unit>
+                </InputRow>
+              </FieldWrap>
             );
           })}
         </Body>

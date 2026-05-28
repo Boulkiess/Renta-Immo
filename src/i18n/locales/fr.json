@@ -1,7 +1,7 @@
 {
   "nav": {
     "brand": "ImmoRenta",
-    "badge": "ANALYSE PRO v3",
+    "badge": "ANALYSE PRO v4",
     "export": "Export",
     "import": "Import",
     "exportCsv": "📊 CSV",
@@ -112,7 +112,7 @@
     "budgetMensuel":    { "title": "Budget mensuel logement+investissement", "body": "Enveloppe mensuelle fixe. Le surplus non consommé par les coûts réels est automatiquement investi en ETF." },
     "investirSurplus":  { "title": "Investir le surplus en ETF", "body": "Si activé : la différence entre le budget mensuel et les sorties réelles est investie en ETF. Le tiret = scénario ETF pur de référence." },
     "apportETF":        { "title": "Apport ETF pur (référence)", "body": "Capital de départ du scénario ETF pur. Pas d'achat immo, l'apport + le surplus mensuel sont capitalisés en ETF." },
-    "prixAchat":        { "title": "Prix d'achat net vendeur", "body": "Prix payé au vendeur, hors frais.", "code": "Rendement brut = Loyer×12 / Coût total" },
+    "prixAchat":        { "title": "Prix d'achat net vendeur", "body": "Prix payé au vendeur, hors frais de notaire et d'agence." },
     "fraisNotaire":     { "title": "Frais de notaire", "body": "7-8% dans l'ancien, 2-3% dans le neuf." },
     "travaux":          { "title": "Travaux de rénovation", "body": "En LMNP Réel, amortissables sur plusieurs années.", "code": "Amort. travaux = Travaux × Taux amort." },
     "fraisAgence":      { "title": "Frais d'agence acheteur", "body": "Honoraires d'agence à charge de l'acheteur." },

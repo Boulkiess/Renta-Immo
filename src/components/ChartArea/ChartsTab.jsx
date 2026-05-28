@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
 import { COL, KEYS } from '../../state/definitions.js';
@@ -24,7 +24,8 @@ const X_LABELS = Array.from({ length: 30 }, (_, i) => String(i + 1));
 export default function ChartsTab() {
   const { t } = useTranslation();
   const { sims, RES, etfPurGlobal, G } = useApp();
-  const deps = [sims, RES, etfPurGlobal, G];
+  const theme = useTheme();
+  const deps = [sims, RES, etfPurGlobal, G, theme.name];
 
   const activeKeys = KEYS.filter(k => sims[k].enabled);
 

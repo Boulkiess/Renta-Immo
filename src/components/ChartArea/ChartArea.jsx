@@ -9,6 +9,7 @@ import AmortTab from './AmortTab.jsx';
 const Area = styled.div`
   display: flex; flex-direction: column;
   flex: 1; min-width: 0; overflow: hidden;
+  @media (max-width: 960px) { flex: none; overflow: visible; }
 `;
 
 export default function ChartArea() {

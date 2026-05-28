@@ -1,7 +1,7 @@
 {
   "nav": {
     "brand": "ImmoRenta",
-    "badge": "PRO ANALYSIS v3",
+    "badge": "PRO ANALYSIS v4",
     "export": "Export",
     "import": "Import",
     "exportCsv": "📊 CSV",
@@ -112,7 +112,7 @@
     "budgetMensuel":    { "title": "Monthly housing + investment budget", "body": "Fixed monthly envelope. The surplus not consumed by real costs is automatically invested in ETF." },
     "investirSurplus":  { "title": "Invest surplus in ETF", "body": "If enabled: the difference between the monthly budget and real outflows is invested in ETF. The dashed line = pure ETF reference scenario." },
     "apportETF":        { "title": "Pure ETF reference contribution", "body": "Starting capital for the pure ETF scenario. No property purchase — contribution + monthly surplus are compounded in ETF." },
-    "prixAchat":        { "title": "Net purchase price", "body": "Price paid to the seller, excluding fees.", "code": "Gross yield = Rent×12 / Total cost" },
+    "prixAchat":        { "title": "Net purchase price", "body": "Price paid to the seller, excluding notary and agency fees." },
     "fraisNotaire":     { "title": "Notary fees", "body": "7-8% for existing properties, 2-3% for new builds." },
     "travaux":          { "title": "Renovation works", "body": "Under LMNP Real, depreciable over several years.", "code": "Works depreciation = Works × Rate" },
     "fraisAgence":      { "title": "Buyer's agent fees", "body": "Agent commission paid by the buyer." },

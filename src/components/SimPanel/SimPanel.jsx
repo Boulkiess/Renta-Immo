@@ -38,14 +38,14 @@ const ModeBtn = styled.button`
   &:hover { border-color: ${({ theme }) => theme.a}; }
 `;
 
-const KpiRow = styled.div`display: flex; gap: 6px; flex-wrap: wrap;`;
+const KpiRow = styled.div`display: grid; grid-template-columns: 1fr 1fr; gap: 4px;`;
 
 const KpiChip = styled.div`
   background: ${({ theme }) => theme.s2}; border: 1px solid ${({ theme }) => theme.border};
-  border-radius: 5px; padding: 2px 7px; font-size: 10px; display: flex; align-items: center; gap: 4px;
+  border-radius: 5px; padding: 4px 7px; display: flex; flex-direction: column; gap: 1px;
 `;
-const KpiLabel = styled.span`color: ${({ theme }) => theme.muted};`;
-const KpiVal = styled.span`color: ${({ $col }) => $col}; font-weight: 700;`;
+const KpiLabel = styled.span`font-size: 9px; color: ${({ theme }) => theme.muted}; white-space: nowrap;`;
+const KpiVal = styled.span`font-size: 11px; color: ${({ $col }) => $col}; font-weight: 700;`;
 
 const ScrollBody = styled.div`overflow-y: auto; flex: 1;`;
 
@@ -58,7 +58,7 @@ const fmtP = v => (!isFinite(v) || isNaN(v)) ? '—' : v.toFixed(2) + '%';
 
 export default function SimPanel({ simKey }) {
   const { t } = useTranslation();
-  const { sims, updateSim, updateSimBulk, openGrp, toggleOpenGrp, RES } = useApp();
+  const { G, sims, updateSim, updateSimBulk, openGrp, toggleOpenGrp, RES, crossovers } = useApp();
   const p = sims[simKey];
   const r = RES[simKey];
   const col = COL[simKey];
@@ -97,21 +97,41 @@ export default function SimPanel({ simKey }) {
                   <KpiVal $col={col}>{fmtP(r.rendBrut)}</KpiVal>
                 </KpiChip>
                 <KpiChip>
+                  <KpiLabel>{t('kpi.rendNet')}</KpiLabel>
+                  <KpiVal $col={col}>{fmtP(r.rendNet)}</KpiVal>
+                </KpiChip>
+                <KpiChip>
+                  <KpiLabel>{t('kpi.mensualite')}</KpiLabel>
+                  <KpiVal $col={col}>{fmtE(r.mens + r.assM)}</KpiVal>
+                </KpiChip>
+                <KpiChip>
                   <KpiLabel>{t('kpi.cfMensuel')}</KpiLabel>
                   <KpiVal $col={r.cfM >= 0 ? col : '#f87171'}>{fmtE(r.cfM)}</KpiVal>
                 </KpiChip>
               </>
             )}
             {p.mode === 'rp' && (
-              <KpiChip>
-                <KpiLabel>{t('kpi.effortMois')}</KpiLabel>
-                <KpiVal $col={col}>{fmtE(Math.abs(r.cfM))}</KpiVal>
-              </KpiChip>
+              <>
+                <KpiChip>
+                  <KpiLabel>{t('kpi.mensualite')}</KpiLabel>
+                  <KpiVal $col={col}>{fmtE(r.mens + r.assM)}</KpiVal>
+                </KpiChip>
+                <KpiChip>
+                  <KpiLabel>{t('kpi.effortMois')}</KpiLabel>
+                  <KpiVal $col={r.cfM >= 0 ? col : '#f87171'}>{fmtE(r.cfM)}</KpiVal>
+                </KpiChip>
+                <KpiChip>
+                  <KpiLabel>{t('kpi.patrimTotal', { horizon: G.horizon })}</KpiLabel>
+                  <KpiVal $col={col}>{fmtE(r.flux[G.horizon - 1]?.patTotal)}</KpiVal>
+                </KpiChip>
+                <KpiChip>
+                  <KpiLabel>{t('kpi.vsEtfPur')}</KpiLabel>
+                  <KpiVal $col={col}>
+                    {crossovers[simKey] ? t('kpi.anN', { n: crossovers[simKey] }) : t('kpi.gt30ans')}
+                  </KpiVal>
+                </KpiChip>
+              </>
             )}
-            <KpiChip>
-              <KpiLabel>{t('kpi.mensualite')}</KpiLabel>
-              <KpiVal $col={col}>{fmtE(r.mens + r.assM)}</KpiVal>
-            </KpiChip>
           </KpiRow>
         )}
       </Header>

@@ -12,10 +12,12 @@ import ChartArea from './components/ChartArea/ChartArea.jsx';
 const AppWrap = styled.div`
   display: flex; flex-direction: column;
   height: 100vh; overflow: hidden;
+  @media (max-width: 960px) { height: auto; min-height: 100vh; overflow: auto; }
 `;
 
 const Main = styled.div`
   display: flex; flex: 1; min-height: 0; overflow: hidden;
+  @media (max-width: 960px) { flex-direction: column; overflow: visible; flex: none; }
 `;
 
 const SimsPane = styled.div`
@@ -23,6 +25,10 @@ const SimsPane = styled.div`
   width: 690px; flex-shrink: 0;
   border-right: 1px solid ${({ theme }) => theme.border};
   overflow: hidden;
+  @media (max-width: 960px) {
+    width: 100%; overflow-x: auto;
+    border-right: none; border-bottom: 1px solid ${({ theme }) => theme.border};
+  }
 `;
 
 export default function App() {

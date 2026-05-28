@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
 import { COL, KEYS } from '../../state/definitions.js';
@@ -20,6 +20,7 @@ const KEY_YEARS = [5, 10, 15, 20, 25, 30];
 export default function ReventeTab() {
   const { t } = useTranslation();
   const { sims, RES, etfPurGlobal } = useApp();
+  const theme = useTheme();
   const activeKeys = KEYS.filter(k => sims[k].enabled);
 
   function datasets() {
@@ -34,7 +35,7 @@ export default function ReventeTab() {
       <Desc dangerouslySetInnerHTML={{ __html: t('charts.revente.desc') }} />
       <CanvasChart
         draw={c => drawLine(c, datasets(), X_LABELS)}
-        deps={[sims, RES, etfPurGlobal]}
+        deps={[sims, RES, etfPurGlobal, theme.name]}
         height={220}
       />
 

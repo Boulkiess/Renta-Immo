@@ -12,27 +12,27 @@ const Nav = styled.nav`
 `;
 const Brand = styled.div`
   display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; white-space: nowrap;
-  color: ${({ theme }) => theme.text};
+  color: ${({ theme }) => theme.navText};
 `;
 const Badge = styled.span`
-  font-size: 9px; color: ${({ theme }) => theme.muted};
-  background: ${({ theme }) => theme.border}; padding: 2px 7px; border-radius: 20px; font-weight: 600;
+  font-size: 9px; color: ${({ theme }) => theme.navText}99;
+  background: rgba(255,255,255,.1); padding: 2px 7px; border-radius: 20px; font-weight: 600;
 `;
 const Tabs = styled.div`display: flex; gap: 3px; flex-wrap: wrap;`;
 const Tab = styled.button`
   padding: 5px 10px; border-radius: 6px; border: none; cursor: pointer;
   font-size: 11px; font-weight: 600; font-family: inherit; transition: all .15s; white-space: nowrap;
   background: ${({ $active }) => $active ? '#1e40af' : 'transparent'};
-  color: ${({ $active, theme }) => $active ? '#93c5fd' : theme.muted};
-  &:hover { background: ${({ theme }) => theme.border}; color: ${({ theme }) => theme.text}; }
+  color: ${({ $active, theme }) => $active ? '#93c5fd' : theme.navText + '99'};
+  &:hover { background: ${({ theme }) => theme.navSubtle}; color: ${({ theme }) => theme.navText}; }
 `;
 const Actions = styled.div`display: flex; align-items: center; gap: 6px;`;
 const ActionBtn = styled.button`
-  background: ${({ theme }) => theme.border}; border: 1px solid ${({ theme }) => theme.subtle};
-  border-radius: 6px; color: ${({ theme }) => theme.muted};
+  background: ${({ theme }) => theme.navSubtle}; border: 1px solid ${({ theme }) => theme.navSubtle2};
+  border-radius: 6px; color: ${({ theme }) => theme.navText}bb;
   font-family: inherit; font-size: 11px; font-weight: 700;
-  padding: 4px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px;
-  &:hover { color: ${({ theme }) => theme.text}; }
+  padding: 4px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap;
+  &:hover { color: ${({ theme }) => theme.navText}; background: ${({ theme }) => theme.navSubtle2}; }
 `;
 const ExpWrap = styled.div`position: relative; flex-shrink: 0;`;
 const ExpMenu = styled.div`

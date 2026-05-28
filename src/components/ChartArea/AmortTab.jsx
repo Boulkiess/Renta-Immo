@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
 import { COL, KEYS } from '../../state/definitions.js';
@@ -31,6 +31,7 @@ function aggregateByYear(amort, duree) {
 export default function AmortTab() {
   const { t } = useTranslation();
   const { sims, RES } = useApp();
+  const theme = useTheme();
   const activeKeys = KEYS.filter(k => sims[k].enabled);
 
   return (
@@ -64,14 +65,14 @@ export default function AmortTab() {
             <ChartDesc dangerouslySetInnerHTML={{ __html: t('charts.amort.desc') }} />
             <CanvasChart
               draw={c => drawBars(c, amortDs, amortX, true)}
-              deps={[r, p.duree]}
+              deps={[r, p.duree, theme.name]}
               height={180}
             />
 
             <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.amortCap.title') }} />
             <CanvasChart
               draw={c => drawLine(c, capDs, capX)}
-              deps={[r, p.duree]}
+              deps={[r, p.duree, theme.name]}
               height={120}
             />
           </SimBlock>
