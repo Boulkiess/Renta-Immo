@@ -24,8 +24,8 @@ export default function ReventeTab() {
   const activeKeys = KEYS.filter(k => sims[k].enabled);
 
   function datasets() {
-    const ds = activeKeys.map(k => ({ color: COL[k], data: RES[k].flux.map(f => f.bilanRevente) }));
-    ds.push({ color: '#94a3b8', dashed: true, data: etfPurGlobal.map(e => e.cap) });
+    const ds = activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.bilanRevente) }));
+    ds.push({ color: '#94a3b8', dashed: true, label: 'ETF pur', data: etfPurGlobal.map(e => e.cap) });
     return ds;
   }
 

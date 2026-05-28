@@ -45,11 +45,11 @@ export default function AmortTab() {
         const capData = r.flux.map(f => f.rest);
 
         const amortDs = [
-          { color: COL[k],     data: cap },
-          { color: '#f59e0b',  data: inter },
-          { color: '#94a3b8',  data: ass },
+          { color: COL[k],     label: t('amort.capital'),    data: cap },
+          { color: '#f59e0b',  label: t('amort.interets'),   data: inter },
+          { color: '#94a3b8',  label: t('amort.assurance'),  data: ass },
         ];
-        const capDs = [{ color: COL[k], data: capData }];
+        const capDs = [{ color: COL[k], label: t('amort.capital'), data: capData }];
 
         return (
           <SimBlock key={k}>

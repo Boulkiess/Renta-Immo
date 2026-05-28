@@ -31,6 +31,36 @@ export function drawLine(canvas, datasets, xLabels) {
   canvas._meta = { datasets, xLabels, xS, dpr, W };
 }
 
+export function attachHover(canvas) {
+  if (!canvas || canvas._hov) return;
+  canvas._hov = true;
+  canvas.style.cursor = 'crosshair';
+  const tip = document.createElement('div');
+  tip.style.cssText = "position:fixed;background:var(--s2,#0d1b2a);color:var(--text,#e2e8f0);padding:8px 10px;border-radius:6px;font:11px 'DM Sans',sans-serif;pointer-events:none;display:none;z-index:9999;min-width:120px;box-shadow:0 4px 14px rgba(0,0,0,.5);border:1px solid var(--border,#1e293b);";
+  document.body.appendChild(tip);
+  canvas._tip = tip;
+  canvas.addEventListener('mousemove', e => {
+    const m = canvas._meta;
+    if (!m) { tip.style.display = 'none'; return; }
+    const rect = canvas.getBoundingClientRect(), cx = e.clientX - rect.left;
+    let bi = 0, bd = 1e9;
+    m.xLabels.forEach((_, i) => { const dx = Math.abs(m.xS(i) * (rect.width / m.W) - cx); if (dx < bd) { bd = dx; bi = i; } });
+    let h = `<div style="font-weight:700;margin-bottom:5px;color:var(--muted,#64748b);font-size:10px">Année ${m.xLabels[bi]}</div>`;
+    m.datasets.filter(d => !d.hide).forEach(d => {
+      const v = d.data[bi];
+      if (v == null || !isFinite(v)) return;
+      h += `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:3px"><span style="display:flex;align-items:center;gap:5px;color:${d.color}"><span style="width:7px;height:7px;border-radius:50%;background:${d.color};flex-shrink:0;display:inline-block"></span>${d.label || ''}</span><span style="font-weight:700;color:var(--text,#e2e8f0)">${fmtK(v)}</span></div>`;
+    });
+    tip.innerHTML = h;
+    tip.style.display = 'block';
+    let tx = e.clientX + 14, ty = e.clientY - 10;
+    if (tx + tip.offsetWidth > innerWidth - 8) tx = e.clientX - tip.offsetWidth - 10;
+    if (ty + tip.offsetHeight > innerHeight - 8) ty = innerHeight - tip.offsetHeight - 8;
+    tip.style.left = tx + 'px'; tip.style.top = ty + 'px';
+  });
+  canvas.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+}
+
 export function drawBars(canvas, datasets, xLabels, stacked) {
   if (!canvas) return;
   const W = canvas.offsetWidth || 600, H = parseInt(canvas.dataset.h) || 200, dpr = devicePixelRatio || 1;

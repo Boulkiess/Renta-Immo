@@ -29,14 +29,14 @@ export default function ChartsTab() {
 
   const activeKeys = KEYS.filter(k => sims[k].enabled);
 
-  const cfCumDs   = () => activeKeys.map(k => ({ color: COL[k], data: RES[k].flux.map(f => f.cfC) }));
+  const cfCumDs   = () => activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.cfC) }));
   const patDs     = () => {
-    const ds = activeKeys.map(k => ({ color: COL[k], data: RES[k].flux.map(f => f.patTotal) }));
-    ds.push({ color: '#94a3b8', dashed: true, data: etfPurGlobal.map(e => e.cap) });
+    const ds = activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.patTotal) }));
+    ds.push({ color: '#94a3b8', dashed: true, label: 'ETF pur', data: etfPurGlobal.map(e => e.cap) });
     return ds;
   };
-  const cfAnnDs   = () => activeKeys.map(k => ({ color: COL[k], data: RES[k].flux.map(f => f.cfN) }));
-  const vbDs      = () => activeKeys.map(k => ({ color: COL[k], data: RES[k].flux.map(f => f.vb) }));
+  const cfAnnDs   = () => activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.cfN) }));
+  const vbDs      = () => activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.vb) }));
 
   return (
     <Grid>

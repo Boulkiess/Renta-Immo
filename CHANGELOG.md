@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- **Hover sur les graphiques restauré** : la fonction `attachHover` n'avait pas été portée lors de la migration vers React. Tooltip flottant réimplémenté dans `CanvasChart`, avec labels de séries dans tous les composants graphiques (`ChartsTab`, `ReventeTab`, `AmortTab`).
+
 ## [1.3.1] — 2026-05-28
 
 ### Fixed
