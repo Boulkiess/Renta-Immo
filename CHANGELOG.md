@@ -4,6 +4,7 @@
 
 ### Fixed
 - **Hover sur les graphiques restauré** : la fonction `attachHover` n'avait pas été portée lors de la migration vers React. Tooltip flottant réimplémenté dans `CanvasChart`, avec labels de séries dans tous les composants graphiques (`ChartsTab`, `ReventeTab`, `AmortTab`).
+- **Bilan revente corrigé** : le graphique et le tableau "Bilan net selon la revente" utilisent désormais `bilanTotal` (qui inclut l'ETF poche accumulée avec le surplus mensuel composé) au lieu de `bilanRevente` (qui ne comptabilisait que les flux bruts non composés). La courbe ETF pur de référence reste inchangée en valeur absolue.
 
 ## [1.3.1] — 2026-05-28
 

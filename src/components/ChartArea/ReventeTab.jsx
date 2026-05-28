@@ -24,7 +24,7 @@ export default function ReventeTab() {
   const activeKeys = KEYS.filter(k => sims[k].enabled);
 
   function datasets() {
-    const ds = activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.bilanRevente) }));
+    const ds = activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.bilanTotal) }));
     ds.push({ color: '#94a3b8', dashed: true, label: 'ETF pur', data: etfPurGlobal.map(e => e.cap) });
     return ds;
   }
@@ -67,7 +67,7 @@ export default function ReventeTab() {
                   const f = RES[k].flux[yr - 1];
                   return (
                     <td key={k} style={{ padding: '6px 8px', textAlign: 'right', background: bg }}>
-                      <div style={{ color: COL[k], fontWeight: 700 }}>{fmtE(f?.bilanRevente)}</div>
+                      <div style={{ color: COL[k], fontWeight: 700 }}>{fmtE(f?.bilanTotal)}</div>
                       <div style={{ fontSize: 9, color: 'var(--muted)', marginTop: 2 }}>
                         {t('revente.revente')} {fmtK(f?.reventeNet)}
                         {' · '}
