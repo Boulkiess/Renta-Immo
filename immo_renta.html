@@ -232,7 +232,7 @@ function recomputeETFPur(){
   for(let yr=1;yr<=30;yr++){
     const lpa=G.loyerPerso*12*Math.pow(1+G.revalLoyerPerso/100,yr-1);
     const surplus=Math.max(0,G.budgetMensuel*12-lpa);
-    cap=cap*(1+r)+(G.investirSurplus?surplus:0);
+    cap=cap*(1+r)+surplus;
     etfPurGlobal.push({yr,cap});
   }
 }
@@ -668,9 +668,7 @@ function renderLegend(){
       <span style="color:${on?col:'#475569'}">${modeTag} ${p.label}</span>
     </div>`;
   });
-  if(G.investirSurplus){
-    h+=`<div class="li" style="cursor:default"><div class="ll" style="background:#94a3b8;opacity:.6;border:1px dashed #94a3b8"></div><span style="color:#94a3b8;font-size:10px">📈 ETF pur — ${Math.round(G.apportETF/1000)}k€ apport</span></div>`;
-  }
+  h+=`<div class="li" style="cursor:default"><div class="ll" style="background:#94a3b8;opacity:.6;border:1px dashed #94a3b8"></div><span style="color:#94a3b8;font-size:10px">📈 ETF pur — ${Math.round(G.apportETF/1000)}k€ apport</span></div>`;
   h+=`<span style="font-size:9px;color:var(--muted);margin-left:auto">Cliquer pour masquer/afficher</span>`;
   document.getElementById('legend').innerHTML=h;
 }
@@ -739,9 +737,7 @@ function redraw(){
     // Chart 2: Patrimoine total (immo equity + ETF poche) + une seule courbe ETF pur globale
     let ds2=[];
     KEYS.forEach(k=>ds2.push({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.patTotal),hide:hide(k),label:sims[k].label}));
-    if(G.investirSurplus){
-      ds2.push({color:'#94a3b8',data:yrs.map(i=>etfPurGlobal[i-1]?.cap),hide:false,dashed:true,label:`📈 ETF pur (${Math.round(G.apportETF/1000)}k€ apport)`});
-    }
+    ds2.push({color:'#94a3b8',data:yrs.map(i=>etfPurGlobal[i-1]?.cap),hide:false,dashed:true,label:`📈 ETF pur (${Math.round(G.apportETF/1000)}k€ apport)`});
     drawLine('c2',ds2,yrs);attachHover('c2',ds2.map(d=>d.label));
 
     // Chart 3: CF net annuel (bars)
