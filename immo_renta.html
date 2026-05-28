@@ -181,8 +181,8 @@ amortBien:{t:"Amortissement bien",b:"LMNP Réel uniquement. Typique 25-40 ans �
 amortTravaux:{t:"Amortissement travaux",b:"LMNP Réel. Typique 7-10 ans → 10-14%/an."},
 impotPV:{t:"Impôt plus-value",b:"19% IR + 17.2% PS = 36.2%. Abattements progressifs. RP exonérée."},
 psPV:{t:"PS sur plus-value",b:"17.2%. Exonération totale après 30 ans."},
-loyerActuel:{t:"Loyer actuel (que vous payez)",b:"Le loyer que vous payez comme locataire aujourd'hui. C'est l'économie réalisée si vous achetez votre RP.",code:"Économie mensuelle = Loyer actuel − Mensualité"},
-revalLoyerRP:{t:"Revalorisation loyer marché",b:"Hausse annuelle de votre loyer actuel si vous continuez à louer. Sert à projeter l'économie future de la RP."},
+loyerPerso:{t:"Loyer actuel (que vous payez)",b:"Le loyer mensuel que vous payez pour vous loger. En mode locatif : soustrait du CF pour comparer à situation équivalente. En mode RP : c'est l'économie réalisée si vous achetez.",code:"CF réel (loc) = CF locatif − Loyer perso\nÉconomie (RP) = Loyer perso − Mensualité"},
+revalLoyerPerso:{t:"Revalorisation loyer marché %/an",b:"Hausse annuelle de votre loyer. Sert à projeter l'économie future (RP) et le coût futur (locatif). ~1-3%/an indexé IRL."},
 assurHab:{t:"Assurance habitation",b:"Assurance multirisque habitation propriétaire occupant. 200-500€/an."},
 chargesCoproRP:{t:"Charges copropriété RP",b:"Totalité des charges (pas de distinction récupérable/non). 50-200€/mois."},
 taxeFonciereRP:{t:"Taxe foncière RP",b:"Même impôt que pour un locatif. Pas de taxe d'habitation depuis 2023 pour les RP."},
@@ -192,7 +192,7 @@ provisionRP:{t:"Provision travaux RP",b:"Budget annuel pour l'entretien. ~1% de 
 // ══════════════════════════════════════════════════════════
 // GLOBALS
 // ══════════════════════════════════════════════════════════
-const G={inflation:2,regime:'lmnp',horizon:20,tauxActu:3,rendAlt:6};
+const G={inflation:2,regime:'lmnp',horizon:20,tauxActu:3,rendAlt:6,loyerPerso:900,revalLoyerPerso:2};
 const COL={A:'#6C9AFF',B:'#FF9D5C',C:'#5CEFB0'};
 const KEYS=['A','B','C'];
 
@@ -210,13 +210,12 @@ function mkDef(mode){
     tmi:30,ps:17.2,amortBien:2.5,amortTravaux:10,
     impotPV:19,psPV:17.2,
     // RP only
-    loyerActuel:900,taxeFonciereRP:1200,chargesCoproRP:1200,assurHab:300,
-    provisionRP:500,revalLoyerRP:2,
+    taxeFonciereRP:1200,chargesCoproRP:1200,assurHab:300,provisionRP:500,
   };
 }
 const sims={
   A:{...mkDef('loc'),label:'Locatif — Centre-ville',prixAchat:280000,fraisNotaire:22000,loyer:1050,apport:60000},
-  B:{...mkDef('rp'),label:'RP — Achat appart',prixAchat:320000,fraisNotaire:25000,apport:70000,loyerActuel:1100},
+  B:{...mkDef('rp'),label:'RP — Achat appart',prixAchat:320000,fraisNotaire:25000,apport:70000},
   C:{...mkDef('loc'),label:'Locatif — Périphérie',prixAchat:180000,fraisNotaire:14000,loyer:750,apport:35000,taux:3.5,duree:15},
 };
 let curTab='charts';
@@ -264,10 +263,11 @@ function compute(p){
       le=lb*(1-p.vacance/100);
       chg=p.taxeFonciere+p.chargesCopro+p.assurPNO+p.provision+lb*(p.fraisGestion/100);
       imp=impLoc(le,chg,ab,at,p.tmi,p.ps);
-      cfN=le-chg-ann-asp-imp;
+      const loyerPersoAnn=G.loyerPerso*12*Math.pow(1+G.revalLoyerPerso/100,yr-1);
+      cfN=le-chg-ann-asp-imp-loyerPersoAnn;
     } else {
       // RP: "revenu" = loyer économisé, charges = taxe foncière + copro + assur + provision
-      const loyerEcon=p.loyerActuel*12*Math.pow(1+p.revalLoyerRP/100,yr-1);
+      const loyerEcon=G.loyerPerso*12*Math.pow(1+G.revalLoyerPerso/100,yr-1);
       chg=p.taxeFonciereRP+p.chargesCoproRP+p.assurHab+p.provisionRP;
       cfN=loyerEcon-chg-ann-asp; // no tax on RP
       le=loyerEcon;
@@ -306,7 +306,7 @@ function compute(p){
     const lnA=p.loyer*(1-p.vacance/100)*12-(p.taxeFonciere+p.chargesCopro+p.assurPNO+p.provision+p.loyer*12*(p.fraisGestion/100));
     rendNet=(lnA/ct)*100;
   }
-  const cfM=p.mode==='loc'?p.loyer-mens-assM:p.loyerActuel-mens-assM;
+  const cfM=p.mode==='loc'?p.loyer-mens-assM-G.loyerPerso:G.loyerPerso-mens-assM;
   const be=flux.findIndex(f=>f.cfC>=0);
 
   // Scénario "Louer + Investir" (only for RP mode)
@@ -314,7 +314,6 @@ function compute(p){
   if(p.mode==='rp'){
     const r=G.rendAlt/100;
     const mensualiteRP=mens+assM;
-    const loyerActuelMensuel=p.loyerActuel;
     altFinancier=[];
     let capFin=p.apport; // apport investi dès le départ
     let totalInvesti=p.apport;
@@ -322,14 +321,13 @@ function compute(p){
     for(let yr=1;yr<=30;yr++){
       // Chaque mois de l'année
       for(let m=0;m<12;m++){
-        const loyerMois=p.loyerActuel*Math.pow(1+p.revalLoyerRP/100,(yr-1));
+        const loyerMois=G.loyerPerso*Math.pow(1+G.revalLoyerPerso/100,(yr-1));
         loyersCumules+=loyerMois;
         // Delta = mensualité RP - loyer actuel : si positif, on investit la différence
         const delta=Math.max(0,mensualiteRP-loyerMois);
         capFin=capFin*(1+r/12)+delta;
         totalInvesti+=delta;
       }
-      const loyerAnnuel=p.loyerActuel*12*Math.pow(1+p.revalLoyerRP/100,yr-1);
       altFinancier.push({yr,capFin,loyersCumules,totalInvesti,
         patrimoineNet:capFin, // pas de dette, le loyer est un coût opérationnel
       });
@@ -526,12 +524,10 @@ const GRP_LOC=[
 ];
 const GRP_RP=[
   {t:'Résidence principale',i:'🏡',f:[
-    {k:'loyerActuel',l:'Loyer actuel payé',tp:'e',mn:0,mx:5000,st:50},
     {k:'taxeFonciereRP',l:'Taxe foncière',tp:'e',mn:0,mx:10000,st:100},
     {k:'chargesCoproRP',l:'Charges copro (€/an)',tp:'e',mn:0,mx:8000,st:100},
     {k:'assurHab',l:'Assurance habitation (€/an)',tp:'e',mn:0,mx:2000,st:50},
     {k:'provisionRP',l:'Provision travaux (€/an)',tp:'e',mn:0,mx:5000,st:100},
-    {k:'revalLoyerRP',l:'Reval. loyer marché %/an',tp:'%',mn:0,mx:5,st:.1},
   ]},
 ];
 
@@ -542,7 +538,7 @@ function getGroups(mode){return[...GRP_COMMON,...(mode==='loc'?GRP_LOC:GRP_RP)];
 // ══════════════════════════════════════════════════════════
 function renderPanel(key){
   const p=sims[key],res=compute(p),col=COL[key],isLoc=p.mode==='loc';
-  const cfNeg=(isLoc?res.cfM:p.loyerActuel-res.mens-res.assM)<0;
+  const cfNeg=(isLoc?res.cfM:G.loyerPerso-res.mens-res.assM)<0;
   const groups=getGroups(p.mode);
 
   // KPIs differ by mode
@@ -558,7 +554,7 @@ function renderPanel(key){
     const cross=crossoverYear(res);
     kpis=[
       ['Mensualité',fmtE(res.mens+res.assM)],
-      ['Effort/mois',fmtE(res.mens+res.assM-p.loyerActuel),res.mens+res.assM>p.loyerActuel],
+      ['Effort/mois',fmtE(res.mens+res.assM-G.loyerPerso),res.mens+res.assM>G.loyerPerso],
       [`Patrim. ${G.horizon}a`,fmtE(res.flux[G.horizon-1]?.patNet)],
       ['Croisement',cross?`Année ${cross}`:'> 30 ans'],
     ];
@@ -620,7 +616,7 @@ function updateKpiChips(key,res){
   } else if(p.mode==='rp'&&chips.length>=4){
     const cross=crossoverYear(res);
     chips[0].textContent=fmtE(res.mens+res.assM);
-    const effort=res.mens+res.assM-p.loyerActuel;
+    const effort=res.mens+res.assM-G.loyerPerso;
     chips[1].textContent=fmtE(effort);chips[1].style.color=effort>0?'var(--red)':col;
     chips[2].textContent=fmtE(res.flux[G.horizon-1]?.patNet);
     chips[3].textContent=cross?`Année ${cross}`:'> 30 ans';
@@ -646,6 +642,9 @@ function buildGS(){
     <div class="gf"><span class="gl">Taux actualisation (VAN)</span><button class="ib" data-info="tauxActu">?</button><input class="gi" type="number" min="0" max="15" step="0.5" value="${G.tauxActu}" oninput="G.tauxActu=+this.value;scheduleRedraw()"><span class="gu">%</span></div>
     <div class="gd"></div>
     <div class="gf"><span class="gl">Rdt placement alternatif (net)</span><button class="ib" data-info="rendAlt">?</button><input class="gi" type="number" min="0" max="20" step="0.5" value="${G.rendAlt}" oninput="G.rendAlt=+this.value;scheduleRedraw()"><span class="gu">%</span></div>
+    <div class="gd"></div>
+    <div class="gf"><span class="gl">Loyer actuel payé</span><button class="ib" data-info="loyerPerso">?</button><input class="gi" type="number" min="0" max="5000" step="50" value="${G.loyerPerso}" oninput="G.loyerPerso=+this.value;KEYS.forEach(k=>renderPanel(k));scheduleRedraw()"><span class="gu">€/mois</span></div>
+    <div class="gf"><span class="gl">Reval. loyer</span><button class="ib" data-info="revalLoyerPerso">?</button><input class="gi" type="number" min="0" max="5" step="0.1" value="${G.revalLoyerPerso}" oninput="G.revalLoyerPerso=+this.value;scheduleRedraw()"><span class="gu">%/an</span></div>
   `;
 }
 
@@ -775,7 +774,7 @@ function redraw(){
         ["CF mensuel brut",k=>fmtE(RES[k].cfM)],
       ]:[]),
       ...(KEYS.some(k=>sims[k].mode==='rp')?[
-        ["Effort mensuel (RP)",k=>sims[k].mode==='rp'?fmtE(RES[k].mens+RES[k].assM-sims[k].loyerActuel):'—'],
+        ["Effort mensuel (RP)",k=>sims[k].mode==='rp'?fmtE(RES[k].mens+RES[k].assM-G.loyerPerso):'—'],
         ["Point de croisement (RP)",k=>sims[k].mode==='rp'?(()=>{const c=crossoverYear(RES[k]);return c?`Année ${c}`:'> 30 ans';})():'—'],
       ]:[]),
       ["Breakeven CF cumulé",k=>RES[k].be?`An ${RES[k].be}`:'> 30 ans'],
@@ -907,6 +906,8 @@ function exportToCSV(d){
   row('Horizon',d.global.horizon,'ans');
   row("Taux d'actualisation (VAN)",d.global.tauxActu,'%');
   row('Rdt placement alternatif (net)',d.global.rendAlt,'%');
+  row('Loyer perso (€/mois)',d.global.loyerPerso,'€/mois');
+  row('Reval. loyer perso (%/an)',d.global.revalLoyerPerso,'%/an');
   row('');
 
   row('## Paramètres des simulations');row('Paramètre',...lbls);
@@ -929,14 +930,13 @@ function exportToCSV(d){
     ['Assurance PNO/Hab (€/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.assurPNO:d.simulations[k].inputs.assurHab],
     ['Gestion locative (%)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.fraisGestion:''],
     ['Provision travaux (€/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.provision:d.simulations[k].inputs.provisionRP],
-    ['Reval. loyer (%/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.revalLoyer:d.simulations[k].inputs.revalLoyerRP],
+    ['Reval. loyer (%/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.revalLoyer:''],
     ['TMI (%)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.tmi:''],
     ['Prélèvements sociaux (%)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.ps:''],
     ['Amort. bien (%/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.amortBien:''],
     ['Amort. travaux (%/an)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.amortTravaux:''],
     ['Impôt PV (%)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.impotPV:''],
     ['PS PV (%)',k=>d.simulations[k].inputs.mode==='loc'?d.simulations[k].inputs.psPV:''],
-    ['Loyer actuel (€/mois)',k=>d.simulations[k].inputs.mode==='rp'?d.simulations[k].inputs.loyerActuel:''],
   ].forEach(([l,fn])=>row(l,...KEYS.map(fn)));
   row('');
 
@@ -1075,6 +1075,8 @@ function restoreFromJSON(data){
   if(g.horizon!=null)G.horizon=+g.horizon;
   if(g.tauxActu!=null)G.tauxActu=+g.tauxActu;
   if(g.rendAlt!=null)G.rendAlt=+g.rendAlt;
+  if(g.loyerPerso!=null)G.loyerPerso=+g.loyerPerso;
+  if(g.revalLoyerPerso!=null)G.revalLoyerPerso=+g.revalLoyerPerso;
   const sData=data.simulations||{};
   KEYS.forEach(k=>{
     const s=sData[k];if(!s)return;
@@ -1096,6 +1098,8 @@ function restoreFromYAML(flat){
   if(flat['global.horizon']!=null)G.horizon=+flat['global.horizon'];
   if(flat['global.tauxActu']!=null)G.tauxActu=+flat['global.tauxActu'];
   if(flat['global.rendAlt']!=null)G.rendAlt=+flat['global.rendAlt'];
+  if(flat['global.loyerPerso']!=null)G.loyerPerso=+flat['global.loyerPerso'];
+  if(flat['global.revalLoyerPerso']!=null)G.revalLoyerPerso=+flat['global.revalLoyerPerso'];
   KEYS.forEach(k=>{
     const lbl=flat[`simulations.${k}.label`],en=flat[`simulations.${k}.enabled`];
     if(lbl!=null)sims[k].label=String(lbl);
@@ -1118,6 +1122,8 @@ function restoreFromCSV(sections){
     else if(p==='Horizon')G.horizon=n;
     else if(p==="Taux d'actualisation (VAN)")G.tauxActu=n;
     else if(p==='Rdt placement alternatif (net)')G.rendAlt=n;
+    else if(p==='Loyer perso (€/mois)')G.loyerPerso=n;
+    else if(p==='Reval. loyer perso (%/an)')G.revalLoyerPerso=n;
   }}
   const sSec=sections['Paramètres des simulations'];if(!sSec)return;
   KEYS.forEach((k,i)=>{const lbl=sSec.headers[i+1];if(lbl)sims[k].label=lbl;});
@@ -1140,14 +1146,13 @@ function restoreFromCSV(sections){
     'Assurance PNO/Hab (€/an)':(p,v)=>{if(!v)return;p.mode==='loc'?(p.assurPNO=+v):(p.assurHab=+v);},
     'Gestion locative (%)':(p,v)=>{if(v)p.fraisGestion=+v;},
     'Provision travaux (€/an)':(p,v)=>{if(!v)return;p.mode==='loc'?(p.provision=+v):(p.provisionRP=+v);},
-    'Reval. loyer (%/an)':(p,v)=>{if(!v)return;p.mode==='loc'?(p.revalLoyer=+v):(p.revalLoyerRP=+v);},
+    'Reval. loyer (%/an)':(p,v)=>{if(!v||p.mode!=='loc')return;p.revalLoyer=+v;},
     'TMI (%)':(p,v)=>{if(v)p.tmi=+v;},
     'Prélèvements sociaux (%)':(p,v)=>{if(v)p.ps=+v;},
     'Amort. bien (%/an)':(p,v)=>{if(v)p.amortBien=+v;},
     'Amort. travaux (%/an)':(p,v)=>{if(v)p.amortTravaux=+v;},
     'Impôt PV (%)':(p,v)=>{if(v)p.impotPV=+v;},
     'PS PV (%)':(p,v)=>{if(v)p.psPV=+v;},
-    'Loyer actuel (€/mois)':(p,v)=>{if(v)p.loyerActuel=+v;},
   };
   for(const row of sSec.rows){
     const fn=fm[row[0]];if(!fn)continue;
