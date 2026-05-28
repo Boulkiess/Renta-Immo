@@ -1,0 +1,45 @@
+# Changelog
+
+## [Unreleased]
+
+### Fixed
+- **Mode RP — cash flow corrigé** : le loyer non dépensé (`loyerPerso`) n'est plus compté comme un flux positif. Le `cfN` en mode RP reflète désormais uniquement les sorties réelles (charges + mensualité + assurance emprunteur). L'IRR, le bilan revente et le cash-flow cumulé sont donc corrects.
+
+## [1.3.0] — 2026-05-28
+
+### Added
+- **Layout responsive** : colonnes de simulation empilées sur mobile, graphiques redimensionnés.
+
+### Fixed
+- Régressions UI introduites lors de la migration Vite (styles, espacements, comportement des sliders).
+
+## [1.2.0] — 2026-05
+
+### Changed
+- **Migration vers Vite** : l'application est désormais construite avec Vite (`npm run dev / build / preview`). Déploiement automatique sur GitHub Pages via GitHub Actions.
+- **Modularisation du code** : l'application mono-fichier `immo_renta.html` a été découpée en modules ES :
+  - `js/main.js` — point d'entrée, exposition `window`
+  - `js/state.js` — état partagé (`G`, `sims`, `COL`, `KEYS`, définitions des groupes)
+  - `js/compute.js` — moteur financier (`compute()`, `recomputeETFPur()`, `crossoverYear()`, IRR)
+  - `js/charts.js` — rendus canvas (`drawLine()`, `drawBars()`, `attachHover()`)
+  - `js/render.js` — interface (`renderPanel()`, `rebuildShell()`, `redraw()`, export/import)
+  - `js/utils.js` — formateurs (`fmtE()`, `fmtK()`, `fmtP()`, `fmtTRI()`)
+
+## [1.1.0] — 2026-04
+
+### Added
+- **Courbe ETF pur toujours affichée** sur le graphique Patrimoine total, même si aucune simulation n'est en mode locatif.
+- **ETF poche inclus dans le bilan revente** : le patrimoine total (équité immobilière + ETF du surplus) est intégré au calcul `bilanTotal`.
+- **ETF pur externalisé** : `recomputeETFPur()` remplit un tableau global `etfPurGlobal[]` calculé une seule fois par cycle de rendu, indépendamment de `compute()`.
+- **Budget mensuel + surplus ETF** (`budgetMensuel`, `investirSurplus`, `apportETF`) : paramètres globaux permettant de normaliser la comparaison RP vs locatif sur une même enveloppe mensuelle. Le surplus (budget − sorties réelles) est réinvesti en ETF dans chaque scénario.
+- **Revalorisation du loyer personnel** (`revalLoyerPerso`) : le loyer actuel payé par l'investisseur est revalorisé chaque année dans le scénario ETF pur.
+
+### Changed
+- Les calculs locatifs intègrent désormais le loyer personnel (`loyerPerso`) et la revalorisation du loyer de marché (`revalLoyer`) dans le `cfN` annuel.
+
+## [1.0.0] — 2026-03
+
+### Added
+- **Export** des données de simulation en CSV, JSON et YAML.
+- **Import** des données de simulation depuis CSV, JSON et YAML.
+- Application initiale : outil d'analyse d'investissement immobilier locatif (mode `loc`) et résidence principale (mode `rp`) avec 3 simulations concurrentes (A, B, C), graphiques canvas, calcul IRR/TRI, tableau de bord KPIs.

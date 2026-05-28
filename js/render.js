@@ -199,7 +199,7 @@ export function rebuildShell(){
   if(curTab==='charts'){
     area.innerHTML=`
       <div class="cc"><div class="ct">💰 Cash-flow immobilier cumulé — 30 ans</div>
-        <div class="cs">Flux nets cumulés de la seule poche immobilière. Locatif : loyers − charges − mensualité − impôts − loyer perso. RP : loyer économisé − charges − mensualité (notion comptable).</div>
+        <div class="cs">Flux nets cumulés de la seule poche immobilière. Locatif : loyers − charges − mensualité − impôts − loyer perso. RP : sorties réelles uniquement (−charges − mensualité).</div>
         <canvas id="c1" data-h="230"></canvas></div>
       <div class="cc" style="margin-top:10px"><div class="ct">🏦 Patrimoine total — 30 ans</div>
         <div class="cs">Équité immobilière + portefeuille ETF constitué avec le surplus mensuel (budget − sorties réelles). Les <b>pointillés</b> = scénario ETF pur : même apport + surplus du budget investi sans achat. Base de comparaison équitable sur même enveloppe mensuelle.</div>
