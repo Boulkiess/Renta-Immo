@@ -29,12 +29,16 @@ function impLoc(le, chg, ab, at, tmi, ps, regime) {
 export function computeEtfPur(g) {
   const result = [];
   let cap = g.apportETF;
+  let totalContribs = g.apportETF;
   const r = g.rendAlt / 100;
   for (let yr = 1; yr <= 30; yr++) {
     const lpa = g.loyerPerso * 12 * Math.pow(1 + g.revalLoyerPerso / 100, yr - 1);
     const surplus = Math.max(0, g.budgetMensuel * 12 - lpa);
     cap = cap * (1 + r) + surplus;
-    result.push({ yr, cap });
+    totalContribs += surplus;
+    const gain = Math.max(0, cap - totalContribs);
+    const capNet = cap - gain * 0.30;
+    result.push({ yr, cap, capNet });
   }
   return result;
 }

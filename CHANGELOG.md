@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Fixed
+- **Fiscalité ETF à la revente** : le scénario ETF pur dans ReventeTab affiche désormais la valeur nette après PFU 30% sur la plus-value (PFU CTO simplifié). `computeEtfPur` retourne `capNet = cap − gain × 0,30` en plus du `cap` brut. Les autres vues (ChartsTab patrimoine, KpisTab, crossover) continuent d'utiliser le brut pour cohérence avec `patTotal` immobilier.
+
+### Fixed
 - **Hover sur les graphiques restauré** : la fonction `attachHover` n'avait pas été portée lors de la migration vers React. Tooltip flottant réimplémenté dans `CanvasChart`, avec labels de séries dans tous les composants graphiques (`ChartsTab`, `ReventeTab`, `AmortTab`).
 - **Bilan revente corrigé** : le graphique et le tableau "Bilan net selon la revente" utilisent désormais `bilanTotal` (qui inclut l'ETF poche accumulée avec le surplus mensuel composé) au lieu de `bilanRevente` (qui ne comptabilisait que les flux bruts non composés). La courbe ETF pur de référence reste inchangée en valeur absolue.
 

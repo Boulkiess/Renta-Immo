@@ -290,12 +290,14 @@ cap[yr] = cap[yr−1] × (1 + rendAlt/100) + surplus
 
 Représente l'alternative : investir l'apport en ETF et placer le surplus mensuel après paiement du loyer.
 
-**Simplification — fiscalité ETF non appliquée :** les rendements composent au taux brut `rendAlt` sans aucune taxe. En réalité :
-- **CTO** : PFU 30% (12,8% IR + 17,2% PS) sur la plus-value à la cession
-- **PEA** : 17,2% PS uniquement à la sortie (après 5 ans)
-- **Assurance-vie** : 24,7% après abattement et 8 ans de détention
+La fonction retourne deux valeurs par année :
+- `cap` : valeur brute (composition sans taxe) — utilisée dans ChartsTab (patrimoine), KpisTab, crossover, export
+- `capNet` : valeur nette après **PFU 30% sur la plus-value** (`capNet = cap − max(0, cap − totalContribs) × 0,30`) — utilisée uniquement dans **ReventeTab** (chart + table hover)
 
-Pour un ETF capitalisant, la taxe ne s'applique pas annuellement mais **à la cession** sur `cap_final − Σ_versements`. Le modèle ne l'applique pas du tout, ce qui **surestime la performance ETF** par rapport à l'immobilier (qui paie l'impôt chaque année via `impLoc()`). La correction correcte serait de déduire la taxe à la sortie sur la plus-value totale, pas de réduire `rendAlt` annuellement (ce qui fausserait la composition).
+**Simplifications restantes :**
+- Taux fixé à 30% flat (PFU CTO) — pas de distinction PEA 17,2% / CTO 30%
+- Pas de taxe annuelle (correct pour un ETF capitalisant : l'imposition n'a lieu qu'à la cession)
+- Le crossover compare `patTotal` immo (brut, avant impôt de cession) avec `cap` ETF (brut) — cohérence intentionnelle ; seule la ReventeTab utilise `capNet`
 
 ### Crossover ✅
 
