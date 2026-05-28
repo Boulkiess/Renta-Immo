@@ -302,12 +302,13 @@ function compute(p){
     if(p.mode==='loc') iPV=pvB*((p.impotPV+p.psPV)/100);
     const reventeNet=pr-rest-fa-iPV;
     const bilanRevente=reventeNet+cfC-p.apport;
+    const bilanTotal=reventeNet+etfCap-p.apport; // revente + ETF poche - apport initial
     const patTotal=(vb-rest)+etfCap;
 
     flux.push({yr,le,chg,ann:ann+asp,imp,cfN,cfC,vb,rest,
       patNet:vb-rest+cfC-p.apport,
       patTotal,etfPoche:etfCap,
-      reventeNet,bilanRevente,pr});
+      reventeNet,bilanRevente,bilanTotal,pr});
 
     irrFlows.push(cfN);
   }
@@ -797,7 +798,10 @@ function redraw(){
 
   else if(curTab==='revente'){
     let ds=[];
-    KEYS.forEach(k=>ds.push({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.bilanRevente),hide:hide(k),label:sims[k].label}));
+    KEYS.forEach(k=>{
+      const data=yrs.map(i=>G.investirSurplus?RES[k].flux[i-1]?.bilanTotal:RES[k].flux[i-1]?.bilanRevente);
+      ds.push({color:COL[k],data,hide:hide(k),label:sims[k].label});
+    });
     if(G.investirSurplus){
       ds.push({color:'#94a3b8',data:yrs.map(i=>etfPurGlobal[i-1]?.cap-G.apportETF),hide:false,dashed:true,label:`📈 ETF pur (${Math.round(G.apportETF/1000)}k€ apport)`});
     }
@@ -808,12 +812,15 @@ function redraw(){
       rows+=`<div class="rg"><div class="yb">Yr ${yr}</div>`;
       KEYS.forEach(k=>{
         if(!sims[k].enabled){rows+=`<div class="rc" style="background:#1118;padding:6px 8px;font-size:10px;color:#475569">Désactivé</div>`;return;}
-        const f=RES[k].flux[yr-1],col=COL[k],pos=(f?.bilanRevente||0)>=0;
+        const f=RES[k].flux[yr-1],col=COL[k];
+        const bilan=G.investirSurplus?f?.bilanTotal:f?.bilanRevente;
+        const pos=(bilan||0)>=0;
         rows+=`<div class="rc" style="background:${col}0f;border:1px solid ${col}28">
           <div style="font-size:9px;font-weight:700;color:${col};margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">${sims[k].mode==='loc'?'📊':'🏡'} ${sims[k].label}</div>
           <div style="font-size:10px">Revente : <b>${fmtK(f?.pr)}</b></div>
           <div style="font-size:10px">Capital restant : <b style="color:var(--red)">${fmtK(f?.rest)}</b></div>
-          <div style="font-size:10px;color:${pos?'var(--green)':'var(--red)'}">Bilan : <b>${fmtK(f?.bilanRevente)}</b></div>
+          ${G.investirSurplus?`<div style="font-size:10px">ETF poche : <b style="color:var(--a)">${fmtK(f?.etfPoche)}</b></div>`:''}
+          <div style="font-size:10px;color:${pos?'var(--green)':'var(--red)'}">Bilan ${G.investirSurplus?'total':'immo'} : <b>${fmtK(bilan)}</b></div>
         </div>`;
       });
       rows+=`</div>`;
