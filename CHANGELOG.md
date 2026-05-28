@@ -2,8 +2,13 @@
 
 ## [Unreleased]
 
+## [1.3.1] — 2026-05-28
+
 ### Fixed
-- **Mode RP — cash flow corrigé** : le loyer non dépensé (`loyerPerso`) n'est plus compté comme un flux positif. Le `cfN` en mode RP reflète désormais uniquement les sorties réelles (charges + mensualité + assurance emprunteur). L'IRR, le bilan revente et le cash-flow cumulé sont donc corrects.
+- **Mode RP — cash flow corrigé** : le loyer non dépensé (`loyerPerso`) n'est plus compté comme un flux positif dans `src/engine/compute.js`. Le `cfN` en mode RP reflète désormais uniquement les sorties réelles (charges + mensualité + assurance emprunteur). Corrige l'IRR, le bilan revente et le cash-flow cumulé pour tous les scénarios — notamment quand `loyerPerso > mensualité`.
+
+### Removed
+- Suppression des fichiers legacy devenus inutilisés après la migration React : `js/` (anciens modules vanilla JS), `style.css` (remplacé par styled-components), `immo_renta.html` (ancien fichier mono-page de référence).
 
 ## [1.3.0] — 2026-05-28
 

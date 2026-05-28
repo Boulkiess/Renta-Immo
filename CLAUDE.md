@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-**ImmoRenta** is a French real estate investment analysis tool that runs entirely in the browser. Open `index.html` via a dev server or directly to run it. No React or framework — the React/styled-components packages in `package.json` are unused leftovers.
+**ImmoRenta** is a French real estate investment analysis tool built with React + Vite, running entirely in the browser.
 
 ## Commands
 
@@ -16,59 +16,56 @@ npm run preview  # Preview the production build
 
 Deployment: pushing to `main` triggers GitHub Actions → Vite build → GitHub Pages.
 
-The file `immo_renta.html` is the legacy single-file version kept for reference; the active codebase is `index.html` + `style.css` + `js/`.
+## Before every commit
+
+**Update `CHANGELOG.md`** under `[Unreleased]` before committing any change. Add a `### Fixed`, `### Added`, `### Changed`, or `### Removed` entry as appropriate.
 
 ## Architecture
 
 ```
-index.html          HTML shell (39 lines) — references style.css and js/main.js
-style.css           All CSS (dark theme, CSS custom properties in :root)
-js/
-  main.js           Entry point — imports everything, exposes to window, calls init sequence
-  state.js          All shared state: G, sims, COL, KEYS, I, mkDef(), GRP_*, getGroups()
-  compute.js        Financial engine: compute(), recomputeETFPur(), crossoverYear(), irr()
-  charts.js         Canvas renderers: drawLine(), drawBars(), attachHover()
-  render.js         UI: renderPanel(), rebuildShell(), redraw(), export/import handlers
-  utils.js          Formatters: fmtE(), fmtK(), fmtP(), fmtTRI()
+index.html              HTML shell — loads src/main.jsx via Vite
+src/
+  main.jsx              React entry point (ReactDOM.createRoot)
+  App.jsx               Root component — theme provider, layout, tab routing
+  state/
+    AppContext.jsx       React context: sims, G (globals), dispatch actions
+    definitions.js      mkDef(), GRP_COMMON/LOC/RP, field metadata, I (info registry)
+  engine/
+    compute.js          Financial engine: compute(p,g), computeEtfPur(g), crossoverYear()
+    charts.js           Canvas renderers: drawLine(), drawBars(), attachHover()
+    utils.js            Formatters: fmtE(), fmtK(), fmtP(), fmtTRI()
+    io.js               Export/import handlers (CSV, JSON, YAML)
+  components/
+    SimPanel/           Left-column simulation panel (sliders, KPI chips, mode switch)
+    ChartArea/          Canvas chart wrappers (Charts, KPIs, Revente, Amort tabs)
+    GlobalStrip/        Global settings bar (loyerPerso, budget, regime, horizon…)
+    NavBar/             Tab navigation
+    Legend/             Simulation legend
+    common/             Shared UI atoms
+  i18n/                 Translations (fr/en)
+  theme/                Styled-components theme tokens
 ```
 
 ### Core data flow
 
-1. **`sims` object** (`state.js`) — holds state for 3 concurrent simulations (A, B, C), each with a `mode` (`'loc'` for rental, `'rp'` for primary residence) and ~25 financial parameters defined by `mkDef()`.
-2. **`compute(p)`** (`compute.js`) — pure function: takes a simulation's parameters, returns all derived financials: monthly payments, annual cashflows over 30 years, IRR at multiple horizons, NPV, patrimoine net. This is the financial engine — touch it carefully.
-3. **`renderPanel(key)`** (`render.js`) — rebuilds the full HTML for one of the 3 left-column simulation panels. Called on mode change or group toggle. KPI chips are updated more cheaply via `updateKpiChips()` on slider/number input events.
-4. **`rebuildShell()`** (`render.js`) — recreates canvas elements and static content for the active tab. Called only on tab changes and resize.
-5. **`redraw()`** (`render.js`) — reads all `sims`, calls `compute()` for each, draws charts or tables. Triggered via `scheduleRedraw()` which debounces with `requestAnimationFrame`.
+1. **`AppContext`** (`state/AppContext.jsx`) — holds state for 3 concurrent simulations (A, B, C) via `useReducer`. Each sim has a `mode` (`'loc'` / `'rp'`) and ~25 financial parameters from `mkDef()`, plus global settings `G`.
+2. **`compute(p, g)`** (`engine/compute.js`) — pure function: takes a simulation's parameters and globals, returns derived financials: monthly payments, 30-year cashflows, IRR at multiple horizons, NPV, patrimoine net. This is the financial engine — touch it carefully.
+3. **`computeEtfPur(g)`** (`engine/compute.js`) — pure function returning the 30-year ETF reference scenario array.
+4. Charts and KPI tables call `compute()` and `computeEtfPur()` on each render cycle.
 
-### Window exposure pattern
+### Key data shapes
 
-All event handlers in HTML are inline strings (`onclick="setTab('charts')"`). `js/main.js` exposes every needed function via `Object.assign(window, {...})`. When adding a new exported function that needs to be callable from HTML, add it to that `Object.assign` call.
-
-### Charts
-
-Two pure canvas renderers in `charts.js` — `drawLine()` and `drawBars()` — handle all charts. They store render metadata on the canvas element (`el._meta`) for the hover tooltip system (`attachHover()`). Canvas id strings are hardcoded in `rebuildShell()` and referenced by name in `redraw()`.
-
-### Key globals (`state.js`)
-
-- `G` — global settings shared across simulations: `inflation`, `regime` (`'lmnp'`/`'microbic'`/`'nu'`), `horizon`, `tauxActu`, `rendAlt`, `loyerPerso`, `revalLoyerPerso`, `budgetMensuel`, `investirSurplus`, `apportETF`
-- `COL` — color map `{A, B, C}` for the 3 simulations
-- `curTab` — active tab id (`'charts'`, `'kpis'`, `'revente'`, `'amort'`)
-- `openGrp` — tracks which accordion group is open per simulation panel (`render.js`)
-- `I` (info registry) — tooltip/popover content keyed by parameter name
-
-### Field definitions (`state.js`)
-
-`GRP_COMMON`, `GRP_LOC`, `GRP_RP` define the parameter groups and their slider configs. `GROUPS_ALL()` flattens them for lookups. `getGroups(mode)` returns the right combination for a given simulation mode.
-
-### ETF reference scenario
-
-`recomputeETFPur()` in `compute.js` fills the module-level `etfPurGlobal[]` array. It must be called before `redraw()` and before `renderPanel()` (KPI chips reference it via `crossoverYear()`). `redraw()` calls it at the top; `renderPanel()` calls it explicitly.
+- `p` (simulation params) — `{ mode, prixAchat, fraisNotaire, travaux, apport, taux, duree, loyer, … }` — see `mkDef()` in `definitions.js`
+- `g` (globals) — `{ loyerPerso, revalLoyerPerso, budgetMensuel, investirSurplus, apportETF, rendAlt, tauxActu, horizon, regime, inflation }`
+- `compute()` return — `{ flux[30], cfM, mens, assM, tri10/15/20, van, moic, revente[], … }`
+- `flux[yr]` — `{ cfN, cfC, le, chg, ann, imp, vb, rest, patNet, patTotal, etfPoche, reventeNet, bilanRevente, bilanTotal }`
 
 ## Financial formulas
 
 - **Loan payment**: standard annuity — `mens = emp × (τ/12) / (1 − (1+τ/12)^−n)`
 - **IRR**: Newton-Raphson on cashflows `[-apport, CF1, ..., CFn + reventeNet]`
-- **ETF pur reference**: apport invested upfront + annual surplus (budget − real outflows) compounding at `G.rendAlt`
+- **ETF pur reference**: apport invested upfront + annual surplus (budget − real outflows) compounding at `g.rendAlt`
 - **Tax** (`impLoc()`): LMNP (amortissements déductibles), Micro-BIC (50% abattement), Foncier nu (charges réelles)
 - **Capital gains**: only applies to `'loc'` mode; RP is fully exempt (`impotPV`/`psPV` = 0)
 - **Patrimoine total**: equity immobilière (valeur bien − capital restant) + ETF poche accumulée avec le surplus mensuel
+- **RP cash flow**: `cfN = -(charges + annuité + assurance)` — sorties réelles uniquement, jamais positif. Le loyer non dépensé n'est PAS un cash flow.

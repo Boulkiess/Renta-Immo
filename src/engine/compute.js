@@ -77,7 +77,7 @@ export function compute(p, g) {
       cfN = le - chg - ann - asp - imp - loyerPersoAnn;
     } else {
       chg = p.taxeFonciereRP + p.chargesCoproRP + p.assurHab + p.provisionRP;
-      cfN = loyerPersoAnn - chg - ann - asp;
+      cfN = -(chg + ann + asp);
       le = loyerPersoAnn;
     }
     cfC += cfN;
