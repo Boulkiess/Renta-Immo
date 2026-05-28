@@ -82,9 +82,9 @@ input[type=number]{-moz-appearance:textfield}
 .ni{width:60px;background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:inherit;font-size:10px;font-weight:700;padding:2px 5px;text-align:right;outline:none;transition:border-color .15s}
 .ni:focus{border-color:#475569}
 input[type=range]{width:100%;cursor:pointer;height:4px;border-radius:2px;-webkit-appearance:none;appearance:none;background:var(--border);display:block;margin:0}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;cursor:grab;border:2px solid var(--bg);box-shadow:0 0 4px rgba(0,0,0,.6)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;cursor:grab;border:2px solid var(--bg);box-shadow:0 0 4px rgba(0,0,0,.6);background:var(--rng-col,#6C9AFF)}
 input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1.15)}
-input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;cursor:grab;border:2px solid var(--bg)}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;cursor:grab;border:2px solid var(--bg);background:var(--rng-col,#6C9AFF)}
 input[type=range]:focus{outline:none}
 
 /* Content */
@@ -158,7 +158,8 @@ regime:{t:"Régime fiscal locatif",b:"<b>LMNP Réel</b> : amortissements déduct
 tauxActu:{t:"Taux d'actualisation (VAN)",b:"Taux utilisé pour calculer la Valeur Actuelle Nette. Représente le coût d'opportunité du capital — typiquement le rendement attendu d'un placement alternatif."},
 rendAlt:{t:"Rendement ETF / placement alternatif",b:"Rendement annuel net du portefeuille ETF. Utilisé pour capitaliser le surplus mensuel investi dans <b>tous les scénarios</b> (loc, RP, ETF pur). Historiquement ~7-8% brut ETF World, ~5-6% net après impôts et inflation."},
 budgetMensuel:{t:"Budget mensuel logement+investissement",b:"Enveloppe mensuelle fixe disponible pour se loger <b>et</b> investir. Le surplus non consommé par les coûts réels (mensualité, loyer perso, charges…) est automatiquement investi en ETF. Permet une comparaison équitable entre tous les scénarios sur la même base de sacrifice mensuel."},
-investirSurplus:{t:"Investir le surplus en ETF",b:"Si activé : chaque mois, la différence entre le budget mensuel et les sorties réelles est investie en ETF au taux 'Rdt placement alternatif'.<br>Cela normalise la comparaison : chaque scénario utilise la même enveloppe mensuelle, l'argent non dépensé en immo va en ETF.<br>Le tiret représente le scénario <b>ETF pur</b> : même apport + même surplus investi sans aucun achat immobilier."},
+investirSurplus:{t:"Investir le surplus en ETF",b:"Si activé : chaque mois, la différence entre le budget mensuel et les sorties réelles est investie en ETF au taux 'Rdt placement alternatif'.<br>Cela normalise la comparaison : chaque scénario utilise la même enveloppe mensuelle, l'argent non dépensé en immo va en ETF.<br>Le tiret représente le scénario <b>ETF pur</b> : apport ETF de référence + même surplus investi sans aucun achat immobilier."},
+apportETF:{t:"Apport ETF pur (référence)",b:"Capital de départ investi dans le scénario ETF pur de référence. C'est la seule simulation automatique : pas d'achat immo, l'apport + le surplus mensuel (budget − loyer actuel) sont capitalisés en ETF. Ajustez pour comparer équitablement avec vos simulations A/B/C."},
 prixAchat:{t:"Prix d'achat net vendeur",b:"Prix payé au vendeur, hors frais.",code:"Rendement brut = Loyer×12 / Coût total"},
 fraisNotaire:{t:"Frais de notaire",b:"7-8% dans l'ancien, 2-3% dans le neuf."},
 travaux:{t:"Travaux de rénovation",b:"En LMNP Réel, amortissables sur plusieurs années.",code:"Amort. travaux = Travaux × Taux amort."},
@@ -194,7 +195,7 @@ provisionRP:{t:"Provision travaux RP",b:"Budget annuel pour l'entretien. ~1% de 
 // ══════════════════════════════════════════════════════════
 // GLOBALS
 // ══════════════════════════════════════════════════════════
-const G={inflation:2,regime:'lmnp',horizon:20,tauxActu:3,rendAlt:6,loyerPerso:900,revalLoyerPerso:2,budgetMensuel:2500,investirSurplus:true};
+const G={inflation:2,regime:'lmnp',horizon:20,tauxActu:3,rendAlt:6,loyerPerso:900,revalLoyerPerso:2,budgetMensuel:2500,investirSurplus:true,apportETF:60000};
 const COL={A:'#6C9AFF',B:'#FF9D5C',C:'#5CEFB0'};
 const KEYS=['A','B','C'];
 
@@ -222,6 +223,19 @@ const sims={
 };
 let curTab='charts';
 const openGrp={A:'Acquisition',B:'Acquisition',C:'Acquisition'};
+let etfPurGlobal=[];
+
+function recomputeETFPur(){
+  etfPurGlobal=[];
+  let cap=G.apportETF;
+  const r=G.rendAlt/100;
+  for(let yr=1;yr<=30;yr++){
+    const lpa=G.loyerPerso*12*Math.pow(1+G.revalLoyerPerso/100,yr-1);
+    const surplus=Math.max(0,G.budgetMensuel*12-lpa);
+    cap=cap*(1+r)+(G.investirSurplus?surplus:0);
+    etfPurGlobal.push({yr,cap});
+  }
+}
 
 // ══════════════════════════════════════════════════════════
 // COMPUTE
@@ -251,8 +265,7 @@ function compute(p){
   const flux=[];let cfC=0;
   const irrFlows=[-p.apport];
   const rAlt=G.rendAlt/100;
-  let etfCap=0,etfPurCap=p.apport;
-  const etfPur=[];
+  let etfCap=0;
 
   for(let yr=1;yr<=30;yr++){
     const mi=Math.min(yr*12,amort.length)-1;
@@ -276,15 +289,10 @@ function compute(p){
     }
     cfC+=cfN;
 
-    // Sortie réelle de trésorerie (hors notion de loyer économisé)
+    // Surplus du budget investi en ETF (poche propre à cette sim)
     const realOutAnn=p.mode==='loc'?-cfN:chg+ann+asp;
     const surplusAnn=Math.max(0,G.budgetMensuel*12-realOutAnn);
     etfCap=etfCap*(1+rAlt)+(G.investirSurplus?surplusAnn:0);
-
-    // ETF pur : même apport investi + surplus (budget - loyer perso) chaque année
-    const surplusEtfPur=Math.max(0,G.budgetMensuel*12-loyerPersoAnn);
-    etfPurCap=etfPurCap*(1+rAlt)+(G.investirSurplus?surplusEtfPur:0);
-    etfPur.push({yr,cap:etfPurCap,surplus:surplusEtfPur});
 
     // Revente
     const pr=(p.prixAchat+p.travaux)*Math.pow(1+p.revalBien/100,yr);
@@ -334,7 +342,7 @@ function compute(p){
   }
 
   return{ct,emp,mens,assM,totInt,totAss,rendBrut,rendNet,cfM,
-    be:be>=0?be+1:null,flux,amort,etfPur,
+    be:be>=0?be+1:null,flux,amort,
     tri10:calcTRI(10),tri15:calcTRI(15),tri20:calcTRI(20),
     van:calcVAN(G.horizon),
     moic:flux[G.horizon-1]?(flux[G.horizon-1].bilanRevente+p.apport)/p.apport:0,
@@ -363,10 +371,10 @@ function irr(flows,guess=0.1,maxIter=100,tol=1e-7){
 
 // crossover year: when patTotal (immo + ETF poche) surpasses etfPur
 function crossoverYear(res){
-  if(!res.etfPur||!G.investirSurplus)return null;
+  if(!etfPurGlobal.length||!G.investirSurplus)return null;
   for(let i=0;i<30;i++){
     const immo=res.flux[i]?.patTotal;
-    const etf=res.etfPur[i]?.cap;
+    const etf=etfPurGlobal[i]?.cap;
     if(immo!=null&&etf!=null&&immo>=etf)return i+1;
   }
   return null;
@@ -524,6 +532,7 @@ function getGroups(mode){return[...GRP_COMMON,...(mode==='loc'?GRP_LOC:GRP_RP)];
 // PANEL RENDER
 // ══════════════════════════════════════════════════════════
 function renderPanel(key){
+  recomputeETFPur();
   const p=sims[key],res=compute(p),col=COL[key],isLoc=p.mode==='loc';
   const cfNeg=(isLoc?res.cfM:G.loyerPerso-res.mens-res.assM)<0;
   const groups=getGroups(p.mode);
@@ -575,7 +584,7 @@ function renderPanel(key){
         const v=p[f.k],hasI=!!I[f.k];
         const dv=f.tp==='e'?v:v.toFixed(f.st<.1?2:1);
         const unit=f.tp==='e'?'€':f.tp==='%'?'%':'';
-        h+=`<div class="fr"><div class="ft"><div class="fl">${hasI?`<button class="ib" data-info="${f.k}">?</button>`:''}<span>${f.l}</span></div><div class="fw"><input class="ni" type="number" min="${f.mn}" max="${f.mx}" step="${f.st}" value="${dv}" oninput="updN('${key}','${f.k}',this)" style="border-color:${col}44"><span class="gu">${unit}</span></div></div><input type="range" min="${f.mn}" max="${f.mx}" step="${f.st}" value="${v}" oninput="updS('${key}','${f.k}',this)" style="accent-color:${col}"></div>`;
+        h+=`<div class="fr"><div class="ft"><div class="fl">${hasI?`<button class="ib" data-info="${f.k}">?</button>`:''}<span>${f.l}</span></div><div class="fw"><input class="ni" type="number" min="${f.mn}" max="${f.mx}" step="${f.st}" value="${dv}" oninput="updN('${key}','${f.k}',this)" style="border-color:${col}44"><span class="gu">${unit}</span></div></div><input type="range" min="${f.mn}" max="${f.mx}" step="${f.st}" value="${v}" oninput="updS('${key}','${f.k}',this)" style="--rng-col:${col}"></div>`;
       });
       h+=`</div>`;
     }
@@ -635,6 +644,7 @@ function buildGS(){
     <div class="gd"></div>
     <div class="gf"><span class="gl">Budget mensuel</span><button class="ib" data-info="budgetMensuel">?</button><input class="gi" type="number" min="500" max="20000" step="100" value="${G.budgetMensuel}" oninput="G.budgetMensuel=+this.value;scheduleRedraw();renderLegend()" style="width:62px"><span class="gu">€/mois</span></div>
     <div class="gf" style="gap:6px"><span class="gl">Surplus→ETF</span><button class="ib" data-info="investirSurplus">?</button><label class="tgl"><input type="checkbox" ${G.investirSurplus?'checked':''} onchange="G.investirSurplus=this.checked;KEYS.forEach(k=>renderPanel(k));renderLegend();scheduleRedraw()"><div class="track"></div><div class="knob"></div></label></div>
+    <div class="gf"><span class="gl">Apport ETF pur</span><button class="ib" data-info="apportETF">?</button><input class="gi" type="number" min="0" max="500000" step="1000" value="${G.apportETF}" oninput="G.apportETF=+this.value;renderLegend();scheduleRedraw()" style="width:68px"><span class="gu">€</span></div>
   `;
 }
 
@@ -656,11 +666,10 @@ function renderLegend(){
       <div class="ll" style="background:${on?col:'#475569'}"></div>
       <span style="color:${on?col:'#475569'}">${modeTag} ${p.label}</span>
     </div>`;
-    // ETF pur reference line (when surplus toggle is active)
-    if(G.investirSurplus&&on){
-      h+=`<div class="li" style="cursor:default"><div class="ll" style="background:${col};opacity:.4;border:1px dashed ${col}"></div><span style="color:${col};opacity:.5;font-size:10px">ETF pur — ${p.label}</span></div>`;
-    }
   });
+  if(G.investirSurplus){
+    h+=`<div class="li" style="cursor:default"><div class="ll" style="background:#94a3b8;opacity:.6;border:1px dashed #94a3b8"></div><span style="color:#94a3b8;font-size:10px">📈 ETF pur — ${Math.round(G.apportETF/1000)}k€ apport</span></div>`;
+  }
   h+=`<span style="font-size:9px;color:var(--muted);margin-left:auto">Cliquer pour masquer/afficher</span>`;
   document.getElementById('legend').innerHTML=h;
 }
@@ -714,6 +723,7 @@ function scheduleRedraw(){if(_raf)cancelAnimationFrame(_raf);_raf=requestAnimati
 
 function redraw(){
   _raf=null;
+  recomputeETFPur();
   const RES={};KEYS.forEach(k=>RES[k]=compute(sims[k]));
   const yrs=Array.from({length:30},(_,i)=>i+1);
   const names=KEYS.map(k=>sims[k].label);
@@ -725,14 +735,12 @@ function redraw(){
     const ds1=KEYS.map(k=>({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.cfC),hide:hide(k),label:sims[k].label}));
     drawLine('c1',ds1,yrs);attachHover('c1',ds1.map(d=>d.label));
 
-    // Chart 2: Patrimoine total (immo equity + ETF poche) + ETF pur (dashed)
+    // Chart 2: Patrimoine total (immo equity + ETF poche) + une seule courbe ETF pur globale
     let ds2=[];
-    KEYS.forEach(k=>{
-      ds2.push({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.patTotal),hide:hide(k),label:sims[k].label});
-      if(G.investirSurplus&&sims[k].enabled){
-        ds2.push({color:COL[k],data:yrs.map(i=>RES[k].etfPur[i-1]?.cap),hide:false,dashed:true,label:`ETF pur — ${sims[k].label}`});
-      }
-    });
+    KEYS.forEach(k=>ds2.push({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.patTotal),hide:hide(k),label:sims[k].label}));
+    if(G.investirSurplus){
+      ds2.push({color:'#94a3b8',data:yrs.map(i=>etfPurGlobal[i-1]?.cap),hide:false,dashed:true,label:`📈 ETF pur (${Math.round(G.apportETF/1000)}k€ apport)`});
+    }
     drawLine('c2',ds2,yrs);attachHover('c2',ds2.map(d=>d.label));
 
     // Chart 3: CF net annuel (bars)
@@ -770,10 +778,10 @@ function redraw(){
       [`Patrimoine total ${G.horizon}a ⬛`,k=>fmtE(RES[k].flux[G.horizon-1]?.patTotal)],
       [`Patrimoine total 30a ⬛`,k=>fmtE(RES[k].flux[29]?.patTotal)],
       ...(G.investirSurplus?[
-        [`ETF pur ${G.horizon}a ⬜`,k=>fmtE(RES[k].etfPur[G.horizon-1]?.cap)],
-        [`ETF pur 30a ⬜`,k=>fmtE(RES[k].etfPur[29]?.cap)],
+        [`ETF pur ${G.horizon}a ⬜`,_=>fmtE(etfPurGlobal[G.horizon-1]?.cap)],
+        [`ETF pur 30a ⬜`,_=>fmtE(etfPurGlobal[29]?.cap)],
         [`Avantage vs ETF pur ${G.horizon}a`,k=>{
-          const tot=RES[k].flux[G.horizon-1]?.patTotal,etf=RES[k].etfPur[G.horizon-1]?.cap;
+          const tot=RES[k].flux[G.horizon-1]?.patTotal,etf=etfPurGlobal[G.horizon-1]?.cap;
           return(tot!=null&&etf!=null)?fmtE(tot-etf):'—';
         }],
         [`Croisement vs ETF pur`,k=>{const c=crossoverYear(RES[k]);return c?`Année ${c}`:'> 30 ans';}],
@@ -789,12 +797,10 @@ function redraw(){
 
   else if(curTab==='revente'){
     let ds=[];
-    KEYS.forEach(k=>{
-      ds.push({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.bilanRevente),hide:hide(k),label:sims[k].label});
-      if(G.investirSurplus&&sims[k].enabled){
-        ds.push({color:COL[k],data:yrs.map(i=>RES[k].etfPur[i-1]?.cap-sims[k].apport),hide:false,dashed:true,label:`ETF pur — ${sims[k].label}`});
-      }
-    });
+    KEYS.forEach(k=>ds.push({color:COL[k],data:yrs.map(i=>RES[k].flux[i-1]?.bilanRevente),hide:hide(k),label:sims[k].label}));
+    if(G.investirSurplus){
+      ds.push({color:'#94a3b8',data:yrs.map(i=>etfPurGlobal[i-1]?.cap-G.apportETF),hide:false,dashed:true,label:`📈 ETF pur (${Math.round(G.apportETF/1000)}k€ apport)`});
+    }
     drawLine('cr',ds,yrs);attachHover('cr',ds.map(d=>d.label));
 
     let rows='';
@@ -865,7 +871,7 @@ function buildExportData(){
           reventeNette:Math.round(f.reventeNet),
           bilanRevente:Math.round(f.bilanRevente),
         })),
-        etfPur:r.etfPur.map(e=>({annee:e.yr,capitalEtf:Math.round(e.cap),surplusAnnuel:Math.round(e.surplus)})),
+        etfPurRef:etfPurGlobal.map(e=>({annee:e.yr,capitalEtf:Math.round(e.cap)})),
       }
     };
   });
@@ -895,6 +901,7 @@ function exportToCSV(d){
   row('Reval. loyer perso (%/an)',d.global.revalLoyerPerso,'%/an');
   row('Budget mensuel (€/mois)',d.global.budgetMensuel,'€/mois');
   row('Investir surplus ETF',d.global.investirSurplus?'true':'false');
+  row('Apport ETF pur (€)',d.global.apportETF,'€');
   row('');
 
   row('## Paramètres des simulations');row('Paramètre',...lbls);
@@ -959,7 +966,7 @@ function exportToCSV(d){
         f.charges,f.annuitePlusAssurance,...(isLoc?[f.impots]:[]),
         f.cfNet,f.cfCumule,f.valeurBien,f.capitalRestant,
         f.patrimoineNet,f.patrimoineTotal??'',f.etfPoche??'',f.reventeNette,f.bilanRevente,
-        s.computed.etfPur?.[i]?.capitalEtf??'');
+        s.computed.etfPurRef?.[i]?.capitalEtf??'');
     });
     row('');
   });
@@ -1066,6 +1073,7 @@ function restoreFromJSON(data){
   if(g.revalLoyerPerso!=null)G.revalLoyerPerso=+g.revalLoyerPerso;
   if(g.budgetMensuel!=null)G.budgetMensuel=+g.budgetMensuel;
   if(g.investirSurplus!=null)G.investirSurplus=g.investirSurplus===true||g.investirSurplus==='true';
+  if(g.apportETF!=null)G.apportETF=+g.apportETF;
   const sData=data.simulations||{};
   KEYS.forEach(k=>{
     const s=sData[k];if(!s)return;
@@ -1091,6 +1099,7 @@ function restoreFromYAML(flat){
   if(flat['global.revalLoyerPerso']!=null)G.revalLoyerPerso=+flat['global.revalLoyerPerso'];
   if(flat['global.budgetMensuel']!=null)G.budgetMensuel=+flat['global.budgetMensuel'];
   if(flat['global.investirSurplus']!=null)G.investirSurplus=flat['global.investirSurplus']===true||flat['global.investirSurplus']==='true';
+  if(flat['global.apportETF']!=null)G.apportETF=+flat['global.apportETF'];
   KEYS.forEach(k=>{
     const lbl=flat[`simulations.${k}.label`],en=flat[`simulations.${k}.enabled`];
     if(lbl!=null)sims[k].label=String(lbl);
@@ -1117,6 +1126,7 @@ function restoreFromCSV(sections){
     else if(p==='Reval. loyer perso (%/an)')G.revalLoyerPerso=n;
     else if(p==='Budget mensuel (€/mois)')G.budgetMensuel=n;
     else if(p==='Investir surplus ETF')G.investirSurplus=v==='true';
+    else if(p==='Apport ETF pur (€)')G.apportETF=n;
   }}
   const sSec=sections['Paramètres des simulations'];if(!sSec)return;
   KEYS.forEach((k,i)=>{const lbl=sSec.headers[i+1];if(lbl)sims[k].label=lbl;});
