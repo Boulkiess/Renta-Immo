@@ -41,7 +41,8 @@ const ModeBtn = styled.button`
 const KpiRow = styled.div`display: grid; grid-template-columns: 1fr 1fr; gap: 4px;`;
 
 const KpiChip = styled.div`
-  background: ${({ theme }) => theme.s2}; border: 1px solid ${({ theme }) => theme.border};
+  background: ${({ theme }) => theme.s2};
+  border: 1px solid ${({ $danger, theme }) => $danger ? '#f87171' : theme.border};
   border-radius: 5px; padding: 4px 7px; display: flex; flex-direction: column; gap: 1px;
 `;
 const KpiLabel = styled.span`font-size: 9px; color: ${({ theme }) => theme.muted}; white-space: nowrap;`;
@@ -93,7 +94,7 @@ export default function SimPanel({ simKey }) {
               <KpiLabel>{t('kpi.mensualite')}</KpiLabel>
               <KpiVal $col={col}>{fmtE(r.mens + r.assM)}</KpiVal>
             </KpiChip>
-            <KpiChip>
+            <KpiChip $danger={-(r.flux[0]?.cfN ?? 0) / 12 > G.budgetMensuel}>
               <KpiLabel>{t('kpi.cfMensuel')}</KpiLabel>
               <KpiVal $col={(r.flux[0]?.cfN ?? 0) < 0 ? '#f87171' : col}>
                 {fmtE((r.flux[0]?.cfN ?? 0) / 12)}
