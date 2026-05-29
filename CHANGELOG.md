@@ -3,7 +3,7 @@
 ## [Unreleased]
 
 ### Changed
-- **Alerte budget sur le chip CF** : le chip "CF réel/mois" affiche un contour rouge lorsque le décaissement mensuel (`−cfN/12`) dépasse le budget mensuel (`budgetMensuel`).
+- **Alerte budget sur le chip CF** : le chip "CF réel/mois" affiche un contour rouge lorsque le décaissement mensuel (`−cfN/12`) dépasse le budget mensuel (`budgetMensuel`). La comparaison utilise `Math.round()` pour éviter les faux positifs par arrondi flottant lors d'une égalité apparente.
 
 ### Added
 - **Persistance de l'état dans le navigateur** : l'état complet (simulations A/B/C, globaux, onglet actif, groupes ouverts) est sauvegardé dans `localStorage` à la fermeture/refresh de la page et restauré automatiquement au chargement suivant. Les nouvelles clés ajoutées dans le code récupèrent leur valeur par défaut si absentes du JSON sauvegardé.

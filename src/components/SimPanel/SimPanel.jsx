@@ -94,7 +94,7 @@ export default function SimPanel({ simKey }) {
               <KpiLabel>{t('kpi.mensualite')}</KpiLabel>
               <KpiVal $col={col}>{fmtE(r.mens + r.assM)}</KpiVal>
             </KpiChip>
-            <KpiChip $danger={-(r.flux[0]?.cfN ?? 0) / 12 > G.budgetMensuel}>
+            <KpiChip $danger={Math.round(-(r.flux[0]?.cfN ?? 0) / 12) > G.budgetMensuel}>
               <KpiLabel>{t('kpi.cfMensuel')}</KpiLabel>
               <KpiVal $col={(r.flux[0]?.cfN ?? 0) < 0 ? '#f87171' : col}>
                 {fmtE((r.flux[0]?.cfN ?? 0) / 12)}
