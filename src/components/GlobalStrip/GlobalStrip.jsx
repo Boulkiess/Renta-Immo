@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
@@ -36,6 +37,7 @@ export default function GlobalStrip() {
   const { t } = useTranslation();
   const { G, updateG } = useApp();
   const u = t('global.units', { returnObjects: true });
+  const [horizonDraft, setHorizonDraft] = useState(null);
 
   return (
     <Strip>
@@ -62,7 +64,15 @@ export default function GlobalStrip() {
 
       <Field>
         <Label>{t('global.horizon')}</Label>
-        <NumInput type="number" min="5" max="30" step="1" value={G.horizon} onChange={e => updateG({ horizon: +e.target.value || 20 })} />
+        <NumInput type="number" min="5" max="30" step="1"
+          value={horizonDraft !== null ? horizonDraft : G.horizon}
+          onChange={e => {
+            setHorizonDraft(e.target.value);
+            const v = parseInt(e.target.value, 10);
+            if (v >= 1 && v <= 30) updateG({ horizon: v });
+          }}
+          onBlur={() => setHorizonDraft(null)}
+        />
         <Unit>{u.years}</Unit>
       </Field>
       <Div />
