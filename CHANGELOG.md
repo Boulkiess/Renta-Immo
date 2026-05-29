@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **Couleur "Intérêts" dans le graphe Décomposition du prêt** : le segment intérêts passe de l'orange ambre (`#f59e0b`) au jaune vif (`#ffe600`) pour le distinguer de la couleur de la simulation B.
+
 ### Fixed
 - **Champ horizon — saisie libre** : l'input "Horizon" dans la barre globale se met à jour en temps réel dès que la valeur est valide (1–30 ans). Quand le champ est vide ou en cours de frappe, la simulation conserve la dernière valeur valide. Le focus n'est plus nécessaire pour valider.
 
