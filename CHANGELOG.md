@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- **Mode auto pour les paramètres dérivés** : 6 champs du SimPanel peuvent être calculés automatiquement — frais de notaire (8% du prix d'achat), taux d'intérêt (courbe taux moyens France 05/2026 interpolée selon la durée : 7a 3,25% · 10a 3,30% · 15a 3,45% · 20a 3,55% · 25a 3,70%), provision travaux, taxe foncière, et leurs équivalents RP (0,5%/an du prix d'achat). Un badge "A" apparaît à côté de chaque champ auto-capable. Cliquer sur le badge bascule entre auto et manuel ; modifier le slider/input désactive aussi l'auto. L'état de chaque champ est stocké dans `autoFields[]` par simulation. Les calculs restent dans une fonction pure `resolveAutoFields()` sans modifier le moteur financier `compute()`. Les tooltips (ⓘ) de chaque champ auto-capable affichent la formule utilisée.
+
 ### Changed
 - **Couleur "Intérêts" dans le graphe Décomposition du prêt** : le segment intérêts passe de l'orange ambre (`#f59e0b`) au jaune vif (`#ffe600`) pour le distinguer de la couleur de la simulation B.
 

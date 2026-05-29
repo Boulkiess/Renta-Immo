@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { InfoButton } from '../common/Popover.jsx';
 import { useApp } from '../../state/AppContext.jsx';
+import { AUTOABLE_FIELDS, computeAutoValue } from '../../state/definitions.js';
 
 const Wrap = styled.div`border-bottom: 1px solid ${({ theme }) => theme.border};`;
 
@@ -37,12 +39,48 @@ const NumIn = styled.input`
 
 const Unit = styled.span`font-size: 9px; color: ${({ theme }) => theme.muted}; width: 12px; flex-shrink: 0; text-align: left;`;
 
+const AutoBadgeBtn = styled.button.attrs({ type: 'button' })`
+  font-size: 8px; font-weight: 700; letter-spacing: 0.3px;
+  min-width: 18px; height: 14px; padding: 0 3px; flex-shrink: 0;
+  border-radius: 3px; border: 1px solid;
+  cursor: pointer; line-height: 14px; text-align: center;
+  transition: opacity 200ms, background 200ms, color 200ms, border-color 200ms;
+  background: ${({ $active, $zero, theme }) => $active && !$zero ? theme.a : 'transparent'};
+  color: ${({ $active, $zero, theme }) => $active && !$zero ? '#fff' : theme.muted};
+  border-color: ${({ $active, $zero, theme }) =>
+    $active && !$zero ? theme.a : $zero ? `${theme.muted}55` : `${theme.muted}66`};
+  opacity: ${({ $active }) => $active ? 1 : 0.45};
+  &:hover { opacity: 1; }
+`;
+
+const HintBannerWrap = styled.div`
+  background: ${({ theme }) => theme.s2};
+  border: 1px solid ${({ theme }) => `${theme.a}55`};
+  border-radius: 4px; padding: 5px 7px; margin-bottom: 2px;
+  font-size: 9px; color: ${({ theme }) => theme.muted};
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 6px;
+`;
+
+const HintDismiss = styled.button.attrs({ type: 'button' })`
+  background: none; border: none; color: ${({ theme }) => theme.muted};
+  cursor: pointer; font-size: 10px; padding: 0; line-height: 1; flex-shrink: 0;
+  opacity: 0.6; &:hover { opacity: 1; }
+`;
+
 const unitFor = tp => tp === 'e' ? '€' : tp === '%' ? '%' : '';
 
 export default function FieldGroup({ simKey, group, open, onToggle }) {
   const { t } = useTranslation();
-  const { sims, updateSim } = useApp();
-  const p = sims[simKey];
+  const { sims, resolvedSims, updateSim, toggleAutoField } = useApp();
+  const p = sims[simKey];          // raw state — used for autoFields badge
+  const rp = resolvedSims[simKey]; // resolved state — used for display values
+
+  const hasAutoFields = group.f.some(f => AUTOABLE_FIELDS.has(f.k));
+  const [hintSeen, setHintSeen] = useState(() => !!localStorage.getItem('immorenta_auto_hint_seen'));
+  const dismissHint = () => {
+    localStorage.setItem('immorenta_auto_hint_seen', '1');
+    setHintSeen(true);
+  };
 
   return (
     <Wrap>
@@ -52,14 +90,39 @@ export default function FieldGroup({ simKey, group, open, onToggle }) {
       </GrpHead>
       {open && (
         <Body>
+          {hasAutoFields && !hintSeen && (
+            <HintBannerWrap>
+              <span>{t('auto.hint')}</span>
+              <HintDismiss onClick={dismissHint} title={t('auto.hintDismiss')}>✕</HintDismiss>
+            </HintBannerWrap>
+          )}
           {group.f.map(field => {
-            const val = p[field.k] ?? field.mn;
+            const isAutoable = AUTOABLE_FIELDS.has(field.k);
+            const isAuto = isAutoable && (p.autoFields ?? []).includes(field.k);
+            const isZeroGuard = isAuto && computeAutoValue(p, field.k) === 0;
+            const val = rp[field.k] ?? field.mn;
+
+            const handleChange = v => {
+              if (isAuto) toggleAutoField(simKey, field.k);
+              updateSim(simKey, field.k, v);
+            };
+
             return (
               <FieldWrap key={field.k}>
                 <LabelRow>
                   <FieldLabel title={t(`fields.${field.k}.label`, field.k)}>
                     {t(`fields.${field.k}.label`, field.k)}
                   </FieldLabel>
+                  {isAutoable && (
+                    <AutoBadgeBtn
+                      $active={isAuto}
+                      $zero={isZeroGuard}
+                      onClick={() => toggleAutoField(simKey, field.k)}
+                      title={isZeroGuard ? t('auto.zeroGuard') : isAuto ? t('auto.tooltipOn') : t('auto.tooltipOff')}
+                    >
+                      {t('auto.badge')}
+                    </AutoBadgeBtn>
+                  )}
                   <InfoButton tooltipKey={field.k} />
                 </LabelRow>
                 <InputRow>
@@ -68,15 +131,17 @@ export default function FieldGroup({ simKey, group, open, onToggle }) {
                       type="range"
                       min={field.mn} max={field.mx} step={field.st}
                       value={val}
-                      style={{ width: '100%' }}
-                      onChange={e => updateSim(simKey, field.k, +e.target.value)}
+                      style={{ width: '100%', opacity: isAuto ? 0.35 : 1 }}
+                      disabled={isAuto}
+                      onChange={e => handleChange(+e.target.value)}
                     />
                   </RangeWrap>
                   <NumIn
                     type="number"
                     min={field.mn} max={field.mx} step={field.st}
                     value={val}
-                    onChange={e => { const v = +e.target.value; if (isFinite(v)) updateSim(simKey, field.k, v); }}
+                    style={{ opacity: isAuto ? 0.6 : 1 }}
+                    onChange={e => { const v = +e.target.value; if (isFinite(v)) handleChange(v); }}
                   />
                   <Unit>{unitFor(field.tp)}</Unit>
                 </InputRow>

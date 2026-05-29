@@ -114,22 +114,22 @@
     "investirSurplus":  { "title": "Invest surplus in ETF", "body": "If enabled: the difference between the monthly budget and real outflows is invested in ETF. The dashed line = pure ETF reference scenario." },
     "apportETF":        { "title": "Pure ETF reference contribution", "body": "Starting capital for the pure ETF scenario. No property purchase — contribution + monthly surplus are compounded in ETF." },
     "prixAchat":        { "title": "Net purchase price", "body": "Price paid to the seller, excluding notary and agency fees." },
-    "fraisNotaire":     { "title": "Notary fees", "body": "7-8% for existing properties, 2-3% for new builds." },
+    "fraisNotaire":     { "title": "Notary fees", "body": "7-8% for existing properties, 2-3% for new builds. <b>Auto: 8% × purchase price.</b>" },
     "travaux":          { "title": "Renovation works", "body": "Under LMNP Real, depreciable over several years.", "code": "Works depreciation = Works × Rate" },
     "fraisAgence":      { "title": "Buyer's agent fees", "body": "Agent commission paid by the buyer." },
     "apport":           { "title": "Down payment", "body": "Own capital invested. Reduces the loan amount but also the leverage." },
-    "taux":             { "title": "Nominal interest rate", "body": "Nominal loan rate.", "code": "Payment = K×(r/12)/(1−(1+r/12)^−n)" },
+    "taux":             { "title": "Nominal interest rate", "body": "Nominal loan rate. Auto mode: France average rates (updated 05/2026) — 7y 3.25% · 10y 3.30% · 15y 3.45% · 20y 3.55% · 25y 3.70%.", "code": "Payment = K×(r/12)/(1−(1+r/12)^−n)" },
     "duree":            { "title": "Loan duration", "body": "Longer = lower monthly payment but higher total cost." },
     "assurance":        { "title": "Mortgage insurance (PMI)", "body": "0.10-0.40%/yr of capital depending on profile.", "code": "Monthly insurance = Capital × rate / 12" },
     "revalBien":        { "title": "Property appreciation", "body": "Annual increase assumption. ~2-3%/yr historical average in France.", "code": "Value year N = Price × (1+rate)^N" },
     "fraisVente":       { "title": "Selling agent fees", "body": "3-7% of sale price. Negotiable or avoidable via private sale." },
     "loyer":            { "title": "Gross monthly rent", "body": "Excluding recoverable charges. Key driver of profitability.", "code": "Gross yield = Rent×12 / Total cost" },
     "vacance":          { "title": "Vacancy rate", "body": "5-8% in tight markets, 10-15% in rural areas.", "code": "Collected rent = Gross rent × (1−vacancy)" },
-    "taxeFonciere":     { "title": "Property tax", "body": "Annual local tax. Varies significantly by municipality." },
+    "taxeFonciere":     { "title": "Property tax", "body": "Annual local tax. Varies significantly by municipality. <b>Auto: 0.5% × purchase price.</b>" },
     "chargesCopro":     { "title": "Non-recoverable HOA fees", "body": "Remain the owner's responsibility." },
     "assurPNO":         { "title": "Landlord insurance", "body": "Mandatory in co-ownership. €100-300/yr." },
     "fraisGestion":     { "title": "Property management", "body": "6-9% incl. tax of collected rents if using an agency." },
-    "provision":        { "title": "Maintenance reserve", "body": "Precautionary savings. Rule of thumb: ~1% of value/yr." },
+    "provision":        { "title": "Maintenance reserve", "body": "Precautionary savings. Rule of thumb: ~1% of value/yr. <b>Auto: 0.5% × purchase price.</b>" },
     "revalLoyer":       { "title": "Rent increase", "body": "Capped by the rent index. 1-4%/yr depending on inflation.", "code": "Rent year N = Rent × (1+rate)^(N−1)" },
     "tmi":              { "title": "Income tax bracket", "body": "Marginal rate: 0%, 11%, 30%, 41% or 45%.", "code": "Tax = Taxable income × (bracket + social contributions)" },
     "ps":               { "title": "Social contributions", "body": "17.2% on rental income (CSG+CRDS+solidarity)." },
@@ -141,8 +141,8 @@
     "revalLoyerPerso":  { "title": "Market rent revaluation %/yr", "body": "Annual increase of your rent. ~1-3%/yr indexed." },
     "assurHab":         { "title": "Home insurance", "body": "Owner-occupier home insurance. €200-500/yr." },
     "chargesCoproRP":   { "title": "HOA fees (primary residence)", "body": "All charges (no recoverable/non-recoverable split). €50-200/mo." },
-    "taxeFonciereRP":   { "title": "Property tax (primary residence)", "body": "Same tax as for rental. No housing tax since 2023 for primary residences." },
-    "provisionRP":      { "title": "Maintenance reserve (primary)", "body": "Annual maintenance budget. ~1% of property value." }
+    "taxeFonciereRP":   { "title": "Property tax (primary residence)", "body": "Same tax as for rental. No housing tax since 2023 for primary residences. <b>Auto: 0.5% × purchase price.</b>" },
+    "provisionRP":      { "title": "Maintenance reserve (primary)", "body": "Annual maintenance budget. ~1% of property value. <b>Auto: 0.5% × purchase price.</b>" }
   },
   "charts": {
     "cf1": {
@@ -226,5 +226,13 @@
   "import": {
     "error": "Import error:\n{{msg}}",
     "unsupported": "Unsupported format: {{ext}}"
+  },
+  "auto": {
+    "badge": "A",
+    "tooltipOn": "Auto mode active — click to override manually",
+    "tooltipOff": "Auto mode off — click to enable",
+    "zeroGuard": "Computed value is 0 — check the purchase price",
+    "hint": "Fields marked A are auto-calculated. Click A to switch to manual.",
+    "hintDismiss": "OK"
   }
 }

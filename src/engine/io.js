@@ -204,6 +204,7 @@ function applySimFromObj(key, data, updateSimBulk) {
     if (inp[f] == null) return;
     if (f === 'mode' || f === 'label')  updates[f] = String(inp[f]);
     else if (f === 'enabled')           updates[f] = inp[f] === true || inp[f] === 'true';
+    else if (f === 'autoFields')        { if (Array.isArray(inp[f])) updates[f] = inp[f]; }
     else { const n = parseFloat(inp[f]); if (!isNaN(n)) updates[f] = n; }
   });
   updateSimBulk(key, updates);

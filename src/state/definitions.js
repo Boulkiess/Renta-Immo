@@ -7,6 +7,51 @@ export const DEFAULT_G = {
   investirSurplus: true, apportETF: 60000,
 };
 
+export const AUTOABLE_FIELDS = new Set(['fraisNotaire', 'taux', 'provision', 'provisionRP', 'taxeFonciere', 'taxeFonciereRP']);
+
+export const TAUX_CURVE_UPDATED_AT = '2026-05';
+const _TAUX_CURVE = [
+  { y: 7, r: 3.25 }, { y: 10, r: 3.30 }, { y: 15, r: 3.45 }, { y: 20, r: 3.55 }, { y: 25, r: 3.70 }, { y: 30, r: 3.85 },
+];
+if (typeof window !== 'undefined') {
+  const [cy, cm] = TAUX_CURVE_UPDATED_AT.split('-').map(Number);
+  const now = new Date();
+  if ((now.getFullYear() - cy) * 12 + now.getMonth() + 1 - cm > 12)
+    console.warn(`[ImmoRenta] Rate curve last updated ${TAUX_CURVE_UPDATED_AT} — consider refreshing _TAUX_CURVE in definitions.js`);
+}
+
+function interpTaux(duree) {
+  if (duree <= _TAUX_CURVE[0].y) return _TAUX_CURVE[0].r;
+  const last = _TAUX_CURVE[_TAUX_CURVE.length - 1];
+  if (duree >= last.y) return last.r;
+  for (let i = 0; i < _TAUX_CURVE.length - 1; i++) {
+    const a = _TAUX_CURVE[i], b = _TAUX_CURVE[i + 1];
+    if (duree >= a.y && duree <= b.y) return a.r + (duree - a.y) / (b.y - a.y) * (b.r - a.r);
+  }
+  return 3.85;
+}
+
+export function computeAutoValue(p, fieldKey) {
+  const base = p.prixAchat ?? 0;
+  switch (fieldKey) {
+    case 'fraisNotaire':   return base > 0 ? Math.round(base * 0.08) : 0;
+    case 'taux':           return (p.duree ?? 0) > 0 ? +interpTaux(p.duree).toFixed(2) : 0;
+    case 'provision':      return base > 0 ? Math.round(base * 0.005) : 0;
+    case 'provisionRP':    return base > 0 ? Math.round(base * 0.005) : 0;
+    case 'taxeFonciere':   return base > 0 ? Math.round(base * 0.005) : 0;
+    case 'taxeFonciereRP': return base > 0 ? Math.round(base * 0.005) : 0;
+    default:               return p[fieldKey] ?? 0;
+  }
+}
+
+export function resolveAutoFields(p) {
+  const af = p.autoFields ?? [];
+  if (!af.length) return p;
+  const overrides = {};
+  af.forEach(k => { overrides[k] = computeAutoValue(p, k); });
+  return { ...p, ...overrides };
+}
+
 export function mkDef(mode) {
   return {
     mode,
@@ -20,6 +65,9 @@ export function mkDef(mode) {
     tmi: 30, ps: 17.2, amortBien: 2.5, amortTravaux: 10,
     impotPV: 19, psPV: 17.2,
     taxeFonciereRP: 1200, chargesCoproRP: 1200, assurHab: 300, provisionRP: 500,
+    autoFields: mode === 'loc'
+      ? ['fraisNotaire', 'taux', 'provision', 'taxeFonciere']
+      : ['fraisNotaire', 'taux', 'provisionRP', 'taxeFonciereRP'],
   };
 }
 

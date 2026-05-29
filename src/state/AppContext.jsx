@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { DEFAULT_G, DEFAULT_SIMS, KEYS } from './definitions.js';
+import { DEFAULT_G, DEFAULT_SIMS, KEYS, resolveAutoFields } from './definitions.js';
 import { compute, computeEtfPur, crossoverYear } from '../engine/compute.js';
 
 const STORAGE_KEY = 'immorenta_state';
@@ -34,11 +34,19 @@ export function AppProvider({ children }) {
 
   const etfPurGlobal = useMemo(() => computeEtfPur(G), [G]);
 
+  /** resolvedSims: auto fields replaced by computed values. Use for display and compute(). */
+  const resolvedSims = useMemo(() => {
+    const r = {};
+    KEYS.forEach(k => { r[k] = resolveAutoFields(sims[k]); });
+    return r;
+  }, [sims]);
+
+  /** RES: financial engine results, always computed from resolved (auto-applied) params. */
   const RES = useMemo(() => {
     const r = {};
-    KEYS.forEach(k => { r[k] = compute(sims[k], G); });
+    KEYS.forEach(k => { r[k] = compute(resolvedSims[k], G); });
     return r;
-  }, [sims, G]);
+  }, [resolvedSims, G]);
 
   const crossovers = useMemo(() => {
     const r = {};
@@ -62,6 +70,15 @@ export function AppProvider({ children }) {
     setOpenGrp(prev => ({ ...prev, [key]: prev[key] === grp ? null : grp }));
   }, []);
 
+  const toggleAutoField = useCallback((simKey, fieldKey) => {
+    setSims(prev => {
+      const p = prev[simKey];
+      const af = p.autoFields ?? [];
+      const next = af.includes(fieldKey) ? af.filter(x => x !== fieldKey) : [...af, fieldKey];
+      return { ...prev, [simKey]: { ...p, autoFields: next } };
+    });
+  }, []);
+
   const stateRef = useRef({ G, sims, curTab, openGrp });
   useEffect(() => { stateRef.current = { G, sims, curTab, openGrp }; });
   useEffect(() => {
@@ -76,7 +93,7 @@ export function AppProvider({ children }) {
   return (
     <AppContext.Provider value={{
       G, updateG,
-      sims, updateSim, updateSimBulk,
+      sims, resolvedSims, updateSim, updateSimBulk, toggleAutoField,
       curTab, setCurTab,
       openGrp, toggleOpenGrp,
       RES, etfPurGlobal, crossovers,
