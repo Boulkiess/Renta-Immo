@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- **Persistance de l'état dans le navigateur** : l'état complet (simulations A/B/C, globaux, onglet actif, groupes ouverts) est sauvegardé dans `localStorage` à la fermeture/refresh de la page et restauré automatiquement au chargement suivant. Les nouvelles clés ajoutées dans le code récupèrent leur valeur par défaut si absentes du JSON sauvegardé.
+
 ### Changed
 - **Refonte KPI chips SimPanel** : 4 indicateurs unifiés LOC/RP (Mensualité, CF réel/mois, Effort/mois, Patrimoine à terme) remplacent les indicateurs mode-spécifiques (rendBrut/rendNet, crossover ETF, effort différentiel). CF réel/mois = `cfN/12` (an 1, toutes charges incluses). Effort/mois = `−cfN/12 − loyerPerso` (surcoût mensuel vs. situation actuelle).
 
