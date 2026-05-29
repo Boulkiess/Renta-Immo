@@ -59,12 +59,13 @@
     "rendBrut": "Rdt brut",
     "rendNet": "Rdt net",
     "mensualite": "Mensualité",
-    "cfMensuel": "CF mensuel",
+    "cfMensuel": "CF réel/mois",
     "effortMois": "Effort/mois",
     "patrimTotal": "Patrim. tot. {{horizon}}a",
     "vsEtfPur": "vs ETF pur",
     "anN": "An {{n}}",
-    "gt30ans": "> 30 ans"
+    "gt30ans": "> 30 ans",
+    "pointMort": "Point mort"
   },
   "groups": {
     "Acquisition": "🏠 Acquisition",

@@ -54,11 +54,10 @@ const Disabled = styled.div`
 `;
 
 const fmtE = v => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v || 0);
-const fmtP = v => (!isFinite(v) || isNaN(v)) ? '—' : v.toFixed(2) + '%';
 
 export default function SimPanel({ simKey }) {
   const { t } = useTranslation();
-  const { G, sims, updateSim, updateSimBulk, openGrp, toggleOpenGrp, RES, crossovers } = useApp();
+  const { G, sims, updateSim, updateSimBulk, openGrp, toggleOpenGrp, RES } = useApp();
   const p = sims[simKey];
   const r = RES[simKey];
   const col = COL[simKey];
@@ -90,48 +89,26 @@ export default function SimPanel({ simKey }) {
 
         {p.enabled && (
           <KpiRow>
-            {p.mode === 'loc' && (
-              <>
-                <KpiChip>
-                  <KpiLabel>{t('kpi.rendBrut')}</KpiLabel>
-                  <KpiVal $col={col}>{fmtP(r.rendBrut)}</KpiVal>
-                </KpiChip>
-                <KpiChip>
-                  <KpiLabel>{t('kpi.rendNet')}</KpiLabel>
-                  <KpiVal $col={col}>{fmtP(r.rendNet)}</KpiVal>
-                </KpiChip>
-                <KpiChip>
-                  <KpiLabel>{t('kpi.mensualite')}</KpiLabel>
-                  <KpiVal $col={col}>{fmtE(r.mens + r.assM)}</KpiVal>
-                </KpiChip>
-                <KpiChip>
-                  <KpiLabel>{t('kpi.cfMensuel')}</KpiLabel>
-                  <KpiVal $col={r.cfM >= 0 ? col : '#f87171'}>{fmtE(r.cfM)}</KpiVal>
-                </KpiChip>
-              </>
-            )}
-            {p.mode === 'rp' && (
-              <>
-                <KpiChip>
-                  <KpiLabel>{t('kpi.mensualite')}</KpiLabel>
-                  <KpiVal $col={col}>{fmtE(r.mens + r.assM)}</KpiVal>
-                </KpiChip>
-                <KpiChip>
-                  <KpiLabel>{t('kpi.effortMois')}</KpiLabel>
-                  <KpiVal $col={r.cfM >= 0 ? col : '#f87171'}>{fmtE(r.cfM)}</KpiVal>
-                </KpiChip>
-                <KpiChip>
-                  <KpiLabel>{t('kpi.patrimTotal', { horizon: G.horizon })}</KpiLabel>
-                  <KpiVal $col={col}>{fmtE(r.flux[G.horizon - 1]?.patTotal)}</KpiVal>
-                </KpiChip>
-                <KpiChip>
-                  <KpiLabel>{t('kpi.vsEtfPur')}</KpiLabel>
-                  <KpiVal $col={col}>
-                    {crossovers[simKey] ? t('kpi.anN', { n: crossovers[simKey] }) : t('kpi.gt30ans')}
-                  </KpiVal>
-                </KpiChip>
-              </>
-            )}
+            <KpiChip>
+              <KpiLabel>{t('kpi.mensualite')}</KpiLabel>
+              <KpiVal $col={col}>{fmtE(r.mens + r.assM)}</KpiVal>
+            </KpiChip>
+            <KpiChip>
+              <KpiLabel>{t('kpi.cfMensuel')}</KpiLabel>
+              <KpiVal $col={(r.flux[0]?.cfN ?? 0) < 0 ? '#f87171' : col}>
+                {fmtE((r.flux[0]?.cfN ?? 0) / 12)}
+              </KpiVal>
+            </KpiChip>
+            <KpiChip>
+              <KpiLabel>{t('kpi.effortMois')}</KpiLabel>
+              <KpiVal $col={-(r.flux[0]?.cfN ?? 0) / 12 - G.loyerPerso > 0 ? '#f87171' : col}>
+                {fmtE(-(r.flux[0]?.cfN ?? 0) / 12 - G.loyerPerso)}
+              </KpiVal>
+            </KpiChip>
+            <KpiChip>
+              <KpiLabel>{t('kpi.patrimTotal', { horizon: G.horizon })}</KpiLabel>
+              <KpiVal $col={col}>{fmtE(r.flux[G.horizon - 1]?.patTotal)}</KpiVal>
+            </KpiChip>
           </KpiRow>
         )}
       </Header>

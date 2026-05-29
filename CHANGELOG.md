@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **Refonte KPI chips SimPanel** : 4 indicateurs unifiés LOC/RP (Mensualité, CF réel/mois, Effort/mois, Patrimoine à terme) remplacent les indicateurs mode-spécifiques (rendBrut/rendNet, crossover ETF, effort différentiel). CF réel/mois = `cfN/12` (an 1, toutes charges incluses). Effort/mois = `−cfN/12 − loyerPerso` (surcoût mensuel vs. situation actuelle).
+
 ### Fixed
 - **Fiscalité ETF à la revente** : le scénario ETF pur dans ReventeTab affiche désormais la valeur nette après PFU 30% sur la plus-value (PFU CTO simplifié). `computeEtfPur` retourne `capNet = cap − gain × 0,30` en plus du `cap` brut. Les autres vues (ChartsTab patrimoine, KpisTab, crossover) continuent d'utiliser le brut pour cohérence avec `patTotal` immobilier.
 

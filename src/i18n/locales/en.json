@@ -59,12 +59,13 @@
     "rendBrut": "Gross yield",
     "rendNet": "Net yield",
     "mensualite": "Monthly payment",
-    "cfMensuel": "Monthly CF",
+    "cfMensuel": "Real CF/mo",
     "effortMois": "Effort/mo",
     "patrimTotal": "Total wealth {{horizon}}y",
     "vsEtfPur": "vs pure ETF",
     "anN": "Yr {{n}}",
-    "gt30ans": "> 30 yrs"
+    "gt30ans": "> 30 yrs",
+    "pointMort": "Break-even"
   },
   "groups": {
     "Acquisition": "🏠 Acquisition",

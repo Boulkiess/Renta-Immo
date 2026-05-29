@@ -355,7 +355,22 @@ Mode loc : cfM = loyer − mens − assM − loyerPerso     (hors charges opéra
 Mode rp  : cfM = loyerPerso − mens − assM             (différentiel vs. rester locataire)
 ```
 
-**Attention** : `cfM` est un indicateur simplifié affiché dans les KPI chips. Il **n'inclut pas** taxeFonciere, chargesCopro, assurPNO, fraisGestion, provision. La vraie sortie mensuelle est `−cfN[yr=1]/12`. Ne pas utiliser `cfM` dans des calculs financiers.
+**Attention** : `cfM` est un indicateur simplifié **non affiché dans les KPI chips du SimPanel** (remplacé par `cfN[yr=1]/12`). Il est conservé dans `compute()` pour KpisTab et io.js. Il **n'inclut pas** taxeFonciere, chargesCopro, assurPNO, fraisGestion, provision, ni l'impôt. Ne pas utiliser `cfM` dans des calculs financiers.
+
+### KPI chips SimPanel (unified LOC/RP)
+
+Les 4 chips affichés dans le header de chaque SimPanel sont identiques pour les modes LOC et RP :
+
+| Chip | Formule | Couleur |
+|------|---------|---------|
+| Mensualité | `r.mens + r.assM` | couleur sim |
+| CF réel/mois | `r.flux[0].cfN / 12` | rouge si < 0, couleur sim sinon |
+| Effort/mois | `−r.flux[0].cfN / 12 − G.loyerPerso` | rouge si > 0, couleur sim sinon |
+| Patrimoine Xa | `r.flux[G.horizon−1].patTotal` | couleur sim |
+
+**Effort/mois** = surcoût mensuel vs. situation actuelle (louer à `loyerPerso`). Positif = tu dépenses plus qu'aujourd'hui. Négatif = l'investissement est moins cher que ta situation actuelle. Formule unifiée valide pour LOC et RP. Redondant avec CF réel/mois uniquement si `loyerPerso = 0`.
+
+`rendBrut`, `rendNet`, `cfM`, `crossover` ne sont plus affichés dans le SimPanel — toujours calculés par `compute()` et disponibles dans KpisTab et io.js.
 
 ### Point mort (break-even) ✅
 
