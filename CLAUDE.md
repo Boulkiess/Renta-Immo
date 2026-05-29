@@ -20,6 +20,8 @@ Deployment: pushing to `main` triggers GitHub Actions → Vite build → GitHub 
 
 **Update `CHANGELOG.md`** under `[Unreleased]` before committing any change. Add a `### Fixed`, `### Added`, `### Changed`, or `### Removed` entry as appropriate.
 
+**Keep `CLAUDE.md` in sync with the code.** If you modify formulas, parameters, data shapes, architecture, or any documented behavior, update the relevant sections of this file in the same commit. This file is the source of truth for the financial engine — it must reflect actual code, not past intentions.
+
 ## Architecture
 
 ```
