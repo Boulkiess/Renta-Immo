@@ -69,6 +69,43 @@ const HintDismiss = styled.button.attrs({ type: 'button' })`
 
 const unitFor = tp => tp === 'e' ? '€' : tp === '%' ? '%' : '';
 
+const stepDecimals = st => {
+  const s = st.toString();
+  const i = s.indexOf('.');
+  return i === -1 ? 0 : s.length - i - 1;
+};
+
+function NumInput({ field, val, isAuto, onChange }) {
+  const dec = stepDecimals(field.st);
+  // null = show formatted value; string = user is actively typing
+  const [localStr, setLocalStr] = useState(null);
+  const displayStr = localStr ?? val.toFixed(dec);
+  return (
+    <NumIn
+      type="text"
+      inputMode="decimal"
+      value={displayStr}
+      style={{ opacity: isAuto ? 0.6 : 1 }}
+      onFocus={() => setLocalStr(val.toFixed(dec))}
+      onBlur={() => setLocalStr(null)}
+      onChange={e => {
+        setLocalStr(e.target.value);
+        const v = +e.target.value;
+        if (isFinite(v)) onChange(v);
+      }}
+      onKeyDown={e => {
+        if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+        e.preventDefault();
+        const dir = e.key === 'ArrowUp' ? 1 : -1;
+        const step = e.shiftKey ? field.st * 10 : field.st;
+        const next = Math.min(field.mx, Math.max(field.mn, +(val + dir * step).toFixed(dec)));
+        setLocalStr(null);
+        onChange(next);
+      }}
+    />
+  );
+}
+
 export default function FieldGroup({ simKey, group, open, onToggle }) {
   const { t } = useTranslation();
   const { sims, resolvedSims, updateSim, toggleAutoField } = useApp();
@@ -136,13 +173,7 @@ export default function FieldGroup({ simKey, group, open, onToggle }) {
                       onChange={e => handleChange(+e.target.value)}
                     />
                   </RangeWrap>
-                  <NumIn
-                    type="number"
-                    min={field.mn} max={field.mx} step={field.st}
-                    value={val}
-                    style={{ opacity: isAuto ? 0.6 : 1 }}
-                    onChange={e => { const v = +e.target.value; if (isFinite(v)) handleChange(v); }}
-                  />
+                  <NumInput field={field} val={val} isAuto={isAuto} onChange={handleChange} />
                   <Unit>{unitFor(field.tp)}</Unit>
                 </InputRow>
               </FieldWrap>
