@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
@@ -95,7 +95,64 @@ const NumInput = styled.input`
 const Unit = styled.span`
   font-size: 10px;
   color: ${UNIT_COL};
+  cursor: ns-resize;
+  user-select: none;
+  &:hover {
+    opacity: 1;
+  }
 `;
+
+const stepDecimals = st => {
+  const s = st.toString();
+  const i = s.indexOf('.');
+  return i === -1 ? 0 : s.length - i - 1;
+};
+
+const PIXELS_PER_STEP = 6;
+
+function DraggableUnit({ min, max, step, val, onChange, children }) {
+  const dragRef = useRef(null);
+  const dec = stepDecimals(step);
+
+  const handleMouseDown = e => {
+    e.preventDefault();
+    const el = e.currentTarget;
+    dragRef.current = { currentVal: val };
+    el.requestPointerLock();
+    document.body.style.userSelect = 'none';
+
+    const handleMove = mv => {
+      if (!mv.movementY) return;
+      const mult = mv.shiftKey ? 10 : 1;
+      dragRef.current.currentVal -= (mv.movementY * mult * step) / PIXELS_PER_STEP;
+      const next = Math.min(max, Math.max(min, +dragRef.current.currentVal.toFixed(dec)));
+      onChange(next);
+    };
+
+    const cleanup = () => {
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleUp);
+      document.removeEventListener('pointerlockchange', onLockChange);
+      document.body.style.userSelect = '';
+      dragRef.current = null;
+    };
+
+    const handleUp = () => {
+      document.exitPointerLock();
+      cleanup();
+    };
+
+    const onLockChange = () => {
+      if (!document.pointerLockElement) cleanup();
+    };
+
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleUp);
+    document.addEventListener('pointerlockchange', onLockChange);
+  };
+
+  return <Unit onMouseDown={handleMouseDown}>{children}</Unit>;
+}
 
 const Select = styled.select`
   background: ${SELECT_BG};
@@ -135,7 +192,15 @@ export default function GlobalStrip() {
             value={G.inflation}
             onChange={e => updateG({ inflation: +e.target.value })}
           />
-          <Unit>{u.perYear}</Unit>
+          <DraggableUnit
+            min={0}
+            max={10}
+            step={0.1}
+            val={G.inflation}
+            onChange={v => updateG({ inflation: v })}
+          >
+            {u.perYear}
+          </DraggableUnit>
         </Field>
 
         <Field>
@@ -165,7 +230,15 @@ export default function GlobalStrip() {
             }}
             onBlur={() => setHorizonDraft(null)}
           />
-          <Unit>{u.years}</Unit>
+          <DraggableUnit
+            min={5}
+            max={30}
+            step={1}
+            val={G.horizon}
+            onChange={v => updateG({ horizon: v })}
+          >
+            {u.years}
+          </DraggableUnit>
         </Field>
 
         <Field>
@@ -179,7 +252,15 @@ export default function GlobalStrip() {
             value={G.tauxActu}
             onChange={e => updateG({ tauxActu: +e.target.value })}
           />
-          <Unit>{u.percent}</Unit>
+          <DraggableUnit
+            min={0}
+            max={15}
+            step={0.5}
+            val={G.tauxActu}
+            onChange={v => updateG({ tauxActu: v })}
+          >
+            {u.percent}
+          </DraggableUnit>
         </Field>
 
         <Field>
@@ -193,7 +274,15 @@ export default function GlobalStrip() {
             value={G.rendAlt}
             onChange={e => updateG({ rendAlt: +e.target.value })}
           />
-          <Unit>{u.percent}</Unit>
+          <DraggableUnit
+            min={0}
+            max={20}
+            step={0.5}
+            val={G.rendAlt}
+            onChange={v => updateG({ rendAlt: v })}
+          >
+            {u.percent}
+          </DraggableUnit>
         </Field>
 
         <Field>
@@ -207,7 +296,15 @@ export default function GlobalStrip() {
             value={G.loyerPerso}
             onChange={e => updateG({ loyerPerso: +e.target.value })}
           />
-          <Unit>{u.perMonth}</Unit>
+          <DraggableUnit
+            min={0}
+            max={5000}
+            step={50}
+            val={G.loyerPerso}
+            onChange={v => updateG({ loyerPerso: v })}
+          >
+            {u.perMonth}
+          </DraggableUnit>
         </Field>
 
         <Field>
@@ -221,7 +318,15 @@ export default function GlobalStrip() {
             value={G.revalLoyerPerso}
             onChange={e => updateG({ revalLoyerPerso: +e.target.value })}
           />
-          <Unit>{u.perYear}</Unit>
+          <DraggableUnit
+            min={0}
+            max={5}
+            step={0.1}
+            val={G.revalLoyerPerso}
+            onChange={v => updateG({ revalLoyerPerso: v })}
+          >
+            {u.perYear}
+          </DraggableUnit>
         </Field>
 
         <Field>
@@ -236,7 +341,15 @@ export default function GlobalStrip() {
             value={G.budgetMensuel}
             onChange={e => updateG({ budgetMensuel: +e.target.value })}
           />
-          <Unit>{u.perMonth}</Unit>
+          <DraggableUnit
+            min={500}
+            max={20000}
+            step={100}
+            val={G.budgetMensuel}
+            onChange={v => updateG({ budgetMensuel: v })}
+          >
+            {u.perMonth}
+          </DraggableUnit>
         </Field>
 
         <Field style={{ gap: 8 }}>
@@ -257,7 +370,15 @@ export default function GlobalStrip() {
             value={G.apportETF}
             onChange={e => updateG({ apportETF: +e.target.value })}
           />
-          <Unit>{u.euros}</Unit>
+          <DraggableUnit
+            min={0}
+            max={500000}
+            step={1000}
+            val={G.apportETF}
+            onChange={v => updateG({ apportETF: v })}
+          >
+            {u.euros}
+          </DraggableUnit>
         </Field>
       </FieldsScroll>
     </Strip>

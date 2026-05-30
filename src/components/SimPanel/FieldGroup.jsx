@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { InfoButton } from '../common/Popover.jsx';
@@ -95,6 +95,11 @@ const Unit = styled.span`
   width: 12px;
   flex-shrink: 0;
   text-align: left;
+  cursor: ns-resize;
+  user-select: none;
+  &:hover {
+    opacity: 1;
+  }
 `;
 
 const AutoBadgeBtn = styled.button.attrs({ type: 'button' })`
@@ -193,6 +198,56 @@ function NumInput({ field, val, isAuto, onChange }) {
   );
 }
 
+const PIXELS_PER_STEP = 6;
+
+function DraggableUnit({ field, val, isAuto, onChange }) {
+  const dragRef = useRef(null);
+  const dec = stepDecimals(field.st);
+
+  const handleMouseDown = e => {
+    e.preventDefault();
+    const el = e.currentTarget;
+    dragRef.current = { currentVal: val };
+    el.requestPointerLock();
+    document.body.style.userSelect = 'none';
+
+    const handleMove = mv => {
+      if (!mv.movementY) return;
+      const mult = mv.shiftKey ? 10 : 1;
+      dragRef.current.currentVal -= (mv.movementY * mult * field.st) / PIXELS_PER_STEP;
+      const next = Math.min(field.mx, Math.max(field.mn, +dragRef.current.currentVal.toFixed(dec)));
+      onChange(next);
+    };
+
+    const cleanup = () => {
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleUp);
+      document.removeEventListener('pointerlockchange', onLockChange);
+      document.body.style.userSelect = '';
+      dragRef.current = null;
+    };
+
+    const handleUp = () => {
+      document.exitPointerLock();
+      cleanup();
+    };
+
+    const onLockChange = () => {
+      if (!document.pointerLockElement) cleanup();
+    };
+
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleUp);
+    document.addEventListener('pointerlockchange', onLockChange);
+  };
+
+  return (
+    <Unit onMouseDown={handleMouseDown} style={{ opacity: isAuto ? 0.6 : undefined }}>
+      {unitFor(field.tp)}
+    </Unit>
+  );
+}
+
 export default function FieldGroup({ simKey, group, open, onToggle }) {
   const { t } = useTranslation();
   const { sims, resolvedSims, updateSim, toggleAutoField } = useApp();
@@ -273,7 +328,7 @@ export default function FieldGroup({ simKey, group, open, onToggle }) {
                     />
                   </RangeWrap>
                   <NumInput field={field} val={val} isAuto={isAuto} onChange={handleChange} />
-                  <Unit>{unitFor(field.tp)}</Unit>
+                  <DraggableUnit field={field} val={val} isAuto={isAuto} onChange={handleChange} />
                 </InputRow>
               </FieldWrap>
             );

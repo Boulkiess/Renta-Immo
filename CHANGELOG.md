@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Drag-to-scrub sur les unités** : survoler l'unité (€, %, ans…) d'un paramètre change le curseur en double flèche verticale. Maintenir le clic et glisser haut/bas ajuste la valeur par pas (6 px par pas, Shift × 10). Fonctionne sur tous les paramètres de simulation (FieldGroup) et les paramètres globaux (GlobalStrip). Le curseur disparaît pendant le drag via Pointer Lock et réapparaît exactement à sa position d'origine au relâchement.
+
+### Added
+
 - **Tableau comparatif — tooltips** : un bouton `?` apparaît avant chaque label de ligne dans le tableau comparatif (onglet KPIs). Cliquer ouvre un popover expliquant la formule ou la définition de l'indicateur (TRI, VAN, MOIC, rendements, cashflow, patrimoine, ETF pur, crossover…). 17 nouvelles clés `tooltips.kpi.*` ajoutées en FR et EN.
 
 ### Changed
