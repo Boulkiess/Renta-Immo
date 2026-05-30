@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Onglet Revente — tableau** : la valeur ETF pur (net) est désormais affichée dans une colonne dédiée plutôt qu'en sous-ligne dans chaque cellule de simulation.
+
 ### Added
 
 - **Persistance thème et langue** : le thème (dark/light) et la langue (fr/en) sont désormais sauvegardés dans `localStorage` (`immorenta_theme`, `immorenta_lang`) et restaurés automatiquement au rechargement de la page.

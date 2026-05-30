@@ -97,6 +97,18 @@ export default function ReventeTab() {
                 {sims[k].label}
               </th>
             ))}
+            <th
+              style={{
+                color: '#94a3b8',
+                textAlign: 'right',
+                padding: '5px 8px',
+                borderBottom: '1px solid var(--border)',
+                fontWeight: 800,
+                fontSize: 10,
+              }}
+            >
+              ETF pur
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -118,14 +130,14 @@ export default function ReventeTab() {
                         {' · '}
                         {t('revente.etfPoche')} {fmtK(f?.etfPoche)}
                       </div>
-                      {etf && (
-                        <div style={{ fontSize: 9, color: '#94a3b8', marginTop: 1 }}>
-                          ETF pur (net): {fmtK(etf.capNet)}
-                        </div>
-                      )}
                     </td>
                   );
                 })}
+                <td style={{ padding: '6px 8px', textAlign: 'right', background: bg }}>
+                  {etf && (
+                    <div style={{ color: '#94a3b8', fontWeight: 700 }}>{fmtE(etf.capNet)}</div>
+                  )}
+                </td>
               </tr>
             );
           })}
