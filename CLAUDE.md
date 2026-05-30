@@ -323,6 +323,64 @@ La fonction retourne deux valeurs par année :
 - Pas de taxe annuelle (correct pour un ETF capitalisant : l'imposition n'a lieu qu'à la cession)
 - Le crossover compare `patTotal` immo (brut, avant impôt de cession) avec `cap` ETF (brut) — cohérence intentionnelle ; seule la ReventeTab utilise `capNet`
 
+### Colonne ETF pur — KpisTab ✅
+
+Le tableau de l'onglet Comparaison affiche une colonne **ETF pur** à droite des colonnes simulation. Les valeurs sont calculées **dans `KpisTab.jsx`** (pas dans `compute.js`) à partir de `etfPurGlobal` et `G`.
+
+#### Rendements & Cashflow
+
+| Ligne          | Valeur ETF    | Formule                                                                       |
+| -------------- | ------------- | ----------------------------------------------------------------------------- |
+| Rendement brut | `rendAlt`     | Rendement supposé de l'ETF, brut = net (pas de charges)                       |
+| Rendement net  | `rendAlt`     | Idem — affiché en `%` via `fmtP`                                              |
+| CF réel/mois   | `−loyerPerso` | Seule sortie mensuelle du scénario ETF : le loyer payé                        |
+| Effort mensuel | `0`           | L'ETF pur est la situation de référence locataire — effort nul par définition |
+
+#### TRI / VAN / MOIC
+
+**TRI ETF (tous horizons) — valeur exacte, non approchée :**
+
+```
+TRI_ETF = rendAlt / 100
+```
+
+Preuve : les flux ETF sont `[−apportETF, −S₁, …, −S_{n−1}, cap[n]−Sₙ]` où `cap[n] = apportETF×(1+r)ⁿ + Σ Sₖ×(1+r)^{n−k}`. La VPN de ces flux au taux `r = rendAlt` s'annule algébriquement pour tout surplus `Sₖ`. Donc TRI₁₀ = TRI₁₅ = TRI₂₀ = `rendAlt` quel que soit le surplus.
+
+```
+TRI_real_ETF = (1 + rendAlt/100) / (1 + inflation/100) − 1
+```
+
+**VAN ETF :**
+
+```
+surplusAnn[t] = max(0, budgetMensuel×12 − loyerPerso×12×(1+revalLoyerPerso/100)^{t−1})
+
+VAN_ETF = −apportETF
+        + Σ_{t=1}^{horizon} (−surplusAnn[t]) / (1+tauxActu/100)^t
+        + cap[horizon] / (1+tauxActu/100)^{horizon}
+```
+
+Si `tauxActu = rendAlt`, VAN = 0. Si `tauxActu < rendAlt`, VAN > 0 (ETF surperforme le taux d'actualisation).
+
+**MOIC ETF :**
+
+```
+MOIC_ETF = (cap[horizon] − Σ_{t=1}^{horizon} surplusAnn[t]) / apportETF
+```
+
+Analogue au MOIC sim : `(valeur_terminale + Σ_flows_opérationnels) / apport_initial`. Ici les flows opérationnels sont `−surplusAnn[t]` (contributions annuelles). Si surplus = 0 : MOIC = `(1 + rendAlt/100)^{horizon}`.
+
+#### Patrimoine
+
+| Ligne                           | Valeur ETF                                            |
+| ------------------------------- | ----------------------------------------------------- |
+| Patrimoine net à horizon        | `—` (métrique immobilière sans équivalent ETF direct) |
+| Patrimoine total à horizon      | `etfPurGlobal[hz−1].cap`                              |
+| Patrimoine total réel à horizon | `cap[hz] / (1+inflation/100)^{hz}`                    |
+| Patrimoine total à 30 ans       | `etfPurGlobal[29].cap`                                |
+| Patrimoine total réel à 30 ans  | `cap[30] / (1+inflation/100)^{30}`                    |
+| Crossover                       | `—`                                                   |
+
 ### Crossover ✅
 
 ```

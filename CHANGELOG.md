@@ -4,6 +4,8 @@
 
 ### Changed
 
+- **Comparaison — colonne ETF pur** : le tableau de l'onglet Comparaison remplace les lignes ETF (`ETF pur à Xans`, `ETF pur 30a`, `Avantage vs ETF`) par une colonne **ETF pur** à droite des colonnes simulation, aligné sur le modèle de l'onglet Revente. La colonne est renseignée pour toutes les sections : rendements (`rendAlt` en %), CF mensuel (`−loyerPerso`), effort (`0 €`), TRI 10/15/20 et réels (`rendAlt` exact par construction Fisher), VAN et MOIC (calculés via les flux `[−apportETF, −surplus₁…]`), patrimoine total nominal et réel. Les labels `Rendement brut (loc.)` / `Rendement net (loc.)` sont raccourcis en `Rendement brut` / `Rendement net`.
+
 - **CLAUDE.md** : suppression des sections dupliquées en fin de fichier (`Code Exploration Policy`, `Session-Aware Routing`, `Model-Driven Tool Tiering`) — déjà incluses via `@AGENTS.md` en tête de fichier.
 
 ### Added

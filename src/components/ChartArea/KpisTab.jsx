@@ -119,6 +119,24 @@ export default function KpisTab() {
   const realTri = tri => (tri === null ? null : (1 + tri) / (1 + infl) - 1);
   const deflate = (v, yr) => (v == null ? null : v / Math.pow(1 + infl, yr));
 
+  const etfTriVal = G.rendAlt / 100;
+  const etfTriRealVal = (1 + etfTriVal) / (1 + infl) - 1;
+  const capHz = etfPurGlobal[hz - 1]?.cap ?? 0;
+  const etfSurplusAtYr = yr =>
+    Math.max(
+      0,
+      G.budgetMensuel * 12 - G.loyerPerso * 12 * Math.pow(1 + G.revalLoyerPerso / 100, yr - 1)
+    );
+  let etfVan = -G.apportETF;
+  let etfSurplusTotal = 0;
+  for (let t = 1; t <= hz; t++) {
+    const s = etfSurplusAtYr(t);
+    etfVan += -s / Math.pow(1 + G.tauxActu / 100, t);
+    etfSurplusTotal += s;
+  }
+  etfVan += capHz / Math.pow(1 + G.tauxActu / 100, hz);
+  const etfMoic = G.apportETF > 0 ? (capHz - etfSurplusTotal) / G.apportETF : null;
+
   const sections = [
     {
       cat: t('kpisTable.coutTotal').startsWith('C') ? 'Coûts & Financement' : 'Costs & Financing',
@@ -162,6 +180,8 @@ export default function KpisTab() {
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.rendBrut',
+          etfVal: G.rendAlt,
+          etfFmt: v => fmtP(v),
         },
         {
           label: t('kpisTable.rendNet'),
@@ -169,6 +189,8 @@ export default function KpisTab() {
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.rendNet',
+          etfVal: G.rendAlt,
+          etfFmt: v => fmtP(v),
         },
         {
           label: t('kpisTable.cfMensuel'),
@@ -176,6 +198,7 @@ export default function KpisTab() {
           better: 'max',
           neg: true,
           tooltipKey: 'kpi.cfMensuel',
+          etfVal: -G.loyerPerso,
         },
         {
           label: t('kpisTable.effortRP'),
@@ -183,6 +206,7 @@ export default function KpisTab() {
           better: 'min',
           neg: true,
           tooltipKey: 'kpi.effortRP',
+          etfVal: 0,
         },
         {
           label: t('kpisTable.breakeven'),
@@ -202,6 +226,8 @@ export default function KpisTab() {
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.tri',
+          etfVal: etfTriVal,
+          etfFmt: v => fmtTRI(v),
         },
         {
           label: t('kpisTable.tri10Real'),
@@ -210,6 +236,8 @@ export default function KpisTab() {
           neg: false,
           tooltipKey: 'kpi.triReal',
           muted: true,
+          etfVal: etfTriRealVal,
+          etfFmt: v => fmtTRI(v),
         },
         {
           label: t('kpisTable.tri15'),
@@ -217,6 +245,8 @@ export default function KpisTab() {
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.tri',
+          etfVal: etfTriVal,
+          etfFmt: v => fmtTRI(v),
         },
         {
           label: t('kpisTable.tri15Real'),
@@ -225,6 +255,8 @@ export default function KpisTab() {
           neg: false,
           tooltipKey: 'kpi.triReal',
           muted: true,
+          etfVal: etfTriRealVal,
+          etfFmt: v => fmtTRI(v),
         },
         {
           label: t('kpisTable.tri20'),
@@ -232,6 +264,8 @@ export default function KpisTab() {
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.tri',
+          etfVal: etfTriVal,
+          etfFmt: v => fmtTRI(v),
         },
         {
           label: t('kpisTable.tri20Real'),
@@ -240,6 +274,8 @@ export default function KpisTab() {
           neg: false,
           tooltipKey: 'kpi.triReal',
           muted: true,
+          etfVal: etfTriRealVal,
+          etfFmt: v => fmtTRI(v),
         },
         {
           label: t('kpisTable.van', { tauxActu: G.tauxActu, horizon: hz }),
@@ -247,6 +283,7 @@ export default function KpisTab() {
           better: 'max',
           neg: true,
           tooltipKey: 'kpi.van',
+          etfVal: etfVan,
         },
         {
           label: t('kpisTable.moic', { horizon: hz }),
@@ -254,6 +291,8 @@ export default function KpisTab() {
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.moic',
+          etfVal: etfMoic,
+          etfFmt: v => fmtMoic(v),
         },
       ],
     },
@@ -266,6 +305,7 @@ export default function KpisTab() {
           better: 'max',
           neg: true,
           tooltipKey: 'kpi.patNet',
+          etfVal: null,
         },
         {
           label: t('kpisTable.patTotal', { horizon: hz }),
@@ -273,6 +313,7 @@ export default function KpisTab() {
           better: 'max',
           neg: true,
           tooltipKey: 'kpi.patTotal',
+          etfVal: etfHz,
         },
         {
           label: t('kpisTable.patTotalReal', { horizon: hz }),
@@ -281,6 +322,7 @@ export default function KpisTab() {
           neg: true,
           tooltipKey: 'kpi.patReal',
           muted: true,
+          etfVal: deflate(etfHz, hz),
         },
         {
           label: t('kpisTable.patTotal30'),
@@ -288,6 +330,7 @@ export default function KpisTab() {
           better: 'max',
           neg: true,
           tooltipKey: 'kpi.patTotal',
+          etfVal: etf30,
         },
         {
           label: t('kpisTable.patTotal30Real'),
@@ -296,27 +339,7 @@ export default function KpisTab() {
           neg: true,
           tooltipKey: 'kpi.patReal',
           muted: true,
-        },
-        {
-          label: t('kpisTable.etfPurHorizon', { horizon: hz }),
-          fmt: () => fmtE(etfHz),
-          better: null,
-          neg: false,
-          tooltipKey: 'kpi.etfPur',
-        },
-        {
-          label: t('kpisTable.etfPur30'),
-          fmt: () => fmtE(etf30),
-          better: null,
-          neg: false,
-          tooltipKey: 'kpi.etfPur',
-        },
-        {
-          label: t('kpisTable.avantageEtf', { horizon: hz }),
-          fmt: k => fmtE((RES[k].flux[hz - 1]?.patTotal ?? 0) - (etfHz ?? 0)),
-          better: 'max',
-          neg: true,
-          tooltipKey: 'kpi.avantageEtf',
+          etfVal: deflate(etf30, 30),
         },
         {
           label: t('kpisTable.crossover'),
@@ -324,6 +347,7 @@ export default function KpisTab() {
           better: 'min',
           neg: false,
           tooltipKey: 'kpi.crossover',
+          etfVal: null,
         },
       ],
     },
@@ -386,12 +410,24 @@ export default function KpisTab() {
                   </span>
                 </th>
               ))}
+              <th
+                style={{
+                  color: '#94a3b8',
+                  textAlign: 'right',
+                  padding: '6px 10px',
+                  borderBottom: '1px solid var(--border)',
+                  fontSize: 11,
+                  fontWeight: 800,
+                }}
+              >
+                ETF pur
+              </th>
             </tr>
           </thead>
           <tbody>
             {sections.map(sec => [
               <tr key={sec.cat}>
-                <SectionCell colSpan={activeKeys.length + 1}>{sec.cat}</SectionCell>
+                <SectionCell colSpan={activeKeys.length + 2}>{sec.cat}</SectionCell>
               </tr>,
               ...sec.rows.map(row => {
                 const formatted = activeKeys.map(k => ({ key: k, val: row.fmt(k) }));
@@ -432,6 +468,17 @@ export default function KpisTab() {
                         </DataCell>
                       );
                     })}
+                    <DataCell
+                      $color="#94a3b8"
+                      $muted={row.muted}
+                      $neg={row.neg && row.etfVal != null && row.etfVal < 0}
+                    >
+                      {row.etfVal != null
+                        ? row.etfFmt
+                          ? row.etfFmt(row.etfVal)
+                          : fmtE(row.etfVal)
+                        : '—'}
+                    </DataCell>
                   </tr>
                 );
               }),
