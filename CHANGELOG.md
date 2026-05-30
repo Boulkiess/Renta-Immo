@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Tableau comparatif — tooltips** : un bouton `?` apparaît avant chaque label de ligne dans le tableau comparatif (onglet KPIs). Cliquer ouvre un popover expliquant la formule ou la définition de l'indicateur (TRI, VAN, MOIC, rendements, cashflow, patrimoine, ETF pur, crossover…). 17 nouvelles clés `tooltips.kpi.*` ajoutées en FR et EN.
+
 ### Changed
 
 - **Onglet Revente — tableau** : la valeur ETF pur (net) est désormais affichée dans une colonne dédiée plutôt qu'en sous-ligne dans chaque cellule de simulation.

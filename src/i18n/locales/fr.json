@@ -256,6 +256,88 @@
     "provisionRP": {
       "title": "Provision travaux RP",
       "body": "Budget annuel pour l'entretien. ~1% de la valeur du bien. <b>Auto : 0,5% × prix d'achat.</b>"
+    },
+    "kpi.coutTotal": {
+      "title": "Coût total d'acquisition",
+      "body": "Prix d'achat + frais de notaire + travaux + frais d'agence. C'est la base de calcul des rendements.",
+      "code": "ct = prixAchat + fraisNotaire + travaux + fraisAgence"
+    },
+    "kpi.emprunte": {
+      "title": "Montant emprunté",
+      "body": "Coût total − apport. Le levier financier amplifie les gains <em>et</em> les pertes.",
+      "code": "emp = max(0, ct − apport)"
+    },
+    "kpi.mensualiteAss": {
+      "title": "Mensualité + assurance",
+      "body": "Annuité constante + assurance emprunteur calculée sur le capital initial (fixe toute la durée).",
+      "code": "mens = emp×(τ/12)/(1−(1+τ/12)^−n)"
+    },
+    "kpi.coutCredit": {
+      "title": "Coût total du crédit",
+      "body": "Somme de tous les intérêts + toutes les primes d'assurance sur la durée du prêt."
+    },
+    "kpi.rendBrut": {
+      "title": "Rendement brut locatif",
+      "body": "Indicateur statique calculé sur l'année 0, avant charges, impôts et crédit.",
+      "code": "Rdt brut = Loyer×12 / Coût total acq."
+    },
+    "kpi.rendNet": {
+      "title": "Rendement net locatif",
+      "body": "Loyer effectif (après vacance) − charges annuelles, rapporté au coût total. Hors crédit et hors impôt.",
+      "code": "Rdt net = (Loyer eff. − Charges) / Coût total"
+    },
+    "kpi.cfMensuel": {
+      "title": "Cash-flow réel / mois",
+      "body": "Flux net mensuel de l'année 1 : loyers encaissés − toutes les charges − mensualité − impôt − loyer perso. Négatif = effort de trésorerie.",
+      "code": "CF mensuel = cfN[an 1] / 12"
+    },
+    "kpi.effortRP": {
+      "title": "Effort mensuel",
+      "body": "Surcoût mensuel de l'investissement par rapport à rester locataire. Positif = tu dépenses plus qu'aujourd'hui. Négatif = l'investissement est moins cher.",
+      "code": "Effort = −cfN[an 1]/12 − loyerPerso"
+    },
+    "kpi.breakeven": {
+      "title": "Breakeven cash-flow cumulé",
+      "body": "Première année où les flux nets cumulés (opérationnels) repassent à zéro. Ne tient pas compte de la valorisation du bien."
+    },
+    "kpi.tri": {
+      "title": "TRI — Taux de Rendement Interne",
+      "body": "Taux d'actualisation qui annule la VAN. Prend en compte le prix de revente, tous les flux nets et le loyer économisé/payé selon le mode.",
+      "code": "NPV(TRI) = 0  [Newton-Raphson]"
+    },
+    "kpi.van": {
+      "title": "VAN — Valeur Actuelle Nette",
+      "body": "Somme des flux futurs actualisés au taux d'opportunité. Positive = l'investissement crée de la valeur vs le placement alternatif.",
+      "code": "VAN = −apport + Σ flux/(1+r)^t + revente/(1+r)^n"
+    },
+    "kpi.moic": {
+      "title": "MOIC — Multiple on Invested Capital",
+      "body": "Combien de fois l'apport a été multiplié à l'horizon. N'est pas actualisé (contrairement à la VAN).",
+      "code": "MOIC = (Revente nette + Flux cumulés) / Apport"
+    },
+    "kpi.patNet": {
+      "title": "Patrimoine immobilier net",
+      "body": "Équité immobilière (valeur estimée − capital restant dû) + flux cumulés − apport initial.",
+      "code": "patNet = (vb − rest) + cfC − apport"
+    },
+    "kpi.patTotal": {
+      "title": "Patrimoine total",
+      "body": "Équité immobilière + poche ETF constituée avec le surplus mensuel réinvesti. Comparé au scénario ETF pur pour évaluer le crossover.",
+      "code": "patTotal = (vb − rest) + etfCap"
+    },
+    "kpi.etfPur": {
+      "title": "ETF pur (scénario de référence)",
+      "body": "Scénario alternatif : apport ETF investi dès le départ + surplus mensuel (budget − loyer perso) capitalisés au rendement alternatif. Sans achat immobilier.",
+      "code": "cap[n] = cap[n−1]×(1+r) + surplus"
+    },
+    "kpi.avantageEtf": {
+      "title": "Avantage vs ETF pur",
+      "body": "Patrimoine total immo − ETF pur à l'horizon. Positif = l'immobilier surperforme le portefeuille ETF de référence.",
+      "code": "Avantage = patTotal − etfPurCap"
+    },
+    "kpi.crossover": {
+      "title": "Croisement vs ETF pur",
+      "body": "Première année où le patrimoine total immo (équité + ETF du surplus) dépasse l'ETF pur. Avant ce point, le scénario ETF est plus rentable."
     }
   },
   "charts": {

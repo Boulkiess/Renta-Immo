@@ -259,6 +259,88 @@
     "provisionRP": {
       "title": "Maintenance reserve (primary)",
       "body": "Annual maintenance budget. ~1% of property value. <b>Auto: 0.5% × purchase price.</b>"
+    },
+    "kpi.coutTotal": {
+      "title": "Total acquisition cost",
+      "body": "Purchase price + notary fees + works + agency fees. This is the base used to compute yields.",
+      "code": "ct = price + notaryFees + works + agencyFees"
+    },
+    "kpi.emprunte": {
+      "title": "Loan amount",
+      "body": "Total cost − down payment. Financial leverage amplifies gains <em>and</em> losses.",
+      "code": "loan = max(0, ct − downPayment)"
+    },
+    "kpi.mensualiteAss": {
+      "title": "Monthly payment + insurance",
+      "body": "Fixed annuity + mortgage insurance calculated on the initial capital (fixed for the entire loan term).",
+      "code": "payment = loan×(r/12)/(1−(1+r/12)^−n)"
+    },
+    "kpi.coutCredit": {
+      "title": "Total credit cost",
+      "body": "Sum of all interest payments + all insurance premiums over the full loan term."
+    },
+    "kpi.rendBrut": {
+      "title": "Gross rental yield",
+      "body": "Static indicator computed at year 0, before expenses, taxes, and debt service.",
+      "code": "Gross yield = Rent×12 / Total acquisition cost"
+    },
+    "kpi.rendNet": {
+      "title": "Net rental yield",
+      "body": "Effective rent (after vacancy) − annual expenses, divided by total cost. Excludes debt service and taxes.",
+      "code": "Net yield = (Eff. rent − Expenses) / Total cost"
+    },
+    "kpi.cfMensuel": {
+      "title": "Real cash-flow / month",
+      "body": "Net monthly flow for year 1: rents collected − all expenses − loan payment − tax − personal rent. Negative = cash effort.",
+      "code": "Monthly CF = annualCF[yr 1] / 12"
+    },
+    "kpi.effortRP": {
+      "title": "Monthly effort",
+      "body": "Extra monthly cost of the investment vs staying a renter. Positive = you spend more than today. Negative = investment is cheaper.",
+      "code": "Effort = −annualCF[yr 1]/12 − personalRent"
+    },
+    "kpi.breakeven": {
+      "title": "Cash-flow break-even",
+      "body": "First year where cumulative net cash flows turn positive. Excludes property appreciation."
+    },
+    "kpi.tri": {
+      "title": "IRR — Internal Rate of Return",
+      "body": "Discount rate that makes the NPV equal to zero. Accounts for sale proceeds, all net flows, and rent saved/paid depending on mode.",
+      "code": "NPV(IRR) = 0  [Newton-Raphson]"
+    },
+    "kpi.van": {
+      "title": "NPV — Net Present Value",
+      "body": "Sum of future cash flows discounted at the opportunity rate. Positive = investment creates value vs the alternative placement.",
+      "code": "NPV = −downPmt + Σ flow/(1+r)^t + sale/(1+r)^n"
+    },
+    "kpi.moic": {
+      "title": "MOIC — Multiple on Invested Capital",
+      "body": "How many times the down payment has been multiplied at the horizon. Not discounted (unlike NPV).",
+      "code": "MOIC = (Net sale + Cumul. flows) / Down payment"
+    },
+    "kpi.patNet": {
+      "title": "Net property wealth",
+      "body": "Property equity (estimated value − outstanding capital) + cumulative cash flows − initial down payment.",
+      "code": "patNet = (value − balance) + cumulCF − downPmt"
+    },
+    "kpi.patTotal": {
+      "title": "Total wealth",
+      "body": "Property equity + ETF pocket built from reinvested monthly surplus. Compared to pure ETF scenario to evaluate the crossover.",
+      "code": "patTotal = (value − balance) + etfPocket"
+    },
+    "kpi.etfPur": {
+      "title": "Pure ETF (reference scenario)",
+      "body": "Alternative scenario: ETF contribution invested upfront + monthly surplus (budget − personal rent) compounded at the alternative return. No property purchase.",
+      "code": "cap[n] = cap[n−1]×(1+r) + surplus"
+    },
+    "kpi.avantageEtf": {
+      "title": "Advantage vs pure ETF",
+      "body": "Total property wealth − pure ETF at the horizon. Positive = real estate outperforms the ETF reference portfolio.",
+      "code": "Advantage = patTotal − etfPureCap"
+    },
+    "kpi.crossover": {
+      "title": "Crossover vs pure ETF",
+      "body": "First year where total property wealth (equity + ETF from surplus) exceeds the pure ETF. Before this point, the ETF scenario is more profitable."
     }
   },
   "charts": {

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
 import { COL, KEYS } from '../../state/definitions.js';
 import { fmtE, fmtP, fmtTRI } from '../../engine/utils.js';
+import { InfoButton } from '../common/Popover.jsx';
 
 const Wrap = styled.div`
   overflow-y: auto;
@@ -116,19 +117,33 @@ export default function KpisTab() {
     {
       cat: t('kpisTable.coutTotal').startsWith('C') ? 'Coûts & Financement' : 'Costs & Financing',
       rows: [
-        { label: t('kpisTable.coutTotal'), fmt: k => fmtE(RES[k].ct), better: 'min', neg: false },
-        { label: t('kpisTable.emprunte'), fmt: k => fmtE(RES[k].emp), better: 'min', neg: false },
+        {
+          label: t('kpisTable.coutTotal'),
+          fmt: k => fmtE(RES[k].ct),
+          better: 'min',
+          neg: false,
+          tooltipKey: 'kpi.coutTotal',
+        },
+        {
+          label: t('kpisTable.emprunte'),
+          fmt: k => fmtE(RES[k].emp),
+          better: 'min',
+          neg: false,
+          tooltipKey: 'kpi.emprunte',
+        },
         {
           label: t('kpisTable.mensualiteAss'),
           fmt: k => fmtE(RES[k].mens + RES[k].assM),
           better: 'min',
           neg: false,
+          tooltipKey: 'kpi.mensualiteAss',
         },
         {
           label: t('kpisTable.coutCredit'),
           fmt: k => fmtE(RES[k].totInt + RES[k].totAss),
           better: 'min',
           neg: false,
+          tooltipKey: 'kpi.coutCredit',
         },
       ],
     },
@@ -140,45 +155,75 @@ export default function KpisTab() {
           fmt: k => (sims[k].mode === 'loc' ? fmtP(RES[k].rendBrut) : '—'),
           better: 'max',
           neg: false,
+          tooltipKey: 'kpi.rendBrut',
         },
         {
           label: t('kpisTable.rendNet'),
           fmt: k => (sims[k].mode === 'loc' ? fmtP(RES[k].rendNet) : '—'),
           better: 'max',
           neg: false,
+          tooltipKey: 'kpi.rendNet',
         },
         {
           label: t('kpisTable.cfMensuel'),
           fmt: k => fmtE(RES[k].flux[0].cfN / 12),
           better: 'max',
           neg: true,
+          tooltipKey: 'kpi.cfMensuel',
         },
         {
           label: t('kpisTable.effortRP'),
           fmt: k => fmtE(-RES[k].flux[0].cfN / 12 - G.loyerPerso),
           better: 'min',
           neg: true,
+          tooltipKey: 'kpi.effortRP',
         },
-        { label: t('kpisTable.breakeven'), fmt: k => fmtBe(RES[k].be), better: 'min', neg: false },
+        {
+          label: t('kpisTable.breakeven'),
+          fmt: k => fmtBe(RES[k].be),
+          better: 'min',
+          neg: false,
+          tooltipKey: 'kpi.breakeven',
+        },
       ],
     },
     {
       cat: 'TRI / VAN / MOIC',
       rows: [
-        { label: t('kpisTable.tri10'), fmt: k => fmtTRI(RES[k].tri10), better: 'max', neg: false },
-        { label: t('kpisTable.tri15'), fmt: k => fmtTRI(RES[k].tri15), better: 'max', neg: false },
-        { label: t('kpisTable.tri20'), fmt: k => fmtTRI(RES[k].tri20), better: 'max', neg: false },
+        {
+          label: t('kpisTable.tri10'),
+          fmt: k => fmtTRI(RES[k].tri10),
+          better: 'max',
+          neg: false,
+          tooltipKey: 'kpi.tri',
+        },
+        {
+          label: t('kpisTable.tri15'),
+          fmt: k => fmtTRI(RES[k].tri15),
+          better: 'max',
+          neg: false,
+          tooltipKey: 'kpi.tri',
+        },
+        {
+          label: t('kpisTable.tri20'),
+          fmt: k => fmtTRI(RES[k].tri20),
+          better: 'max',
+          neg: false,
+          tooltipKey: 'kpi.tri',
+        },
         {
           label: t('kpisTable.van', { tauxActu: G.tauxActu, horizon: hz }),
           fmt: k => fmtE(RES[k].van),
           better: 'max',
           neg: true,
+          tooltipKey: 'kpi.van',
         },
         {
           label: t('kpisTable.moic', { horizon: hz }),
           fmt: k => fmtMoic(RES[k].moic),
           better: 'max',
           neg: false,
+          tooltipKey: 'kpi.moic',
         },
       ],
     },
@@ -190,37 +235,49 @@ export default function KpisTab() {
           fmt: k => fmtE(RES[k].flux[hz - 1]?.patNet),
           better: 'max',
           neg: true,
+          tooltipKey: 'kpi.patNet',
         },
         {
           label: t('kpisTable.patTotal', { horizon: hz }),
           fmt: k => fmtE(RES[k].flux[hz - 1]?.patTotal),
           better: 'max',
           neg: true,
+          tooltipKey: 'kpi.patTotal',
         },
         {
           label: t('kpisTable.patTotal30'),
           fmt: k => fmtE(RES[k].flux[29]?.patTotal),
           better: 'max',
           neg: true,
+          tooltipKey: 'kpi.patTotal',
         },
         {
           label: t('kpisTable.etfPurHorizon', { horizon: hz }),
           fmt: () => fmtE(etfHz),
           better: null,
           neg: false,
+          tooltipKey: 'kpi.etfPur',
         },
-        { label: t('kpisTable.etfPur30'), fmt: () => fmtE(etf30), better: null, neg: false },
+        {
+          label: t('kpisTable.etfPur30'),
+          fmt: () => fmtE(etf30),
+          better: null,
+          neg: false,
+          tooltipKey: 'kpi.etfPur',
+        },
         {
           label: t('kpisTable.avantageEtf', { horizon: hz }),
           fmt: k => fmtE((RES[k].flux[hz - 1]?.patTotal ?? 0) - (etfHz ?? 0)),
           better: 'max',
           neg: true,
+          tooltipKey: 'kpi.avantageEtf',
         },
         {
           label: t('kpisTable.crossover'),
           fmt: k => fmtCross(crossovers[k]),
           better: 'min',
           neg: false,
+          tooltipKey: 'kpi.crossover',
         },
       ],
     },
@@ -311,7 +368,9 @@ export default function KpisTab() {
 
                 return (
                   <tr key={row.label}>
-                    <LabelCell>{row.label}</LabelCell>
+                    <LabelCell>
+                      {row.tooltipKey && <InfoButton tooltipKey={row.tooltipKey} />} {row.label}
+                    </LabelCell>
                     {formatted.map(({ key: k, val }, si) => {
                       const isBest = si === bestIdx;
                       const isNeg = row.neg && nums[si] != null && nums[si] < 0;
