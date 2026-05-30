@@ -293,6 +293,7 @@ export default function FieldGroup({ simKey, group, open, onToggle }) {
             return (
               <FieldWrap key={field.k}>
                 <LabelRow>
+                  <InfoButton tooltipKey={field.k} />
                   <FieldLabel title={t(`fields.${field.k}.label`, field.k)}>
                     {t(`fields.${field.k}.label`, field.k)}
                   </FieldLabel>
@@ -312,7 +313,6 @@ export default function FieldGroup({ simKey, group, open, onToggle }) {
                       {t('auto.badge')}
                     </AutoBadgeBtn>
                   )}
-                  <InfoButton tooltipKey={field.k} />
                 </LabelRow>
                 <InputRow>
                   <RangeWrap>

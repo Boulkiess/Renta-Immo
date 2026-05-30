@@ -182,8 +182,8 @@ export default function GlobalStrip() {
 
       <FieldsScroll>
         <Field>
-          <Label>{t('global.inflation')}</Label>
           <InfoButton tooltipKey="inflation" />
+          <Label>{t('global.inflation')}</Label>
           <NumInput
             type="number"
             min="0"
@@ -204,8 +204,8 @@ export default function GlobalStrip() {
         </Field>
 
         <Field>
-          <Label>{t('global.regime')}</Label>
           <InfoButton tooltipKey="regime" />
+          <Label>{t('global.regime')}</Label>
           <Select value={G.regime} onChange={e => updateG({ regime: e.target.value })}>
             {['lmnp', 'microbic', 'nu'].map(r => (
               <option key={r} value={r}>
@@ -242,8 +242,8 @@ export default function GlobalStrip() {
         </Field>
 
         <Field>
-          <Label>{t('global.tauxActu')}</Label>
           <InfoButton tooltipKey="tauxActu" />
+          <Label>{t('global.tauxActu')}</Label>
           <NumInput
             type="number"
             min="0"
@@ -264,8 +264,8 @@ export default function GlobalStrip() {
         </Field>
 
         <Field>
-          <Label>{t('global.rendAlt')}</Label>
           <InfoButton tooltipKey="rendAlt" />
+          <Label>{t('global.rendAlt')}</Label>
           <NumInput
             type="number"
             min="0"
@@ -286,8 +286,8 @@ export default function GlobalStrip() {
         </Field>
 
         <Field>
-          <Label>{t('global.loyerPerso')}</Label>
           <InfoButton tooltipKey="loyerPerso" />
+          <Label>{t('global.loyerPerso')}</Label>
           <NumInput
             type="number"
             min="0"
@@ -308,8 +308,8 @@ export default function GlobalStrip() {
         </Field>
 
         <Field>
-          <Label>{t('global.revalLoyerPerso')}</Label>
           <InfoButton tooltipKey="revalLoyerPerso" />
+          <Label>{t('global.revalLoyerPerso')}</Label>
           <NumInput
             type="number"
             min="0"
@@ -330,8 +330,8 @@ export default function GlobalStrip() {
         </Field>
 
         <Field>
-          <Label>{t('global.budgetMensuel')}</Label>
           <InfoButton tooltipKey="budgetMensuel" />
+          <Label>{t('global.budgetMensuel')}</Label>
           <NumInput
             $w="62px"
             type="number"
@@ -353,14 +353,14 @@ export default function GlobalStrip() {
         </Field>
 
         <Field style={{ gap: 8 }}>
-          <Label>{t('global.investirSurplus')}</Label>
           <InfoButton tooltipKey="investirSurplus" />
+          <Label>{t('global.investirSurplus')}</Label>
           <Toggle checked={G.investirSurplus} onChange={v => updateG({ investirSurplus: v })} />
         </Field>
 
         <Field>
-          <Label>{t('global.apportETF')}</Label>
           <InfoButton tooltipKey="apportETF" />
+          <Label>{t('global.apportETF')}</Label>
           <NumInput
             $w="68px"
             type="number"
