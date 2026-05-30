@@ -349,23 +349,27 @@ export default function KpisTab() {
           muted: true,
           etfVal: deflate(etfHz, hz),
         },
-        {
-          label: t('kpisTable.patTotal30'),
-          fmt: k => fmtE(RES[k].flux[29]?.patTotal),
-          better: 'max',
-          neg: true,
-          tooltipKey: 'kpi.patTotal',
-          etfVal: etf30,
-        },
-        {
-          label: t('kpisTable.patTotal30Real'),
-          fmt: k => fmtE(deflate(RES[k].flux[29]?.patTotal, 30)),
-          better: 'max',
-          neg: true,
-          tooltipKey: 'kpi.patReal',
-          muted: true,
-          etfVal: deflate(etf30, 30),
-        },
+        ...(hz < 30
+          ? [
+              {
+                label: t('kpisTable.patTotal30'),
+                fmt: k => fmtE(RES[k].flux[29]?.patTotal),
+                better: 'max',
+                neg: true,
+                tooltipKey: 'kpi.patTotal',
+                etfVal: etf30,
+              },
+              {
+                label: t('kpisTable.patTotal30Real'),
+                fmt: k => fmtE(deflate(RES[k].flux[29]?.patTotal, 30)),
+                better: 'max',
+                neg: true,
+                tooltipKey: 'kpi.patReal',
+                muted: true,
+                etfVal: deflate(etf30, 30),
+              },
+            ]
+          : []),
         {
           label: t('kpisTable.crossover'),
           fmt: k => fmtCross(crossovers[k]),

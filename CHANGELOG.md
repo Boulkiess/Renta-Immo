@@ -33,6 +33,7 @@
 
 ### Changed
 
+- **KpisTab — masquer les lignes "Patrimoine total à 30 ans" quand l'horizon = 30** : les lignes `patTotal30` et `patTotal30Real` ne s'affichent plus lorsque l'horizon choisi est déjà 30 ans, car elles font alors doublon avec les lignes "à horizon".
 - **SimPanel & GlobalStrip — icône `?` avant les labels** : le bouton d'aide `?` est déplacé avant le label de chaque paramètre (simulations et barre globale), au lieu d'après.
 
 - **Comparaison — colonne ETF pur** : le tableau de l'onglet Comparaison remplace les lignes ETF (`ETF pur à Xans`, `ETF pur 30a`, `Avantage vs ETF`) par une colonne **ETF pur** à droite des colonnes simulation, aligné sur le modèle de l'onglet Revente. La colonne est renseignée pour toutes les sections : rendements (`rendAlt` en %), CF mensuel (`−loyerPerso`), effort (`0 €`), TRI 10/15/20 et réels (`rendAlt` exact par construction Fisher), VAN et MOIC (calculés via les flux `[−apportETF, −surplus₁…]`), patrimoine total nominal et réel. Les labels `Rendement brut (loc.)` / `Rendement net (loc.)` sont raccourcis en `Rendement brut` / `Rendement net`.
