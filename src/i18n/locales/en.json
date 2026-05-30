@@ -108,7 +108,7 @@
   "tooltips": {
     "inflation": {
       "title": "Inflation (CPI)",
-      "body": "Used to relativize performance in real terms. Does not affect nominal cash flows."
+      "body": "Annual inflation rate. Appreciation and alternative return rates are nominal (e.g. 2% appreciation + 2% inflation = 0% real gain). Used to display real-terms indicators: real IRR (Fisher) and constant-euro wealth in KPIs and charts."
     },
     "regime": {
       "title": "Rental tax regime",
@@ -119,8 +119,8 @@
       "body": "Rate used to calculate Net Present Value. Represents the opportunity cost of capital."
     },
     "rendAlt": {
-      "title": "ETF / alternative investment return",
-      "body": "Net annual return on the ETF portfolio. Historically ~7-8% gross ETF World, ~5-6% net after tax and inflation."
+      "title": "ETF / alternative investment return (nominal, after-tax)",
+      "body": "Nominal annual return after tax. Enter after deducting taxation: ~8% gross ETF World → ~5-6% net after 30% flat tax. With 2% inflation, 6% nominal = ~4% real — the real IRR is computed automatically in the KPIs table."
     },
     "budgetMensuel": {
       "title": "Monthly housing + investment budget",
@@ -341,6 +341,16 @@
     "kpi.crossover": {
       "title": "Crossover vs pure ETF",
       "body": "First year where total property wealth (equity + ETF from surplus) exceeds the pure ETF. Before this point, the ETF scenario is more profitable."
+    },
+    "kpi.triReal": {
+      "title": "Real IRR (inflation-adjusted)",
+      "body": "Nominal IRR adjusted for inflation using the Fisher equation. Measures return in constant euros, above inflation.",
+      "code": "Real IRR = (1 + Nominal IRR) / (1 + inflation) − 1"
+    },
+    "kpi.patReal": {
+      "title": "Real wealth (constant euros)",
+      "body": "Nominal wealth deflated by inflation. Expresses purchasing power in today's euros.",
+      "code": "Real wealth = Nominal wealth / (1 + inflation)^n"
     }
   },
   "charts": {
@@ -350,7 +360,8 @@
     },
     "pat": {
       "title": "Total wealth — 30 yrs",
-      "desc": "Property equity + ETF portfolio built from monthly surplus. <b>Dashed line</b> = pure ETF reference scenario."
+      "desc": "Property equity + ETF portfolio built from monthly surplus. Dark dashed = nominal pure ETF. Light dashed = pure ETF in constant euros.",
+      "realNote": "Nominal euros · light dashed = deflated pure ETF ({{inflation}}%/yr inflation)"
     },
     "cf3": {
       "title": "Net annual cash-flow (after tax)",
@@ -358,7 +369,8 @@
     },
     "vb": {
       "title": "Property value over time",
-      "desc": "Estimated market value based on the configured appreciation rate."
+      "desc": "Estimated nominal market value based on the configured appreciation rate.",
+      "realNote": "Nominal values · real gain ≈ appreciation rate − {{inflation}}%/yr inflation"
     },
     "revente": {
       "title": "Net profit by sale year",
@@ -392,13 +404,18 @@
     "effortRP": "Monthly effort",
     "breakeven": "Breakeven cumulative CF",
     "tri10": "IRR 10y",
+    "tri10Real": "IRR 10y (real)",
     "tri15": "IRR 15y",
+    "tri15Real": "IRR 15y (real)",
     "tri20": "IRR 20y",
+    "tri20Real": "IRR 20y (real)",
     "van": "NPV ({{tauxActu}}%, {{horizon}}y)",
     "moic": "MOIC {{horizon}}y",
     "patNet": "Net property wealth {{horizon}}y",
     "patTotal": "Total wealth {{horizon}}y",
+    "patTotalReal": "Real wealth {{horizon}}y",
     "patTotal30": "Total wealth 30y",
+    "patTotal30Real": "Real wealth 30y",
     "etfPurHorizon": "Pure ETF {{horizon}}y",
     "etfPur30": "Pure ETF 30y",
     "avantageEtf": "Advantage vs pure ETF {{horizon}}y",

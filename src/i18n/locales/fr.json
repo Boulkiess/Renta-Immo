@@ -108,7 +108,7 @@
   "tooltips": {
     "inflation": {
       "title": "Inflation (IPC)",
-      "body": "Utilisé pour relativiser les performances en euros constants. N'affecte pas les flux nominaux calculés."
+      "body": "Taux d'inflation annuel. Les taux de revalorisation et de rendement alternatif sont nominaux (ex : 2% revalo + 2% inflation = 0% de gain réel). L'inflation est utilisée pour afficher les indicateurs réels : TRI réel (Fisher) et patrimoine en euros constants dans les KPIs et graphiques."
     },
     "regime": {
       "title": "Régime fiscal locatif",
@@ -119,8 +119,8 @@
       "body": "Taux utilisé pour calculer la Valeur Actuelle Nette. Représente le coût d'opportunité du capital."
     },
     "rendAlt": {
-      "title": "Rendement ETF / placement alternatif",
-      "body": "Rendement annuel net du portefeuille ETF. Historiquement ~7-8% brut ETF World, ~5-6% net après impôts et inflation."
+      "title": "Rendement ETF / placement alternatif (nominal, net d'impôts)",
+      "body": "Rendement annuel nominal net d'impôts. À saisir après déduction de la fiscalité : ~8% brut ETF World → ~5-6% net après PFU 30%. Avec 2% d'inflation, 6% nominal = ~4% réel — le TRI réel est calculé automatiquement dans les KPIs."
     },
     "budgetMensuel": {
       "title": "Budget mensuel logement+investissement",
@@ -338,6 +338,16 @@
     "kpi.crossover": {
       "title": "Croisement vs ETF pur",
       "body": "Première année où le patrimoine total immo (équité + ETF du surplus) dépasse l'ETF pur. Avant ce point, le scénario ETF est plus rentable."
+    },
+    "kpi.triReal": {
+      "title": "TRI réel (ajusté inflation)",
+      "body": "TRI nominal corrigé de l'inflation par la formule de Fisher. Mesure le rendement en euros constants, au-dessus de l'inflation.",
+      "code": "TRI réel = (1 + TRI nominal) / (1 + inflation) − 1"
+    },
+    "kpi.patReal": {
+      "title": "Patrimoine réel (euros constants)",
+      "body": "Patrimoine nominal déflaté de l'inflation. Exprime la richesse en euros d'aujourd'hui : ce que vous pourrez acheter avec ce capital.",
+      "code": "Patrim. réel = Patrim. nominal / (1 + inflation)^n"
     }
   },
   "charts": {
@@ -347,7 +357,8 @@
     },
     "pat": {
       "title": "Patrimoine total — 30 ans",
-      "desc": "Équité immobilière + portefeuille ETF constitué avec le surplus mensuel. Les <b>pointillés</b> = scénario ETF pur de référence."
+      "desc": "Équité immobilière + portefeuille ETF constitué avec le surplus mensuel. Pointillés gris foncé = ETF pur nominal. Pointillés gris clair = ETF pur en euros constants.",
+      "realNote": "Euros courants · pointillés clairs = ETF pur déflaté ({{inflation}}%/an inflation)"
     },
     "cf3": {
       "title": "Cash-flow net annuel (après impôts)",
@@ -355,7 +366,8 @@
     },
     "vb": {
       "title": "Valeur du bien dans le temps",
-      "desc": "Valeur de marché estimée selon le taux de revalorisation paramétré."
+      "desc": "Valeur de marché nominale selon le taux de revalorisation paramétré.",
+      "realNote": "Valeurs nominales · gain réel ≈ revalorisation − {{inflation}}%/an inflation"
     },
     "revente": {
       "title": "Bilan net selon l'année de revente",
@@ -389,13 +401,18 @@
     "effortRP": "Effort mensuel",
     "breakeven": "Breakeven CF immo cumulé",
     "tri10": "TRI 10a",
+    "tri10Real": "TRI 10a (réel)",
     "tri15": "TRI 15a",
+    "tri15Real": "TRI 15a (réel)",
     "tri20": "TRI 20a",
+    "tri20Real": "TRI 20a (réel)",
     "van": "VAN ({{tauxActu}}%, {{horizon}}a)",
     "moic": "MOIC {{horizon}}a",
     "patNet": "Patrimoine immo net {{horizon}}a",
     "patTotal": "Patrimoine total {{horizon}}a",
+    "patTotalReal": "Patrimoine réel {{horizon}}a",
     "patTotal30": "Patrimoine total 30a",
+    "patTotal30Real": "Patrimoine réel 30a",
     "etfPurHorizon": "ETF pur {{horizon}}a",
     "etfPur30": "ETF pur 30a",
     "avantageEtf": "Avantage vs ETF pur {{horizon}}a",

@@ -34,9 +34,18 @@ const ChartTitle = styled.div`
 const ChartDesc = styled.div`
   font-size: 10px;
   color: ${({ theme }) => theme.muted};
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   line-height: 1.4;
   flex-shrink: 0;
+`;
+const ChartNote = styled.div`
+  font-size: 9px;
+  color: ${({ theme }) => theme.muted};
+  margin-bottom: 4px;
+  font-style: italic;
+  line-height: 1.4;
+  flex-shrink: 0;
+  opacity: 0.75;
 `;
 
 const X_LABELS = Array.from({ length: 30 }, (_, i) => String(i + 1));
@@ -56,6 +65,7 @@ export default function ChartsTab() {
       data: RES[k].flux.map(f => f.cfC),
     }));
   const patDs = () => {
+    const infl = G.inflation / 100;
     const ds = activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
@@ -67,6 +77,14 @@ export default function ChartsTab() {
       label: 'ETF pur',
       data: etfPurGlobal.map(e => e.cap),
     });
+    if (infl > 0) {
+      ds.push({
+        color: '#94a3b840',
+        dashed: true,
+        label: 'ETF pur (réel)',
+        data: etfPurGlobal.map((e, i) => e.cap / Math.pow(1 + infl, i + 1)),
+      });
+    }
     return ds;
   };
   const cfAnnDs = () =>
@@ -93,6 +111,13 @@ export default function ChartsTab() {
       <Card>
         <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.pat.title') }} />
         <ChartDesc dangerouslySetInnerHTML={{ __html: t('charts.pat.desc') }} />
+        {G.inflation > 0 && (
+          <ChartNote
+            dangerouslySetInnerHTML={{
+              __html: t('charts.pat.realNote', { inflation: G.inflation }),
+            }}
+          />
+        )}
         <CanvasChart draw={c => drawLine(c, patDs(), X_LABELS)} deps={deps} />
       </Card>
 
@@ -105,6 +130,13 @@ export default function ChartsTab() {
       <Card>
         <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.vb.title') }} />
         <ChartDesc dangerouslySetInnerHTML={{ __html: t('charts.vb.desc') }} />
+        {G.inflation > 0 && (
+          <ChartNote
+            dangerouslySetInnerHTML={{
+              __html: t('charts.vb.realNote', { inflation: G.inflation }),
+            }}
+          />
+        )}
         <CanvasChart draw={c => drawLine(c, vbDs(), X_LABELS)} deps={deps} />
       </Card>
     </Grid>

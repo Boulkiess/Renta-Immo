@@ -46,16 +46,18 @@ const DataCell = styled.td`
   font-family: ${({ theme }) => theme.mono};
   font-size: 12px;
   font-weight: ${({ $best }) => ($best ? 700 : 500)};
-  color: ${({ $neg, $color, theme }) => ($neg ? theme.red : $color)};
+  color: ${({ $neg, $muted, $color, theme }) => ($neg ? theme.red : $muted ? theme.muted : $color)};
   background: ${({ $best, $color }) => ($best ? $color + '40' : 'transparent')};
   box-shadow: ${({ $best, $color }) => ($best ? `inset 3px 0 0 ${$color}` : 'none')};
   border-bottom: 1px solid ${({ theme }) => theme.border};
+  opacity: ${({ $muted }) => ($muted ? 0.75 : 1)};
 `;
 
 const LabelCell = styled.td`
   padding: 7px 10px;
   font-size: 11px;
   border-bottom: 1px solid ${({ theme }) => theme.border};
+  color: ${({ $muted, theme }) => ($muted ? theme.muted : 'inherit')};
 `;
 
 /* ── Summary cards ── */
@@ -112,6 +114,10 @@ export default function KpisTab() {
   const fmtBe = v => (v == null ? '> 30 ans' : t('kpisTable.anneeN', { n: v }));
   const fmtCross = v => (v == null ? t('kpisTable.gt30ans') : t('kpisTable.anneeN', { n: v }));
   const fmtMoic = v => (v && isFinite(v) ? v.toFixed(2) + 'x' : '—');
+
+  const infl = G.inflation / 100;
+  const realTri = tri => (tri === null ? null : (1 + tri) / (1 + infl) - 1);
+  const deflate = (v, yr) => (v == null ? null : v / Math.pow(1 + infl, yr));
 
   const sections = [
     {
@@ -198,6 +204,14 @@ export default function KpisTab() {
           tooltipKey: 'kpi.tri',
         },
         {
+          label: t('kpisTable.tri10Real'),
+          fmt: k => fmtTRI(realTri(RES[k].tri10)),
+          better: 'max',
+          neg: false,
+          tooltipKey: 'kpi.triReal',
+          muted: true,
+        },
+        {
           label: t('kpisTable.tri15'),
           fmt: k => fmtTRI(RES[k].tri15),
           better: 'max',
@@ -205,11 +219,27 @@ export default function KpisTab() {
           tooltipKey: 'kpi.tri',
         },
         {
+          label: t('kpisTable.tri15Real'),
+          fmt: k => fmtTRI(realTri(RES[k].tri15)),
+          better: 'max',
+          neg: false,
+          tooltipKey: 'kpi.triReal',
+          muted: true,
+        },
+        {
           label: t('kpisTable.tri20'),
           fmt: k => fmtTRI(RES[k].tri20),
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.tri',
+        },
+        {
+          label: t('kpisTable.tri20Real'),
+          fmt: k => fmtTRI(realTri(RES[k].tri20)),
+          better: 'max',
+          neg: false,
+          tooltipKey: 'kpi.triReal',
+          muted: true,
         },
         {
           label: t('kpisTable.van', { tauxActu: G.tauxActu, horizon: hz }),
@@ -245,11 +275,27 @@ export default function KpisTab() {
           tooltipKey: 'kpi.patTotal',
         },
         {
+          label: t('kpisTable.patTotalReal', { horizon: hz }),
+          fmt: k => fmtE(deflate(RES[k].flux[hz - 1]?.patTotal, hz)),
+          better: 'max',
+          neg: true,
+          tooltipKey: 'kpi.patReal',
+          muted: true,
+        },
+        {
           label: t('kpisTable.patTotal30'),
           fmt: k => fmtE(RES[k].flux[29]?.patTotal),
           better: 'max',
           neg: true,
           tooltipKey: 'kpi.patTotal',
+        },
+        {
+          label: t('kpisTable.patTotal30Real'),
+          fmt: k => fmtE(deflate(RES[k].flux[29]?.patTotal, 30)),
+          better: 'max',
+          neg: true,
+          tooltipKey: 'kpi.patReal',
+          muted: true,
         },
         {
           label: t('kpisTable.etfPurHorizon', { horizon: hz }),
@@ -368,14 +414,20 @@ export default function KpisTab() {
 
                 return (
                   <tr key={row.label}>
-                    <LabelCell>
+                    <LabelCell $muted={row.muted}>
                       {row.tooltipKey && <InfoButton tooltipKey={row.tooltipKey} />} {row.label}
                     </LabelCell>
                     {formatted.map(({ key: k, val }, si) => {
                       const isBest = si === bestIdx;
                       const isNeg = row.neg && nums[si] != null && nums[si] < 0;
                       return (
-                        <DataCell key={k} $best={isBest} $color={COL[k]} $neg={isNeg}>
+                        <DataCell
+                          key={k}
+                          $best={isBest}
+                          $color={COL[k]}
+                          $neg={isNeg}
+                          $muted={row.muted}
+                        >
                           {val}
                         </DataCell>
                       );
@@ -395,7 +447,10 @@ export default function KpisTab() {
             <Card key={k} $col={COL[k]}>
               <CardLabel>Patrimoine total · {hz} ans</CardLabel>
               <CardValue $col={COL[k]}>{fmtE(RES[k].flux[hz - 1]?.patTotal)}</CardValue>
-              <CardSub>{sims[k].label}</CardSub>
+              <CardSub>
+                {sims[k].label}
+                {infl > 0 && <> · réel&nbsp;: {fmtE(deflate(RES[k].flux[hz - 1]?.patTotal, hz))}</>}
+              </CardSub>
             </Card>
           ))}
         </Cards>

@@ -4,6 +4,8 @@
 
 ### Added
 
+- **Métriques réelles (ajustées inflation)** : le paramètre Inflation est désormais utilisé pour afficher des indicateurs en euros constants. Dans les KPIs : 3 lignes TRI réel (10/15/20a) via Fisher `(1+TRI)/(1+inflation)−1`, atténuées sous chaque TRI nominal ; 2 lignes Patrimoine réel déflatées par `(1+inflation)^n` ; cards de bas de page avec "réel : Xk€". Dans le graphique Patrimoine : ligne tiretée gris clair = ETF pur en euros constants. Notes `ChartNote` italiques sous les graphiques Patrimoine et Valeur du bien précisant les valeurs nominales. Tooltips : `inflation` (rôle pour les métriques réelles), `rendAlt` (clarifié nominal net d'impôts), `kpi.triReal` et `kpi.patReal` avec formules.
+
 - **Drag-to-scrub sur les unités** : survoler l'unité (€, %, ans…) d'un paramètre change le curseur en double flèche verticale. Maintenir le clic et glisser haut/bas ajuste la valeur par pas (6 px par pas, Shift × 10). Fonctionne sur tous les paramètres de simulation (FieldGroup) et les paramètres globaux (GlobalStrip). Le curseur disparaît pendant le drag via Pointer Lock et réapparaît exactement à sa position d'origine au relâchement.
 
 ### Added
