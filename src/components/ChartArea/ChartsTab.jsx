@@ -52,7 +52,7 @@ const X_LABELS = Array.from({ length: 30 }, (_, i) => String(i + 1));
 
 export default function ChartsTab() {
   const { t } = useTranslation();
-  const { sims, RES, etfPurGlobal, G } = useApp();
+  const { sims, RES, etfPurGlobal, G, crossovers } = useApp();
   const theme = useTheme();
   const deps = [sims, RES, etfPurGlobal, G, theme.name];
 
@@ -118,7 +118,15 @@ export default function ChartsTab() {
             }}
           />
         )}
-        <CanvasChart draw={c => drawLine(c, patDs(), X_LABELS)} deps={deps} />
+        <CanvasChart
+          draw={c => {
+            const ann = activeKeys
+              .filter(k => crossovers[k] != null && crossovers[k] <= 30)
+              .map(k => ({ x: crossovers[k], color: COL[k] + '99', label: `an ${crossovers[k]}` }));
+            drawLine(c, patDs(), X_LABELS, ann);
+          }}
+          deps={[...deps, crossovers]}
+        />
       </Card>
 
       <Card>

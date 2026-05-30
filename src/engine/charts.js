@@ -1,6 +1,6 @@
 import { fmtK } from './utils.js';
 
-export function drawLine(canvas, datasets, xLabels) {
+export function drawLine(canvas, datasets, xLabels, annotations = []) {
   if (!canvas) return;
   const W = canvas.offsetWidth || 600,
     H = canvas.offsetHeight || 220,
@@ -83,6 +83,25 @@ export function drawLine(canvas, datasets, xLabels) {
     });
     ctx.stroke();
     ctx.setLineDash([]);
+  });
+  annotations.forEach(({ x, color = '#94a3b8', label }) => {
+    const xPx = xS(x - 1); // x is 1-based year
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(xPx, p.t);
+    ctx.lineTo(xPx, H - p.b);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if (label) {
+      ctx.fillStyle = color;
+      ctx.font = "9px 'DM Sans',sans-serif";
+      ctx.textAlign = 'left';
+      ctx.fillText(label, xPx + 3, p.t + 10);
+    }
+    ctx.restore();
   });
   canvas._meta = { datasets, xLabels, xS, dpr, W };
 }

@@ -186,16 +186,21 @@ export const GRP_COMMON = [
 
 export const GRP_LOC = [
   {
-    t: 'Exploitation',
+    t: 'Revenus',
     f: [
       { k: 'loyer', tp: 'e', mn: 100, mx: 8000, st: 50 },
       { k: 'vacance', tp: '%', mn: 0, mx: 30, st: 0.5 },
+      { k: 'revalLoyer', tp: '%', mn: 0, mx: 5, st: 0.1 },
+    ],
+  },
+  {
+    t: 'Charges',
+    f: [
       { k: 'taxeFonciere', tp: 'e', mn: 0, mx: 10000, st: 100 },
       { k: 'chargesCopro', tp: 'e', mn: 0, mx: 8000, st: 100 },
       { k: 'assurPNO', tp: 'e', mn: 0, mx: 2000, st: 50 },
       { k: 'fraisGestion', tp: '%', mn: 0, mx: 15, st: 0.5 },
       { k: 'provision', tp: 'e', mn: 0, mx: 5000, st: 100 },
-      { k: 'revalLoyer', tp: '%', mn: 0, mx: 5, st: 0.1 },
     ],
   },
   {

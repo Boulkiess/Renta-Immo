@@ -4,6 +4,20 @@
 
 ### Fixed
 
+- **`fraisDossier` sans traduction** : le champ "Frais de dossier" s'affichait avec la clé brute `fraisDossier` dans le formulaire. Labels et tooltips ajoutés en français et anglais.
+- **`revalCharges` orphelin** : le paramètre de revalorisation des charges (2 %/an par défaut) influençait les calculs sans être visible ni modifiable. Un champ dédié est maintenant présent dans le GlobalStrip entre "Reval. budget" et "Surplus→ETF".
+- **Tooltips `bilanRevente` et `bilanTotal` incorrects** : les deux nouvelles lignes du tableau comparatif pointaient vers les tooltips de `patNet`/`patTotal`. Nouveaux tooltips dédiés avec la bonne formule.
+
+### Added
+
+- **GlobalStrip — hypothèses actives** : bandeau de synthèse en lecture seule affiché à droite du GlobalStrip résumant les taux d'évolution appliqués (inflation, charges, budget, loyer perso). Rend visibles les hypothèses que l'utilisateur n'aurait pas encore ajustées.
+- **KpisTab — Cash-on-cash return (an 1)** : nouvelle ligne dans la section Rendements affichant `cfN[1] / apport × 100`. Indicateur immédiat du rendement courant, complémentaire au TRI.
+- **KpisTab — Note métriques réelles** : lorsque l'inflation est > 0, une note explicative s'affiche sous la description du tableau pour clarifier que les lignes grisées sont en euros constants.
+- **Graphique Patrimoine — ligne de croisement** : une ligne verticale fine (couleur de la simulation) marque l'année de croisement vs ETF pur sur le graphique Patrimoine, avec le label "an N". Visible uniquement si le crossover a lieu avant la 30e année.
+- **SimPanel — sections Revenus/Charges** : la section "Exploitation" du mode Locatif est divisée en deux sections distinctes — "Revenus locatifs" (loyer, vacance, revalLoyer) et "Charges" (taxe foncière, copro, assurances, gestion, provision) — pour améliorer la lisibilité.
+
+### Fixed
+
 - **Abattements progressifs sur la plus-value immobilière** : l'impôt PV est désormais calculé avec les abattements légaux (art. 150 VC CGI). IR : 6 %/an de la 6e à la 21e année → exonération totale à partir de la 22e. PS : 1,65 %/an de la 6e à la 21e, 1,6 % à la 22e, 9 %/an de la 23e à la 30e → exonération totale après 30 ans. Auparavant, le taux plein (19 % + 17,2 %) était appliqué quelle que soit la durée de détention, surestimant massivement l'impôt pour les longues détentions.
 - **Déduction des intérêts d'emprunt** : les intérêts annuels du prêt (`intAnnuel`) sont désormais déduits du revenu imposable en LMNP réel (`le − chg − ab − at − intAnnuel`) et en Foncier nu (`le − chg − intAnnuel`), conformément au droit fiscal français. L'impôt était auparavant surestimé de €2 000–4 000/an en début de prêt.
 - **Report d'amortissement LMNP** : le déficit LMNP (amortissements excédant le revenu imposable) est désormais reporté aux années suivantes via la variable `amortReport`. Les années déficitaires produisent `imp = 0` et le solde non utilisé réduit l'imposition des années futures. Auparavant, l'excédent était perdu.

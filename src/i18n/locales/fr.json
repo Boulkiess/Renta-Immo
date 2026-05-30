@@ -38,8 +38,11 @@
     "revalLoyerPerso": "Reval. loyer",
     "budgetMensuel": "Budget mensuel",
     "revalBudget": "Reval. budget",
+    "revalCharges": "Reval. charges",
     "investirSurplus": "Surplus→ETF",
     "apportETF": "Apport ETF pur",
+    "hypoTitle": "Hypothèses d'évolution actives",
+    "hypoSummary": "Inflation {{inflation}}% · Charges +{{revalCharges}}%/an · Budget +{{revalBudget}}%/an · Loyer perso +{{revalLoyerPerso}}%/an",
     "units": {
       "perYear": "%/an",
       "years": "ans",
@@ -72,7 +75,8 @@
     "Acquisition": "Acquisition",
     "Financement": "Financement",
     "Revente": "Revente",
-    "Exploitation": "Exploitation",
+    "Revenus": "Revenus locatifs",
+    "Charges": "Charges",
     "Fiscalité": "Fiscalité",
     "Résidence principale": "Résidence principale"
   },
@@ -81,6 +85,7 @@
     "fraisNotaire": { "label": "Frais de notaire" },
     "travaux": { "label": "Travaux" },
     "fraisAgence": { "label": "Frais d'agence achat" },
+    "fraisDossier": { "label": "Frais de dossier" },
     "apport": { "label": "Apport personnel" },
     "taux": { "label": "Taux intérêt" },
     "duree": { "label": "Durée (ans)" },
@@ -131,6 +136,11 @@
       "title": "Revalorisation annuelle du budget %/an",
       "body": "Hausse annuelle du budget disponible (augmentations de salaire). Augmente le surplus investi en ETF chaque année. 0% = budget fixe."
     },
+    "revalCharges": {
+      "title": "Revalorisation des charges fixes %/an",
+      "body": "Taux d'augmentation annuel de la taxe foncière, des charges de copropriété, des assurances et des provisions. Typiquement 2–3 %/an en France. Les frais de gestion (proportionnels au loyer) ne sont pas affectés.",
+      "code": "chg[yr] = (taxeFonciere + chargesCopro + assurPNO + provision) × (1 + revalCharges/100)^(yr−1)"
+    },
     "investirSurplus": {
       "title": "Investir le surplus en ETF",
       "body": "Si activé : la différence entre le budget mensuel et les sorties réelles est investie en ETF. Le tiret = scénario ETF pur de référence."
@@ -155,6 +165,11 @@
     "fraisAgence": {
       "title": "Frais d'agence acheteur",
       "body": "Honoraires d'agence à charge de l'acheteur."
+    },
+    "fraisDossier": {
+      "title": "Frais de dossier & courtage",
+      "body": "Frais bancaires liés à l'obtention du prêt (frais de dossier) et/ou honoraires de courtier. Intégrés dans le coût total d'acquisition et dans le montant emprunté.",
+      "code": "ct = prixAchat + fraisNotaire + travaux + fraisAgence + fraisDossier"
     },
     "apport": {
       "title": "Apport personnel",
@@ -320,6 +335,21 @@
       "body": "Combien de fois l'apport a été multiplié à l'horizon. N'est pas actualisé (contrairement à la VAN).",
       "code": "MOIC = (Revente nette + Flux cumulés) / Apport"
     },
+    "kpi.coc": {
+      "title": "Cash-on-cash return (an 1)",
+      "body": "Rendement annuel du flux net opérationnel de l'année 1 rapporté à l'apport initial. Indicateur simple et immédiat : combien rapporte le bien en cash cette année par euro investi. Ne tient pas compte de la valeur de revente ni de l'actualisation.",
+      "code": "coc = cfN[an 1] / apport × 100"
+    },
+    "kpi.bilanRevente": {
+      "title": "Bilan revente",
+      "body": "Gain net en cash si vous vendez à cet horizon : produit de cession net + flux cumulés − apport initial. Mesure ce que vous avez gagné en argent réel, hors valorisation non réalisée.",
+      "code": "bilanRevente = reventeNet + cfC − apport"
+    },
+    "kpi.bilanTotal": {
+      "title": "Bilan total revente",
+      "body": "Gain net global si vous vendez : produit de cession net + poche ETF accumulée (surplus réinvestis) − apport initial. La métrique la plus complète pour comparer deux scénarios.",
+      "code": "bilanTotal = reventeNet + etfCap − apport"
+    },
     "kpi.patNet": {
       "title": "Patrimoine immobilier net",
       "body": "Équité immobilière (valeur estimée − capital restant dû) + flux cumulés − apport initial.",
@@ -394,6 +424,7 @@
   "kpisTable": {
     "title": "Tableau comparatif — Régime locatif :",
     "desc": "Patrimoine total = équité immo + ETF du surplus. ETF pur = apport + budget investi sans achat.",
+    "descReal": "Lignes grisées = valeurs en euros constants (ajustées par l'inflation {{inflation}} %).",
     "indicator": "Indicateur",
     "type": "Type",
     "coutTotal": "Coût total acq.",
@@ -403,6 +434,7 @@
     "rendBrut": "Rendement brut",
     "rendNet": "Rendement net",
     "cfMensuel": "CF réel/mois",
+    "coc": "Cash-on-cash (an 1)",
     "effortRP": "Effort mensuel",
     "breakeven": "Breakeven CF immo cumulé",
     "tri10": "TRI 10a",

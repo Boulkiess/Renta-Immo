@@ -38,8 +38,11 @@
     "revalLoyerPerso": "Rent revaluation",
     "budgetMensuel": "Monthly budget",
     "revalBudget": "Budget growth",
+    "revalCharges": "Charges growth",
     "investirSurplus": "Surplus→ETF",
     "apportETF": "Pure ETF contribution",
+    "hypoTitle": "Active growth assumptions",
+    "hypoSummary": "Inflation {{inflation}}% · Charges +{{revalCharges}}%/yr · Budget +{{revalBudget}}%/yr · Rent +{{revalLoyerPerso}}%/yr",
     "units": {
       "perYear": "%/yr",
       "years": "yrs",
@@ -72,7 +75,8 @@
     "Acquisition": "Acquisition",
     "Financement": "Financing",
     "Revente": "Sale",
-    "Exploitation": "Rental income",
+    "Revenus": "Rental income",
+    "Charges": "Operating expenses",
     "Fiscalité": "Taxation",
     "Résidence principale": "Primary residence"
   },
@@ -81,6 +85,7 @@
     "fraisNotaire": { "label": "Notary fees" },
     "travaux": { "label": "Renovation works" },
     "fraisAgence": { "label": "Buyer's agent fees" },
+    "fraisDossier": { "label": "File & broker fees" },
     "apport": { "label": "Down payment" },
     "taux": { "label": "Interest rate" },
     "duree": { "label": "Duration (yrs)" },
@@ -131,6 +136,11 @@
       "title": "Annual budget growth %/yr",
       "body": "Annual increase of your available budget (salary raises). Grows the ETF surplus each year. 0% = fixed budget."
     },
+    "revalCharges": {
+      "title": "Fixed charges annual growth %/yr",
+      "body": "Annual increase rate for property tax, co-ownership charges, insurance and maintenance reserves. Typically 2–3%/yr in France. Management fees (proportional to rent) are not affected.",
+      "code": "charges[yr] = (propertyTax + copro + insurance + reserve) × (1 + revalCharges/100)^(yr−1)"
+    },
     "investirSurplus": {
       "title": "Invest surplus in ETF",
       "body": "If enabled: the difference between the monthly budget and real outflows is invested in ETF. The dashed line = pure ETF reference scenario."
@@ -153,6 +163,11 @@
       "code": "Works depreciation = Works × Rate"
     },
     "fraisAgence": { "title": "Buyer's agent fees", "body": "Agent commission paid by the buyer." },
+    "fraisDossier": {
+      "title": "File & broker fees",
+      "body": "Bank origination fees and/or mortgage broker commission. Included in total acquisition cost and borrowed amount.",
+      "code": "ct = purchasePrice + notaryFees + works + agencyFees + fileFees"
+    },
     "apport": {
       "title": "Down payment",
       "body": "Own capital invested. Reduces the loan amount but also the leverage."
@@ -323,6 +338,21 @@
       "body": "How many times the down payment has been multiplied at the horizon. Not discounted (unlike NPV).",
       "code": "MOIC = (Net sale + Cumul. flows) / Down payment"
     },
+    "kpi.coc": {
+      "title": "Cash-on-cash return (yr 1)",
+      "body": "Annual yield of the year-1 net operating cash flow relative to the initial down payment. Simple and immediate: how much cash the property generates per euro invested this year. Does not account for resale value or time value of money.",
+      "code": "coc = cfN[yr 1] / downPayment × 100"
+    },
+    "kpi.bilanRevente": {
+      "title": "Net sale profit",
+      "body": "Cash gain if you sell at this horizon: net sale proceeds + cumulative cash flows − initial down payment. Measures what you actually pocketed in cash.",
+      "code": "bilanRevente = reventeNet + cfC − downPmt"
+    },
+    "kpi.bilanTotal": {
+      "title": "Total sale profit",
+      "body": "Overall gain if you sell: net sale proceeds + ETF pocket from reinvested surplus − initial down payment. The most complete metric for comparing two scenarios.",
+      "code": "bilanTotal = reventeNet + etfCap − downPmt"
+    },
     "kpi.patNet": {
       "title": "Net property wealth",
       "body": "Property equity (estimated value − outstanding capital) + cumulative cash flows − initial down payment.",
@@ -397,6 +427,7 @@
   "kpisTable": {
     "title": "Comparison table — Rental regime:",
     "desc": "Total wealth = property equity + ETF from surplus. Pure ETF = contribution + full budget invested without buying.",
+    "descReal": "Greyed rows = values in constant euros (inflation-adjusted at {{inflation}}%).",
     "indicator": "Indicator",
     "type": "Type",
     "coutTotal": "Total acquisition cost",
@@ -406,6 +437,7 @@
     "rendBrut": "Gross yield",
     "rendNet": "Net yield",
     "cfMensuel": "Real CF/mo",
+    "coc": "Cash-on-cash (yr 1)",
     "effortRP": "Monthly effort",
     "breakeven": "Breakeven cumulative CF",
     "tri10": "IRR 10y",

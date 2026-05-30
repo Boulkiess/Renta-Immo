@@ -64,6 +64,18 @@ const FieldsScroll = styled.div`
   overflow-x: auto;
 `;
 
+const HypoBand = styled.div`
+  padding: 0 14px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 10px;
+  color: ${LABEL_COL};
+  border-left: 1px solid ${SEP_COL};
+  flex-shrink: 0;
+`;
+
 const Field = styled.div`
   display: flex;
   align-items: center;
@@ -374,6 +386,28 @@ export default function GlobalStrip() {
           </DraggableUnit>
         </Field>
 
+        <Field>
+          <InfoButton tooltipKey="revalCharges" />
+          <Label>{t('global.revalCharges')}</Label>
+          <NumInput
+            type="number"
+            min="0"
+            max="10"
+            step="0.1"
+            value={G.revalCharges ?? 2}
+            onChange={e => updateG({ revalCharges: +e.target.value })}
+          />
+          <DraggableUnit
+            min={0}
+            max={10}
+            step={0.1}
+            val={G.revalCharges ?? 2}
+            onChange={v => updateG({ revalCharges: v })}
+          >
+            {u.perYear}
+          </DraggableUnit>
+        </Field>
+
         <Field style={{ gap: 8 }}>
           <InfoButton tooltipKey="investirSurplus" />
           <Label>{t('global.investirSurplus')}</Label>
@@ -403,6 +437,15 @@ export default function GlobalStrip() {
           </DraggableUnit>
         </Field>
       </FieldsScroll>
+
+      <HypoBand title={t('global.hypoTitle')}>
+        {t('global.hypoSummary', {
+          inflation: G.inflation,
+          revalCharges: G.revalCharges ?? 2,
+          revalBudget: G.revalBudget,
+          revalLoyerPerso: G.revalLoyerPerso,
+        })}
+      </HypoBand>
     </Strip>
   );
 }

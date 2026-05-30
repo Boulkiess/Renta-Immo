@@ -202,6 +202,14 @@ export default function KpisTab() {
           etfVal: -G.loyerPerso,
         },
         {
+          label: t('kpisTable.coc'),
+          fmt: k => (RES[k].flux[0]?.coc != null ? fmtP(RES[k].flux[0].coc) : '—'),
+          better: 'max',
+          neg: true,
+          tooltipKey: 'kpi.coc',
+          etfVal: null,
+        },
+        {
           label: t('kpisTable.effortRP'),
           fmt: k => fmtE(-RES[k].flux[0].cfN / 12 - G.loyerPerso),
           better: 'min',
@@ -305,7 +313,7 @@ export default function KpisTab() {
           fmt: k => fmtE(RES[k].flux[hz - 1]?.bilanRevente),
           better: 'max',
           neg: true,
-          tooltipKey: 'kpi.patNet',
+          tooltipKey: 'kpi.bilanRevente',
           etfVal: null,
         },
         {
@@ -313,7 +321,7 @@ export default function KpisTab() {
           fmt: k => fmtE(RES[k].flux[hz - 1]?.bilanTotal),
           better: 'max',
           neg: true,
-          tooltipKey: 'kpi.patTotal',
+          tooltipKey: 'kpi.bilanTotal',
           etfVal: null,
         },
         {
@@ -378,6 +386,11 @@ export default function KpisTab() {
           <span style={{ fontWeight: 400 }}>{t(`global.regimes.${G.regime}`)}</span>
         </TableTitle>
         <TableDesc>{t('kpisTable.desc')}</TableDesc>
+        {infl > 0 && (
+          <TableDesc style={{ marginTop: 2 }}>
+            {t('kpisTable.descReal', { inflation: G.inflation })}
+          </TableDesc>
+        )}
 
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
