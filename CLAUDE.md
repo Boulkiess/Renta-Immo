@@ -331,7 +331,12 @@ Si `investirSurplus = false`, retourne `null` (comparaison sans sens car les sur
 
 ### TRI (IRR) — Newton-Raphson ✅
 
-Flux : `[−apport, cfN[1], cfN[2], …, cfN[horizon] + reventeNet[horizon]]`
+**Flux (LOC et RP) :** `[−apport, cfN[1]+loyerPersoAnn[1], …, cfN[horizon]+loyerPersoAnn[horizon] + reventeNet[horizon]]`
+
+- **Mode LOC** : `loyerPersoAnn` est réintégré dans les flux — le loyer personnel est un coût subi indépendamment de l'investissement, pas un coût de l'investissement lui-même.
+- **Mode RP** : `loyerPersoAnn` est ajouté comme bénéfice — c'est le loyer économisé grâce à l'achat de la résidence principale.
+
+Les deux modes utilisent donc la même formule de flux, ce qui rend TRI et VAN comparables entre LOC et RP.
 
 ```
 NPV(r)  = Σ_{t=0}^{n} flux[t] / (1+r)^t = 0
@@ -346,17 +351,21 @@ Calculé pour horizons 10, 15 et 20 ans : `tri10`, `tri15`, `tri20`.
 ### VAN (NPV) ✅
 
 ```
-VAN = −apport + Σ_{t=1}^{horizon} cfN[t]/(1+tauxActu/100)^t + reventeNet[horizon]/(1+tauxActu/100)^{horizon}
+VAN = −apport + Σ_{t=1}^{horizon} f[t]/(1+tauxActu/100)^t + reventeNet[horizon]/(1+tauxActu/100)^{horizon}
+
+où f[t] = cfN[t] + loyerPersoAnn[t]   (même flows que TRI — cf. section TRI ci-dessus)
 ```
+
+**Remarque** : les flows utilisés pour la VAN sont identiques à ceux du TRI. En mode LOC, `loyerPersoAnn` est réintégré (coût subi indépendamment de l'investissement). En mode RP, `loyerPersoAnn` est ajouté comme bénéfice (loyer économisé grâce à l'achat). Les deux modes mesurent ainsi le rendement pur de l'investissement sur une base comparable.
 
 ### MOIC ✅
 
 ```
-MOIC = (bilanRevente[horizon] + apport) / apport
-     = (reventeNet[horizon] + cfC[horizon]) / apport
+irrCfC = Σ_{t=1}^{horizon} irrFlows[t]    (même flows ajustés que TRI/VAN)
+MOIC   = (reventeNet[horizon] + irrCfC) / apport
 ```
 
-Multiple on Invested Capital — combien de fois l'apport a été multiplié (vente + flux cumulés).
+Multiple on Invested Capital — combien de fois l'apport a été multiplié. Utilise les flows ajustés (`loyerPersoAnn` exclu/ajouté selon le mode) pour être cohérent avec TRI et VAN.
 
 ### Rendements (mode `loc`) ✅
 

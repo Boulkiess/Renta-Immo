@@ -149,15 +149,15 @@ export default function KpisTab() {
         },
         {
           label: t('kpisTable.cfMensuel'),
-          fmt: k => (sims[k].mode === 'loc' ? fmtE(RES[k].cfM) : '—'),
+          fmt: k => fmtE(RES[k].flux[0].cfN / 12),
           better: 'max',
           neg: true,
         },
         {
           label: t('kpisTable.effortRP'),
-          fmt: k => (sims[k].mode === 'rp' ? fmtE(Math.abs(RES[k].cfM)) : '—'),
+          fmt: k => fmtE(-RES[k].flux[0].cfN / 12 - G.loyerPerso),
           better: 'min',
-          neg: false,
+          neg: true,
         },
         { label: t('kpisTable.breakeven'), fmt: k => fmtBe(RES[k].be), better: 'min', neg: false },
       ],

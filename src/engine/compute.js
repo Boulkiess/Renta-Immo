@@ -130,7 +130,10 @@ export function compute(p, g) {
       pr,
     });
 
-    irrFlows.push(cfN);
+    // Both modes add loyerPersoAnn to TRI/VAN flows:
+    // LOC: removes personal rent from costs (sunk cost unrelated to the investment)
+    // RP: adds saved rent as a benefit (you no longer pay it)
+    irrFlows.push(cfN + loyerPersoAnn);
   }
 
   function calcTRI(horizon) {
@@ -142,9 +145,9 @@ export function compute(p, g) {
 
   function calcVAN(horizon) {
     const r = g.tauxActu / 100;
-    let van = -p.apport;
+    let van = irrFlows[0]; // -apport
     for (let t = 1; t <= horizon && t <= 30; t++) {
-      let cf = flux[t - 1].cfN;
+      let cf = irrFlows[t]; // same flows as TRI: loyerPersoAnn excluded in LOC mode
       if (t === horizon) cf += flux[t - 1].reventeNet;
       van += cf / Math.pow(1 + r, t);
     }
@@ -185,7 +188,11 @@ export function compute(p, g) {
     tri15: calcTRI(15),
     tri20: calcTRI(20),
     van: calcVAN(g.horizon),
-    moic: flux[g.horizon - 1] ? (flux[g.horizon - 1].bilanRevente + p.apport) / p.apport : 0,
+    moic: flux[g.horizon - 1]
+      ? (flux[g.horizon - 1].reventeNet +
+          irrFlows.slice(1, g.horizon + 1).reduce((a, b) => a + b, 0)) /
+        p.apport
+      : 0,
     revente: flux.map(f => ({ yr: f.yr, pr: f.pr, rest: f.rest, bilanRevente: f.bilanRevente })),
   };
 }

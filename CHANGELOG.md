@@ -29,6 +29,16 @@
 
 ### Fixed
 
+- **Moteur — VAN/TRI incorrects en modes LOC et RP** : deux corrections symétriques sur les flux `irrFlows[]` utilisés par `calcTRI` et `calcVAN`.
+  - **LOC** : `calcVAN` utilisait `flux[t-1].cfN` directement, qui inclut `−loyerPersoAnn`. Le loyer personnel (coût subi indépendamment de l'investissement) était compté comme charge, rendant la VAN très négative. Correction : `calcVAN` réutilise désormais `irrFlows[]` comme `calcTRI`.
+  - **RP** : `irrFlows[]` ne comptabilisait pas le loyer économisé (`loyerPersoAnn`) comme bénéfice. Le TRI et la VAN mesuraient les sorties brutes sans tenir compte que l'investissement fait cesser le paiement du loyer. Correction : `loyerPersoAnn` est ajouté dans `irrFlows[]` pour RP, symétriquement au traitement LOC. Les deux modes mesurent désormais le rendement pur de l'investissement sur une base comparable.
+  - **MOIC** : même cause — calculé depuis `bilanRevente` qui accumule le `cfN` brut. Corrigé pour utiliser `irrFlows[]` (même base que TRI/VAN) : `MOIC = (reventeNet + Σ irrFlows[1..horizon]) / apport`.
+
+- **KpisTab — TRI affiché N/C pour toutes les simulations locatives** : le moteur IRR incluait `loyerPersoAnn` comme dépense dans les flux de trésorerie locatifs, rendant le NPV systématiquement négatif et l'IRR incalculable. Le TRI mesure désormais le rendement pur de l'investissement (sans loyer personnel) pour le mode `loc` — `loyerPersoAnn` est exclu des flux IRR (réintégré dans `cfN` avant push). Le mode `rp` est inchangé. CLAUDE.md mis à jour.
+- **KpisTab — CF mensuel affiché uniquement pour les sims locatives** : suppression du filtre `mode === 'loc'` sur la ligne "CF mensuel simplifié" — la valeur est désormais affichée pour tous les modes.
+- **KpisTab — Effort mensuel affiché uniquement pour les sims RP** : suppression du filtre `mode === 'rp'` sur la ligne "Effort mensuel" — la valeur est désormais affichée pour tous les modes.
+- **KpisTab — Labels "(loc.)" et "(RP)" supprimés** : les labels "CF mensuel net (loc.)" et "Effort mensuel (RP)" renommés en "CF mensuel net simplifié" et "Effort mensuel simplifié" (fr/en) maintenant que les deux lignes s'affichent pour tous les modes.
+
 - **Affichage des décimales dans les inputs numériques** : les champs à pas décimal (ex : assurance 0,01 → affiche `0.25` et non `0.25`) conservent désormais le bon nombre de décimales en toutes circonstances. L'input passe de `type="number"` (qui supprime les zéros finaux) à `type="text" inputMode="decimal"` avec un composant `NumInput` dédié gérant un état local `localStr` : `null` en mode repos (affichage `toFixed(dec)`), chaîne libre pendant la saisie. Les touches ↑/↓ (Shift × 10) incrémentent/décrémentent selon `field.st`, clampées entre `field.mn` et `field.mx`.
 
 ### Added
