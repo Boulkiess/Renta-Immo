@@ -19,11 +19,26 @@ function irr(flows, guess = 0.1, maxIter = 100, tol = 1e-7) {
   return null;
 }
 
-function impLoc(le, chg, ab, at, tmi, ps, regime) {
+// Abattements progressifs sur la plus-value immobilière (art. 150 VC CGI)
+function abattementIR(yr) {
+  if (yr <= 5) return 0;
+  if (yr <= 21) return (yr - 5) * 6; // 6 %/an de la 6e à la 21e → 96 %
+  return 100; // 4 % à la 22e = exonération totale
+}
+
+function abattementPS(yr) {
+  if (yr <= 5) return 0;
+  if (yr <= 21) return (yr - 5) * 1.65; // 1,65 %/an de la 6e à la 21e
+  if (yr === 22) return 16 * 1.65 + 1.6; // 28,0 %
+  if (yr <= 30) return 16 * 1.65 + 1.6 + (yr - 22) * 9; // 9 %/an de la 23e à la 30e
+  return 100;
+}
+
+function impLoc(le, chg, ab, at, tmi, ps, regime, intAnnuel = 0) {
   let ri;
-  if (regime === 'lmnp') ri = Math.max(0, le - chg - ab - at);
+  if (regime === 'lmnp') ri = Math.max(0, le - chg - ab - at - intAnnuel);
   else if (regime === 'microbic') ri = Math.max(0, le * 0.5);
-  else ri = Math.max(0, le - chg);
+  else ri = Math.max(0, le - chg - intAnnuel); // 'nu' (Foncier nu)
   return ri * ((tmi + ps) / 100);
 }
 
@@ -46,7 +61,7 @@ export function computeEtfPur(g) {
 }
 
 export function compute(p, g) {
-  const ct = p.prixAchat + p.fraisNotaire + p.travaux + p.fraisAgence;
+  const ct = p.prixAchat + p.fraisNotaire + p.travaux + p.fraisAgence + (p.fraisDossier ?? 0);
   const emp = Math.max(0, ct - p.apport);
   const tM = p.taux / 100 / 12,
     nM = p.duree * 12;
@@ -70,6 +85,7 @@ export function compute(p, g) {
   const irrFlows = [-p.apport];
   const rAlt = g.rendAlt / 100;
   let etfCap = 0;
+  let amortReport = 0; // report d'amortissement LMNP non utilisé (années déficitaires)
 
   for (let yr = 1; yr <= 30; yr++) {
     const mi = Math.min(yr * 12, amort.length) - 1;
@@ -87,12 +103,24 @@ export function compute(p, g) {
     if (p.mode === 'loc') {
       const lb = p.loyer * 12 * Math.pow(1 + p.revalLoyer / 100, yr - 1);
       le = lb * (1 - p.vacance / 100);
+      const fC = Math.pow(1 + (g.revalCharges ?? 2) / 100, yr - 1);
       chg =
-        p.taxeFonciere + p.chargesCopro + p.assurPNO + p.provision + lb * (p.fraisGestion / 100);
-      imp = impLoc(le, chg, ab, at, p.tmi, p.ps, g.regime);
+        (p.taxeFonciere + p.chargesCopro + p.assurPNO + p.provision) * fC +
+        lb * (p.fraisGestion / 100);
+      const intAnnuel = amort.slice((yr - 1) * 12, yr * 12).reduce((s, m) => s + m.inter, 0);
+      if (g.regime === 'lmnp') {
+        // LMNP réel : intérêts + amortissements déductibles ; déficit reporté aux années suivantes
+        const riRaw = le - chg - ab - at - intAnnuel - amortReport;
+        const ri = Math.max(0, riRaw);
+        amortReport = riRaw < 0 ? -riRaw : 0;
+        imp = ri * ((p.tmi + p.ps) / 100);
+      } else {
+        imp = impLoc(le, chg, ab, at, p.tmi, p.ps, g.regime, intAnnuel);
+      }
       cfN = le - chg - ann - asp - imp - loyerPersoAnn;
     } else {
-      chg = p.taxeFonciereRP + p.chargesCoproRP + p.assurHab + p.provisionRP;
+      const fCrp = Math.pow(1 + (g.revalCharges ?? 2) / 100, yr - 1);
+      chg = (p.taxeFonciereRP + p.chargesCoproRP + p.assurHab + p.provisionRP) * fCrp;
       cfN = -(chg + ann + asp);
       le = loyerPersoAnn;
     }
@@ -107,7 +135,11 @@ export function compute(p, g) {
     const fa = pr * (p.fraisVente / 100);
     const pvB = Math.max(0, pr - p.prixAchat - p.travaux);
     let iPV = 0;
-    if (p.mode === 'loc') iPV = pvB * ((p.impotPV + p.psPV) / 100);
+    if (p.mode === 'loc') {
+      const abIR = Math.min(100, abattementIR(yr));
+      const abPS = Math.min(100, abattementPS(yr));
+      iPV = (pvB * (p.impotPV * (1 - abIR / 100) + p.psPV * (1 - abPS / 100))) / 100;
+    }
     const reventeNet = pr - rest - fa - iPV;
     const bilanRevente = reventeNet + cfC - p.apport;
     const bilanTotal = reventeNet + etfCap - p.apport;
@@ -121,6 +153,7 @@ export function compute(p, g) {
       imp,
       cfN,
       cfC,
+      coc: p.apport > 0 ? (cfN / p.apport) * 100 : null,
       vb,
       rest,
       patNet: vb - rest + cfC - p.apport,
@@ -146,6 +179,7 @@ export function compute(p, g) {
   }
 
   function calcVAN(horizon) {
+    if (horizon > 30 || horizon < 1) return null;
     const r = g.tauxActu / 100;
     let van = irrFlows[0]; // -apport
     for (let t = 1; t <= horizon && t <= 30; t++) {

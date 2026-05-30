@@ -413,6 +413,8 @@
     "tri20Real": "TRI 20a (réel)",
     "van": "VAN ({{tauxActu}}%, {{horizon}}a)",
     "moic": "MOIC {{horizon}}a",
+    "bilanReventeHz": "Bilan revente {{horizon}}a",
+    "bilanTotalHz": "Bilan total revente {{horizon}}a",
     "patNet": "Patrimoine immo net {{horizon}}a",
     "patTotal": "Patrimoine total {{horizon}}a",
     "patTotalReal": "Patrimoine réel {{horizon}}a",

@@ -416,6 +416,8 @@
     "tri20Real": "IRR 20y (real)",
     "van": "NPV ({{tauxActu}}%, {{horizon}}y)",
     "moic": "MOIC {{horizon}}y",
+    "bilanReventeHz": "Net sale profit {{horizon}}y",
+    "bilanTotalHz": "Total sale profit {{horizon}}y",
     "patNet": "Net property wealth {{horizon}}y",
     "patTotal": "Total wealth {{horizon}}y",
     "patTotalReal": "Real wealth {{horizon}}y",

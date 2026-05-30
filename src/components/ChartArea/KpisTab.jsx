@@ -301,6 +301,22 @@ export default function KpisTab() {
       cat: t('kpisTable.patTotal', { horizon: hz }).startsWith('P') ? 'Patrimoine' : 'Wealth',
       rows: [
         {
+          label: t('kpisTable.bilanReventeHz', { horizon: hz }),
+          fmt: k => fmtE(RES[k].flux[hz - 1]?.bilanRevente),
+          better: 'max',
+          neg: true,
+          tooltipKey: 'kpi.patNet',
+          etfVal: null,
+        },
+        {
+          label: t('kpisTable.bilanTotalHz', { horizon: hz }),
+          fmt: k => fmtE(RES[k].flux[hz - 1]?.bilanTotal),
+          better: 'max',
+          neg: true,
+          tooltipKey: 'kpi.patTotal',
+          etfVal: null,
+        },
+        {
           label: t('kpisTable.patNet', { horizon: hz }),
           fmt: k => fmtE(RES[k].flux[hz - 1]?.patNet),
           better: 'max',

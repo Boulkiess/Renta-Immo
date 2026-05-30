@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **Abattements progressifs sur la plus-value immobilière** : l'impôt PV est désormais calculé avec les abattements légaux (art. 150 VC CGI). IR : 6 %/an de la 6e à la 21e année → exonération totale à partir de la 22e. PS : 1,65 %/an de la 6e à la 21e, 1,6 % à la 22e, 9 %/an de la 23e à la 30e → exonération totale après 30 ans. Auparavant, le taux plein (19 % + 17,2 %) était appliqué quelle que soit la durée de détention, surestimant massivement l'impôt pour les longues détentions.
+- **Déduction des intérêts d'emprunt** : les intérêts annuels du prêt (`intAnnuel`) sont désormais déduits du revenu imposable en LMNP réel (`le − chg − ab − at − intAnnuel`) et en Foncier nu (`le − chg − intAnnuel`), conformément au droit fiscal français. L'impôt était auparavant surestimé de €2 000–4 000/an en début de prêt.
+- **Report d'amortissement LMNP** : le déficit LMNP (amortissements excédant le revenu imposable) est désormais reporté aux années suivantes via la variable `amortReport`. Les années déficitaires produisent `imp = 0` et le solde non utilisé réduit l'imposition des années futures. Auparavant, l'excédent était perdu.
+- **Cohérence string régime** : la valeur enum correcte du régime Foncier nu est `'nu'` (et non `'foncier'` comme incorrectement documenté dans CLAUDE.md). Le code était déjà correct ; seule la documentation est corrigée.
+- **Guard `calcVAN()` horizon > 30** : `calcVAN()` retourne désormais `null` pour `horizon > 30` ou `< 1`, cohérent avec `calcTRI()`.
+
+### Added
+
+- **Revalorisation annuelle des charges fixes** (`revalCharges`, défaut 2 %/an) : nouveau paramètre global modélisant la hausse annuelle de la taxe foncière, des charges de copropriété, des assurances et des provisions. Le facteur `(1 + revalCharges/100)^(yr−1)` est appliqué à toutes les charges fixes (LOC et RP) ; les frais de gestion (proportionnels au loyer) restent inchangés.
+- **Frais de dossier et courtage crédit** (`fraisDossier`, défaut 0 €) : nouveau paramètre de simulation (section Acquisition) intégré dans `ct` (coût total) et donc dans `emp`. Modélise les frais bancaires ou de courtier liés à l'obtention du prêt.
+- **Cash-on-cash return** : `coc` ajouté à chaque objet `flux[yr]` — rendement annuel du flux net sur l'apport initial (`cfN / apport × 100`). Disponible pour export et affichage futur.
+- **Bilan revente et bilan total dans le tableau comparatif** : les métriques `bilanRevente` (`reventeNet + cfC − apport`) et `bilanTotal` (`reventeNet + etfCap − apport`) sont désormais affichées dans la section Patrimoine du tableau KPIs à l'horizon choisi.
+
 ### Changed
 
 - **SimPanel & GlobalStrip — icône `?` avant les labels** : le bouton d'aide `?` est déplacé avant le label de chaque paramètre (simulations et barre globale), au lieu d'après.

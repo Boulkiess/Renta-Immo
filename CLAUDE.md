@@ -73,17 +73,17 @@ src/
 ### Key data shapes
 
 - `p` (simulation params) — `{ mode, prixAchat, fraisNotaire, travaux, apport, taux, duree, loyer, … }` — see `mkDef()` in `definitions.js`
-- `g` (globals) — `{ loyerPerso, revalLoyerPerso, budgetMensuel, revalBudget, investirSurplus, apportETF, rendAlt, tauxActu, horizon, regime, inflation }`
+- `g` (globals) — `{ loyerPerso, revalLoyerPerso, budgetMensuel, revalBudget, revalCharges, investirSurplus, apportETF, rendAlt, tauxActu, horizon, regime, inflation }`
 - `compute()` return — `{ flux[30], cfM, mens, assM, tri10/15/20, van, moic, revente[], … }`
-- `flux[yr]` — `{ cfN, cfC, le, chg, ann, imp, vb, rest, patNet, patTotal, etfPoche, reventeNet, bilanRevente, bilanTotal }`
+- `flux[yr]` — `{ cfN, cfC, coc, le, chg, ann, imp, vb, rest, patNet, patTotal, etfPoche, reventeNet, bilanRevente, bilanTotal }`
 
 ## Financial formulas
 
 - **Loan payment**: standard annuity — `mens = emp × (τ/12) / (1 − (1+τ/12)^−n)`
 - **IRR**: Newton-Raphson on cashflows `[-apport, CF1, ..., CFn + reventeNet]`
 - **ETF pur reference**: apport invested upfront + annual surplus (budget − real outflows) compounding at `g.rendAlt`
-- **Tax** (`impLoc()`): LMNP (amortissements déductibles), Micro-BIC (50% abattement), Foncier nu (charges réelles)
-- **Capital gains**: only applies to `'loc'` mode; RP is fully exempt (`impotPV`/`psPV` = 0)
+- **Tax** (`impLoc()` + inline LMNP): LMNP (intérêts + amortissements déductibles, déficit reporté), Micro-BIC (50% abattement), Foncier nu (`'nu'`, intérêts déductibles)
+- **Capital gains**: LOC uniquement avec abattements progressifs (IR exo après 22 ans, PS exo après 30 ans) ; RP totalement exonérée
 - **Patrimoine total**: equity immobilière (valeur bien − capital restant) + ETF poche accumulée avec le surplus mensuel
 - **RP cash flow**: `cfN = -(charges + annuité + assurance)` — sorties réelles uniquement, jamais positif. Le loyer non dépensé n'est PAS un cash flow.
 
@@ -93,19 +93,20 @@ src/
 
 ### Globaux (`g` / `G` dans le state)
 
-| Clé               | Type                                | Défaut   | Description                                                        |
-| ----------------- | ----------------------------------- | -------- | ------------------------------------------------------------------ |
-| `regime`          | `'lmnp' \| 'microbic' \| 'foncier'` | `'lmnp'` | Régime fiscal locatif (global, s'applique aux 3 sims)              |
-| `horizon`         | années (1–30)                       | `20`     | Horizon de calcul pour VAN et MOIC                                 |
-| `tauxActu`        | %                                   | `3`      | Taux d'actualisation pour la VAN                                   |
-| `rendAlt`         | %                                   | `6`      | Rendement de l'investissement alternatif (ETF)                     |
-| `loyerPerso`      | €/mois                              | `900`    | Loyer personnel payé chaque mois                                   |
-| `revalLoyerPerso` | %                                   | `2`      | Revalorisation annuelle du loyer personnel                         |
-| `budgetMensuel`   | €/mois                              | `2500`   | Budget mensuel disponible (sert à calculer le surplus vers ETF)    |
-| `revalBudget`     | %                                   | `0`      | Revalorisation annuelle du budget (hausses de salaire)             |
-| `investirSurplus` | booléen                             | `true`   | Réinvestir le surplus mensuel en ETF                               |
-| `apportETF`       | €                                   | `60 000` | Apport hypothétique investi en ETF dans le scénario de référence   |
-| `inflation`       | %                                   | `2`      | Inflation (non utilisée dans le moteur actuel — paramètre réservé) |
+| Clé               | Type                           | Défaut   | Description                                                                              |
+| ----------------- | ------------------------------ | -------- | ---------------------------------------------------------------------------------------- |
+| `regime`          | `'lmnp' \| 'microbic' \| 'nu'` | `'lmnp'` | Régime fiscal locatif (global, s'applique aux 3 sims). `'nu'` = Foncier nu.              |
+| `horizon`         | années (1–30)                  | `20`     | Horizon de calcul pour VAN et MOIC                                                       |
+| `tauxActu`        | %                              | `3`      | Taux d'actualisation pour la VAN                                                         |
+| `rendAlt`         | %                              | `6`      | Rendement de l'investissement alternatif (ETF)                                           |
+| `loyerPerso`      | €/mois                         | `900`    | Loyer personnel payé chaque mois                                                         |
+| `revalLoyerPerso` | %                              | `2`      | Revalorisation annuelle du loyer personnel                                               |
+| `budgetMensuel`   | €/mois                         | `2500`   | Budget mensuel disponible (sert à calculer le surplus vers ETF)                          |
+| `revalBudget`     | %                              | `0`      | Revalorisation annuelle du budget (hausses de salaire)                                   |
+| `revalCharges`    | %                              | `2`      | Revalorisation annuelle des charges fixes (taxe foncière, copro, assurances, provisions) |
+| `investirSurplus` | booléen                        | `true`   | Réinvestir le surplus mensuel en ETF                                                     |
+| `apportETF`       | €                              | `60 000` | Apport hypothétique investi en ETF dans le scénario de référence                         |
+| `inflation`       | %                              | `2`      | Inflation (non utilisée dans le moteur actuel — paramètre réservé)                       |
 
 ### Par simulation (`p`) — Commun à `loc` et `rp`
 
@@ -116,6 +117,7 @@ src/
 | `fraisNotaire` | €               | `20 000`  | Frais de notaire                                             |
 | `travaux`      | €               | `15 000`  | Montant des travaux                                          |
 | `fraisAgence`  | €               | `0`       | Frais d'agence à l'achat                                     |
+| `fraisDossier` | €               | `0`       | Frais de dossier et courtage crédit (intégrés dans `ct`)     |
 | `apport`       | €               | `50 000`  | Apport personnel                                             |
 | `taux`         | %               | `3,85`    | Taux d'intérêt annuel du crédit                              |
 | `duree`        | années (5–30)   | `20`      | Durée du crédit                                              |
@@ -160,8 +162,8 @@ Toutes les formules ci-dessous sont implémentées dans `engine/compute.js`. ✅
 ### Coût et emprunt
 
 ```
-ct  = prixAchat + fraisNotaire + travaux + fraisAgence     ✅ coût total d'acquisition
-emp = max(0, ct − apport)                                  ✅ montant emprunté
+ct  = prixAchat + fraisNotaire + travaux + fraisAgence + fraisDossier   ✅ coût total d'acquisition
+emp = max(0, ct − apport)                                                ✅ montant emprunté
 ```
 
 ### Mensualité crédit (annuité constante) ✅
@@ -208,33 +210,46 @@ le = lb × (1 − vacance/100)                         (loyer effectif après va
 ### Charges annuelles (mode `loc`) ✅
 
 ```
-chg = taxeFonciere + chargesCopro + assurPNO + provision + lb × (fraisGestion/100)
+fC  = (1 + revalCharges/100)^(yr−1)                  (facteur de revalorisation annuel)
+chg = (taxeFonciere + chargesCopro + assurPNO + provision) × fC + lb × (fraisGestion/100)
 ```
 
-Note : les frais de gestion sont calculés sur le loyer **brut** (lb), pas sur le loyer effectif. C'est la pratique courante des agences.
+Note : les frais de gestion sont calculés sur le loyer **brut** (lb), pas sur le loyer effectif. C'est la pratique courante des agences. Les charges fixes (taxe foncière, copro, assurances, provision) croissent avec `revalCharges` ; les frais de gestion croissent mécaniquement avec le loyer brut.
 
 ### Charges annuelles (mode `rp`) ✅
 
 ```
-chg = taxeFonciereRP + chargesCoproRP + assurHab + provisionRP
+fC  = (1 + revalCharges/100)^(yr−1)
+chg = (taxeFonciereRP + chargesCoproRP + assurHab + provisionRP) × fC
 ```
 
-### Fiscalité locative — `impLoc()` ⚠️
+### Fiscalité locative — `impLoc()` ✅
+
+Régime 'lmnp' (LMNP réel) — calcul inline dans la boucle annuelle avec report de déficit :
 
 ```
-LMNP réel    : RI = max(0, le − chg − ab − at)   où ab = prixAchat×(amortBien/100), at = travaux×(amortTravaux/100)
-Micro-BIC    : RI = max(0, le × 0,50)              (abattement 50%, meublé non-classé uniquement)
-Foncier nu   : RI = max(0, le − chg)
+intAnnuel[yr] = Σ amort[m].inter  pour m ∈ [(yr−1)×12, yr×12)   (intérêts annuels déductibles)
+ab = prixAchat × (amortBien/100),  at = travaux × (amortTravaux/100)
+
+riRaw = le − chg − ab − at − intAnnuel − amortReport   (amortReport = report des années passées)
+RI    = max(0, riRaw)
+amortReport_new = riRaw < 0 ? −riRaw : 0               (excédent reporté à l'année suivante)
+impôt = RI × (tmi + ps) / 100
+```
+
+Régimes 'microbic' et 'nu' — via `impLoc()` :
+
+```
+Micro-BIC  : RI = max(0, le × 0,50)              (abattement 50%, meublé non-classé)
+Foncier nu : RI = max(0, le − chg − intAnnuel)   (intérêts déductibles)
 
 impôt = RI × (tmi + ps) / 100
 ```
 
-**Simplifications (ne pas modifier sans décision explicite) :**
+**Simplification restante (ne pas modifier sans décision explicite) :**
 
-- Les **intérêts d'emprunt** ne sont pas déduits du revenu imposable, ni en LMNP réel ni en Foncier nu, alors qu'ils sont déductibles en droit français. Cela **surestime l'impôt** (surtout les premières années). Choix délibéré pour limiter la complexité.
-- Les **abattements progressifs sur la plus-value** (−6%/an IR entre la 6e et la 21e année, −4% à la 22e, −1,65%/an PS entre la 6e et la 21e…) ne sont **pas appliqués**. La fiscalité PV est donc surestimée pour les détentions longues.
 - Le Micro-BIC est codé à 50% d'abattement : c'est le taux du meublé **non-classé**. Le meublé **classé tourisme** bénéficie de 71%. Non implémenté.
-- En LMNP, les amortissements ne peuvent pas générer un déficit imputable sur le revenu global ; seul le report sur les revenus locatifs futurs est autorisé. Le code applique `max(0, RI)` mais **ne reporte pas** l'excédent d'amortissement sur les années suivantes.
+- En Foncier nu, le déficit foncier imputable sur le revenu global (jusqu'à €10 700/an) n'est pas modélisé (nécessite les revenus globaux de l'utilisateur, hors périmètre).
 
 ### Cash flow annuel ✅
 
@@ -280,10 +295,24 @@ pr = (prixAchat + travaux) × (1 + revalBien/100)^yr        (prix de revente eff
 ```
 fa         = pr × (fraisVente/100)                         (frais de vente)
 pvB        = max(0, pr − prixAchat − travaux)              (plus-value brute)
-iPV        = pvB × (impotPV + psPV)/100   si mode='loc'
-           = 0                             si mode='rp'    (RP totalement exonérée)
+
+Abattements progressifs (art. 150 VC CGI) — mode 'loc' uniquement :
+  abIR(yr) = 0          si yr ≤ 5
+           = (yr−5) × 6  si 6 ≤ yr ≤ 21          (6 %/an → 96 % à la 21e)
+           = 100          si yr ≥ 22               (exonération totale IR)
+
+  abPS(yr) = 0                             si yr ≤ 5
+           = (yr−5) × 1,65                 si 6 ≤ yr ≤ 21   (1,65 %/an)
+           = 26,4 + 1,6 = 28,0             si yr = 22
+           = 28,0 + (yr−22) × 9            si 23 ≤ yr ≤ 30   (9 %/an)
+           = 100                            si yr > 30        (exonération totale PS)
+
+iPV = pvB × (impotPV × (1 − abIR/100) + psPV × (1 − abPS/100)) / 100   si mode='loc'
+    = 0                                                                    si mode='rp'
 reventeNet = pr − capitalRestant − fa − iPV                ✅
 ```
+
+**Note :** Pour une détention de 22 ans ou plus, l'impôt IR sur la PV est nul. Après 30 ans, PS également nul → iPV = 0.
 
 ### Bilans à la revente ✅
 
@@ -292,7 +321,15 @@ bilanRevente = reventeNet + cfC − apport      (gain net opérationnel : vente 
 bilanTotal   = reventeNet + etfCap − apport   (gain net global : vente + ETF accumulé − mise de départ)
 ```
 
-`bilanRevente` suppose que les flux positifs restent en cash. `bilanTotal` suppose qu'ils sont réinvestis en ETF (via le mécanisme surplus).
+`bilanRevente` suppose que les flux positifs restent en cash. `bilanTotal` suppose qu'ils sont réinvestis en ETF (via le mécanisme surplus). Ces deux métriques sont affichées dans **KpisTab** (section Patrimoine) à l'horizon choisi.
+
+### Cash-on-cash return ✅
+
+```
+coc[yr] = cfN[yr] / apport × 100   (% annuel, null si apport = 0)
+```
+
+Rendement brut annuel du flux net sur le capital investi. Disponible dans `flux[yr].coc`. Contrairement au TRI, il ne tient pas compte du temps ni de la valeur de revente — c'est le rendement opérationnel pur de l'année.
 
 ### Patrimoine ✅
 

@@ -11,6 +11,7 @@ export const DEFAULT_G = {
   revalLoyerPerso: 2,
   budgetMensuel: 2500,
   revalBudget: 0,
+  revalCharges: 2,
   investirSurplus: true,
   apportETF: 60000,
 };
@@ -94,6 +95,7 @@ export function mkDef(mode) {
     fraisNotaire: 20000,
     travaux: 15000,
     fraisAgence: 0,
+    fraisDossier: 0,
     apport: 50000,
     taux: 3.85,
     duree: 20,
@@ -161,6 +163,7 @@ export const GRP_COMMON = [
       { k: 'fraisNotaire', tp: 'e', mn: 0, mx: 100000, st: 500 },
       { k: 'travaux', tp: 'e', mn: 0, mx: 400000, st: 1000 },
       { k: 'fraisAgence', tp: 'e', mn: 0, mx: 40000, st: 500 },
+      { k: 'fraisDossier', tp: 'e', mn: 0, mx: 10000, st: 100 },
       { k: 'apport', tp: 'e', mn: 0, mx: 500000, st: 1000 },
     ],
   },
