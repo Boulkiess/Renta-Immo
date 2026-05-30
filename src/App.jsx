@@ -21,8 +21,7 @@ const Main = styled.div`
 `;
 
 const SimsPane = styled.div`
-  display: flex;
-  width: 690px; flex-shrink: 0;
+  display: flex; flex-shrink: 0;
   border-right: 1px solid ${({ theme }) => theme.border};
   overflow: hidden;
   @media (max-width: 960px) {

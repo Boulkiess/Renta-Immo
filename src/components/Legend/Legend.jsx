@@ -5,8 +5,8 @@ import { COL, KEYS } from '../../state/definitions.js';
 
 const Wrap = styled.div`
   display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
-  padding: 6px 12px; border-bottom: 1px solid ${({ theme }) => theme.border};
-  font-size: 10px; flex-shrink: 0;
+  padding: 5px 12px; border-bottom: 1px solid ${({ theme }) => theme.border};
+  background: ${({ theme }) => theme.surface}; font-size: 10px; flex-shrink: 0;
 `;
 
 const Item = styled.button`
@@ -21,8 +21,7 @@ const Item = styled.button`
 `;
 
 const Dot = styled.span`
-  width: 8px; height: 8px; border-radius: 50%;
-  background: ${({ $col }) => $col};
+  width: 8px; height: 8px; border-radius: 50%; background: ${({ $col }) => $col};
 `;
 
 const EtfRef = styled.div`
@@ -33,10 +32,6 @@ const EtfRef = styled.div`
 const DashLine = styled.span`
   display: inline-block; width: 18px; height: 2px;
   background: repeating-linear-gradient(90deg, #94a3b8 0 5px, transparent 5px 9px);
-`;
-
-const Hint = styled.span`
-  font-size: 9px; color: ${({ theme }) => theme.muted}; margin-left: auto;
 `;
 
 export default function Legend() {
@@ -61,7 +56,6 @@ export default function Legend() {
         <DashLine />
         {t('legend.etfPur', { apport: Math.round(G.apportETF / 1000) })}
       </EtfRef>
-      <Hint>{t('legend.hint')}</Hint>
     </Wrap>
   );
 }

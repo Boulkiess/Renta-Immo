@@ -6,7 +6,7 @@ import { drawLine, drawBars } from '../../engine/charts.js';
 import CanvasChart from '../common/CanvasChart.jsx';
 
 const Grid = styled.div`
-  display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1px;
   background: ${({ theme }) => theme.border};
   flex: 1; min-height: 0; overflow: hidden;
 `;
@@ -17,7 +17,6 @@ const Card = styled.div`
 
 const ChartTitle = styled.div`font-size: 11px; font-weight: 700; color: ${({ theme }) => theme.text}; margin-bottom: 2px; flex-shrink: 0;`;
 const ChartDesc = styled.div`font-size: 10px; color: ${({ theme }) => theme.muted}; margin-bottom: 6px; line-height: 1.4; flex-shrink: 0;`;
-const CanvasWrap = styled.div`flex: 1; min-height: 0; position: relative;`;
 
 const X_LABELS = Array.from({ length: 30 }, (_, i) => String(i + 1));
 
@@ -43,33 +42,25 @@ export default function ChartsTab() {
       <Card>
         <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.cf1.title') }} />
         <ChartDesc dangerouslySetInnerHTML={{ __html: t('charts.cf1.desc') }} />
-        <CanvasWrap>
-          <CanvasChart draw={c => drawLine(c, cfCumDs(), X_LABELS)} deps={deps} height={185} />
-        </CanvasWrap>
+        <CanvasChart draw={c => drawLine(c, cfCumDs(), X_LABELS)} deps={deps} />
       </Card>
 
       <Card>
         <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.pat.title') }} />
         <ChartDesc dangerouslySetInnerHTML={{ __html: t('charts.pat.desc') }} />
-        <CanvasWrap>
-          <CanvasChart draw={c => drawLine(c, patDs(), X_LABELS)} deps={deps} height={185} />
-        </CanvasWrap>
+        <CanvasChart draw={c => drawLine(c, patDs(), X_LABELS)} deps={deps} />
       </Card>
 
       <Card>
         <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.cf3.title') }} />
         <ChartDesc dangerouslySetInnerHTML={{ __html: t('charts.cf3.desc') }} />
-        <CanvasWrap>
-          <CanvasChart draw={c => drawBars(c, cfAnnDs(), X_LABELS, false)} deps={deps} height={185} />
-        </CanvasWrap>
+        <CanvasChart draw={c => drawBars(c, cfAnnDs(), X_LABELS, false)} deps={deps} />
       </Card>
 
       <Card>
         <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.vb.title') }} />
         <ChartDesc dangerouslySetInnerHTML={{ __html: t('charts.vb.desc') }} />
-        <CanvasWrap>
-          <CanvasChart draw={c => drawLine(c, vbDs(), X_LABELS)} deps={deps} height={185} />
-        </CanvasWrap>
+        <CanvasChart draw={c => drawLine(c, vbDs(), X_LABELS)} deps={deps} />
       </Card>
     </Grid>
   );

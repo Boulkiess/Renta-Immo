@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Changed
+- **Refonte UI complète — design "Claude"** : redesign visuel de l'ensemble de l'interface.
+  - **Typographie** : DM Sans remplacé par Hanken Grotesk (corps) + Space Mono (valeurs numériques) ; token `theme.mono` et CSS var `--mono` ajoutés.
+  - **Couleurs** : valeurs numériques passent de l'ambre (#fbbf24) au violet (#a78bfa) en dark, (#7c3aed) en light ; navbar toujours dark navy (`#0e1c36`) quelle que soit le thème.
+  - **NavBar** : icône de marque carrée, badge violet "BETA" en monospace, sélecteur de langue segmenté (pill), boutons d'action primary/outline avec contour.
+  - **GlobalStrip** : fond `#0c1830`, icône engrenage, ligne de champs en `overflow-x: auto`, séparateurs fins, valeurs en monospace violet.
+  - **SimPanel** : panneaux à largeur fixe 220px ; deux nouveaux états — strip réduit (46px) avec label vertical + KPI pivotés, et strip désactivé à fond hachuré. Bordure colorée en haut (`border-top`) à la place du bas.
+  - **ChartArea** : la barre d'onglets quitte la NavBar et s'intègre dans la zone graphique sous forme de groupe pill avec icônes SVG (Graphiques, Comparaison, Revente, Amortissement).
+  - **KpisTab** : cartes de synthèse en bas de tableau (TRI, patrimoine, VAN par simulation) avec bordure colorée ; cellules de données en monospace, mise en valeur de la meilleure simulation par fond teinté et inset-shadow.
+  - **Legend** : hint de clic supprimé ; fond `theme.surface` ajouté.
+  - **Layout** : `SimsPane` n'a plus de largeur fixe à 690px — s'adapte aux panneaux actifs. Retrait des lignes alternées sur les `<tr>` pairs.
+
 ### Fixed
 - **Affichage des décimales dans les inputs numériques** : les champs à pas décimal (ex : assurance 0,01 → affiche `0.25` et non `0.25`) conservent désormais le bon nombre de décimales en toutes circonstances. L'input passe de `type="number"` (qui supprime les zéros finaux) à `type="text" inputMode="decimal"` avec un composant `NumInput` dédié gérant un état local `localStr` : `null` en mode repos (affichage `toFixed(dec)`), chaîne libre pendant la saisie. Les touches ↑/↓ (Shift × 10) incrémentent/décrémentent selon `field.st`, clampées entre `field.mn` et `field.mx`.
 

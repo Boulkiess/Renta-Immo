@@ -16,6 +16,8 @@ export const GlobalStyles = createGlobalStyle`
     --red:     ${({ theme }) => theme.red};
     --green:   ${({ theme }) => theme.green};
     --yellow:  ${({ theme }) => theme.yellow};
+    --mono:    ${({ theme }) => theme.mono};
+    --val:     ${({ theme }) => theme.inputColor};
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,7 +25,7 @@ export const GlobalStyles = createGlobalStyle`
   body {
     background: ${({ theme }) => theme.bg};
     color: ${({ theme }) => theme.text};
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 13px;
     overflow-x: hidden;
     min-height: 100vh;
@@ -43,7 +45,6 @@ export const GlobalStyles = createGlobalStyle`
     font-weight: 600; font-size: 10px;
   }
   td { padding: 7px 10px; font-size: 11px; }
-  tr:nth-child(even) td { background: ${({ theme }) => theme.s2}; }
   .tr { text-align: right; font-weight: 700; }
 
   /* Slider */

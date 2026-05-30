@@ -1,7 +1,8 @@
 import { useRef, useEffect } from 'react';
 import { attachHover } from '../../engine/charts.js';
 
-export default function CanvasChart({ draw, deps = [], height = 220 }) {
+export default function CanvasChart({ draw, deps = [], height }) {
+  const wrapRef = useRef(null);
   const ref = useRef(null);
   const drawRef = useRef(draw);
   drawRef.current = draw;
@@ -14,12 +15,12 @@ export default function CanvasChart({ draw, deps = [], height = 220 }) {
 
   // Re-draw on container resize
   useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
+    const wrap = wrapRef.current;
+    if (!wrap) return;
     const ro = new ResizeObserver(() => {
       if (ref.current) drawRef.current(ref.current);
     });
-    ro.observe(canvas.parentElement || canvas);
+    ro.observe(wrap);
     return () => ro.disconnect();
   }, []);
 
@@ -33,5 +34,13 @@ export default function CanvasChart({ draw, deps = [], height = 220 }) {
     };
   }, []);
 
-  return <canvas ref={ref} data-h={height} style={{ width: '100%', display: 'block' }} />;
+  const wrapStyle = height
+    ? { position: 'relative', height: height + 'px', flexShrink: 0 }
+    : { flex: 1, minHeight: 0, position: 'relative' };
+
+  return (
+    <div ref={wrapRef} style={wrapStyle}>
+      <canvas ref={ref} style={{ position: 'absolute', width: '100%', height: '100%', display: 'block' }} />
+    </div>
+  );
 }

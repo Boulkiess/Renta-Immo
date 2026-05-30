@@ -56,6 +56,7 @@ export function mkDef(mode) {
   return {
     mode,
     enabled: true,
+    collapsed: false,
     label: mode === 'loc' ? 'Locatif' : 'Résidence principale',
     prixAchat: 250000, fraisNotaire: 20000, travaux: 15000, fraisAgence: 0, apport: 50000,
     taux: 3.85, duree: 20, assurance: 0.25,

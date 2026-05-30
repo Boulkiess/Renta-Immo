@@ -2,8 +2,8 @@ import { fmtK } from './utils.js';
 
 export function drawLine(canvas, datasets, xLabels) {
   if (!canvas) return;
-  const W = canvas.offsetWidth || 600, H = parseInt(canvas.dataset.h) || 220, dpr = devicePixelRatio || 1;
-  canvas.width = W * dpr; canvas.height = H * dpr; canvas.style.height = H + 'px';
+  const W = canvas.offsetWidth || 600, H = canvas.offsetHeight || 220, dpr = devicePixelRatio || 1;
+  canvas.width = W * dpr; canvas.height = H * dpr;
   const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
   const p = { l: 60, r: 14, t: 12, b: 26 }, cW = W - p.l - p.r, cH = H - p.t - p.b;
   const all = datasets.filter(d => !d.hide).flatMap(d => d.data.filter(v => v != null && isFinite(v)));
@@ -63,8 +63,8 @@ export function attachHover(canvas) {
 
 export function drawBars(canvas, datasets, xLabels, stacked) {
   if (!canvas) return;
-  const W = canvas.offsetWidth || 600, H = parseInt(canvas.dataset.h) || 200, dpr = devicePixelRatio || 1;
-  canvas.width = W * dpr; canvas.height = H * dpr; canvas.style.height = H + 'px';
+  const W = canvas.offsetWidth || 600, H = canvas.offsetHeight || 200, dpr = devicePixelRatio || 1;
+  canvas.width = W * dpr; canvas.height = H * dpr;
   const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
   const p = { l: 60, r: 14, t: 12, b: 26 }, cW = W - p.l - p.r, cH = H - p.t - p.b, n = xLabels.length, gW = cW / n;
   const vis = datasets.filter(d => !d.hide);

@@ -1,18 +1,18 @@
 {
   "nav": {
     "brand": "ImmoRenta",
-    "badge": "ANALYSE PRO v4",
+    "badge": "ANALYSE PRO v5",
     "export": "Export",
     "import": "Import",
-    "exportCsv": "📊 CSV",
+    "exportCsv": "CSV",
     "exportJson": "{ } JSON",
-    "exportYaml": "📄 YAML"
+    "exportYaml": "YAML"
   },
   "tabs": {
-    "charts": "📉 Graphiques",
-    "kpis": "🎯 Comparaison",
-    "revente": "🏷️ Revente",
-    "amort": "💳 Amortissement"
+    "charts": "Graphiques",
+    "kpis": "Comparaison",
+    "revente": "Revente",
+    "amort": "Amortissement"
   },
   "theme": {
     "dark": "Sombre",
@@ -23,7 +23,7 @@
     "en": "EN"
   },
   "global": {
-    "title": "⚙️ Global",
+    "title": "Global",
     "inflation": "Inflation",
     "regime": "Régime fiscal",
     "regimes": {
@@ -48,8 +48,8 @@
     }
   },
   "sim": {
-    "loc": "📊 Locatif",
-    "rp": "🏡 RP",
+    "loc": "Locatif",
+    "rp": "RP",
     "enable": "Activer/désactiver cette simulation",
     "hide": "masquer",
     "show": "afficher",
@@ -68,12 +68,12 @@
     "pointMort": "Point mort"
   },
   "groups": {
-    "Acquisition": "🏠 Acquisition",
-    "Financement": "💳 Financement",
-    "Revente": "🏷️ Revente",
-    "Exploitation": "📊 Exploitation",
-    "Fiscalité": "🧾 Fiscalité",
-    "Résidence principale": "🏡 Résidence principale"
+    "Acquisition": "Acquisition",
+    "Financement": "Financement",
+    "Revente": "Revente",
+    "Exploitation": "Exploitation",
+    "Fiscalité": "Fiscalité",
+    "Résidence principale": "Résidence principale"
   },
   "fields": {
     "prixAchat":       { "label": "Prix d'achat" },
@@ -146,41 +146,41 @@
   },
   "charts": {
     "cf1": {
-      "title": "💰 Cash-flow immobilier cumulé — 30 ans",
+      "title": "Cash-flow immobilier cumulé — 30 ans",
       "desc": "Flux nets cumulés de la seule poche immobilière. Locatif : loyers − charges − mensualité − impôts − loyer perso. RP : loyer économisé − charges − mensualité."
     },
     "pat": {
-      "title": "🏦 Patrimoine total — 30 ans",
+      "title": "Patrimoine total — 30 ans",
       "desc": "Équité immobilière + portefeuille ETF constitué avec le surplus mensuel. Les <b>pointillés</b> = scénario ETF pur de référence."
     },
     "cf3": {
-      "title": "📊 Cash-flow net annuel (après impôts)",
+      "title": "Cash-flow net annuel (après impôts)",
       "desc": "Le saut en fin de prêt est <strong>normal</strong> : les mensualités s'arrêtent."
     },
     "vb": {
-      "title": "📈 Valeur du bien dans le temps",
+      "title": "Valeur du bien dans le temps",
       "desc": "Valeur de marché estimée selon le taux de revalorisation paramétré."
     },
     "revente": {
-      "title": "🏷️ Bilan net selon l'année de revente",
+      "title": "Bilan net selon l'année de revente",
       "desc": "Gain net si vous revendez cette année. RP exonérée d'impôt sur PV. Pointillés = ETF pur de référence."
     },
-    "reventeDetail": "📋 Détail par année clé",
+    "reventeDetail": "Détail par année clé",
     "amort": {
-      "title": "💳 Décomposition annuelle du prêt",
+      "title": "Décomposition annuelle du prêt",
       "desc": "Au début la majorité part en intérêts, puis la part en capital augmente progressivement."
     },
     "amortCap": {
-      "title": "📉 Capital restant dû"
+      "title": "Capital restant dû"
     }
   },
   "legend": {
-    "etfPur": "📈 ETF pur — {{apport}}k€ apport",
+    "etfPur": "ETF pur — {{apport}}k€ apport",
     "hint": "Cliquer pour masquer/afficher"
   },
   "kpisTable": {
-    "title": "🎯 Tableau comparatif — Régime locatif :",
-    "desc": "⬛ Patrimoine total = équité immo + ETF du surplus. ⬜ ETF pur = apport + budget investi sans achat.",
+    "title": "Tableau comparatif — Régime locatif :",
+    "desc": "Patrimoine total = équité immo + ETF du surplus. ETF pur = apport + budget investi sans achat.",
     "indicator": "Indicateur",
     "type": "Type",
     "coutTotal": "Coût total acq.",
@@ -198,14 +198,14 @@
     "van": "VAN ({{tauxActu}}%, {{horizon}}a)",
     "moic": "MOIC {{horizon}} ans",
     "patNet": "Patrimoine immo net {{horizon}}a",
-    "patTotal": "Patrimoine total {{horizon}}a ⬛",
-    "patTotal30": "Patrimoine total 30a ⬛",
-    "etfPurHorizon": "ETF pur {{horizon}}a ⬜",
-    "etfPur30": "ETF pur 30a ⬜",
+    "patTotal": "Patrimoine total {{horizon}}a",
+    "patTotal30": "Patrimoine total 30a",
+    "etfPurHorizon": "ETF pur {{horizon}}a",
+    "etfPur30": "ETF pur 30a",
     "avantageEtf": "Avantage vs ETF pur {{horizon}}a",
     "crossover": "Croisement vs ETF pur",
-    "locatif": "📊 Locatif",
-    "rp": "🏡 RP",
+    "locatif": "Locatif",
+    "rp": "RP",
     "anneeN": "An {{n}}",
     "gt30ans": "> 30 ans",
     "anneeN2": "Année {{n}}"

@@ -1,18 +1,18 @@
 {
   "nav": {
     "brand": "ImmoRenta",
-    "badge": "PRO ANALYSIS v4",
+    "badge": "PRO ANALYSIS v5",
     "export": "Export",
     "import": "Import",
-    "exportCsv": "📊 CSV",
+    "exportCsv": "CSV",
     "exportJson": "{ } JSON",
-    "exportYaml": "📄 YAML"
+    "exportYaml": "YAML"
   },
   "tabs": {
-    "charts": "📉 Charts",
-    "kpis": "🎯 Comparison",
-    "revente": "🏷️ Sale",
-    "amort": "💳 Amortization"
+    "charts": "Charts",
+    "kpis": "Comparison",
+    "revente": "Sale",
+    "amort": "Amortization"
   },
   "theme": {
     "dark": "Dark",
@@ -23,7 +23,7 @@
     "en": "EN"
   },
   "global": {
-    "title": "⚙️ Global",
+    "title": "Global",
     "inflation": "Inflation",
     "regime": "Tax regime",
     "regimes": {
@@ -48,8 +48,8 @@
     }
   },
   "sim": {
-    "loc": "📊 Rental",
-    "rp": "🏡 Primary",
+    "loc": "Rental",
+    "rp": "Primary",
     "enable": "Enable/disable this simulation",
     "hide": "hide",
     "show": "show",
@@ -68,12 +68,12 @@
     "pointMort": "Break-even"
   },
   "groups": {
-    "Acquisition": "🏠 Acquisition",
-    "Financement": "💳 Financing",
-    "Revente": "🏷️ Sale",
-    "Exploitation": "📊 Rental income",
-    "Fiscalité": "🧾 Taxation",
-    "Résidence principale": "🏡 Primary residence"
+    "Acquisition": "Acquisition",
+    "Financement": "Financing",
+    "Revente": "Sale",
+    "Exploitation": "Rental income",
+    "Fiscalité": "Taxation",
+    "Résidence principale": "Primary residence"
   },
   "fields": {
     "prixAchat":       { "label": "Purchase price" },
@@ -146,41 +146,41 @@
   },
   "charts": {
     "cf1": {
-      "title": "💰 Cumulative real estate cash-flow — 30 yrs",
+      "title": "Cumulative real estate cash-flow — 30 yrs",
       "desc": "Net cumulative flows from the property only. Rental: rents − expenses − mortgage − taxes − personal rent. Primary: rent saved − expenses − mortgage."
     },
     "pat": {
-      "title": "🏦 Total wealth — 30 yrs",
+      "title": "Total wealth — 30 yrs",
       "desc": "Property equity + ETF portfolio built from monthly surplus. <b>Dashed line</b> = pure ETF reference scenario."
     },
     "cf3": {
-      "title": "📊 Net annual cash-flow (after tax)",
+      "title": "Net annual cash-flow (after tax)",
       "desc": "The jump at loan end is <strong>normal</strong>: monthly payments stop."
     },
     "vb": {
-      "title": "📈 Property value over time",
+      "title": "Property value over time",
       "desc": "Estimated market value based on the configured appreciation rate."
     },
     "revente": {
-      "title": "🏷️ Net profit by sale year",
+      "title": "Net profit by sale year",
       "desc": "Net gain if you sell this year. Primary residence exempt from capital gains. Dashed = pure ETF reference."
     },
-    "reventeDetail": "📋 Detail by key year",
+    "reventeDetail": "Detail by key year",
     "amort": {
-      "title": "💳 Annual loan breakdown",
+      "title": "Annual loan breakdown",
       "desc": "At the start most goes to interest, then the capital portion increases progressively."
     },
     "amortCap": {
-      "title": "📉 Outstanding loan balance"
+      "title": "Outstanding loan balance"
     }
   },
   "legend": {
-    "etfPur": "📈 Pure ETF — {{apport}}k€ contribution",
+    "etfPur": "Pure ETF — {{apport}}k€ contribution",
     "hint": "Click to hide/show"
   },
   "kpisTable": {
-    "title": "🎯 Comparison table — Rental regime:",
-    "desc": "⬛ Total wealth = property equity + ETF from surplus. ⬜ Pure ETF = contribution + full budget invested without buying.",
+    "title": "Comparison table — Rental regime:",
+    "desc": "Total wealth = property equity + ETF from surplus. Pure ETF = contribution + full budget invested without buying.",
     "indicator": "Indicator",
     "type": "Type",
     "coutTotal": "Total acquisition cost",
@@ -198,14 +198,14 @@
     "van": "NPV ({{tauxActu}}%, {{horizon}}y)",
     "moic": "MOIC {{horizon}} yrs",
     "patNet": "Net property wealth {{horizon}}y",
-    "patTotal": "Total wealth {{horizon}}y ⬛",
-    "patTotal30": "Total wealth 30y ⬛",
-    "etfPurHorizon": "Pure ETF {{horizon}}y ⬜",
-    "etfPur30": "Pure ETF 30y ⬜",
+    "patTotal": "Total wealth {{horizon}}y",
+    "patTotal30": "Total wealth 30y",
+    "etfPurHorizon": "Pure ETF {{horizon}}y",
+    "etfPur30": "Pure ETF 30y",
     "avantageEtf": "Advantage vs pure ETF {{horizon}}y",
     "crossover": "Crossover vs pure ETF",
-    "locatif": "📊 Rental",
-    "rp": "🏡 Primary",
+    "locatif": "Rental",
+    "rp": "Primary",
     "anneeN": "Yr {{n}}",
     "gt30ans": "> 30 yrs",
     "anneeN2": "Year {{n}}"
