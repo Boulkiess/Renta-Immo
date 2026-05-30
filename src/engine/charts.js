@@ -238,7 +238,7 @@ export function drawBars(canvas, datasets, xLabels, stacked) {
   canvas._meta = { datasets: vis, xLabels, xS: i => p.l + (i + 0.5) * gW, dpr, W };
 }
 
-export function drawBarsWithLine(canvas, barDatasets, lineDataset, xLabels) {
+export function drawBarsWithLine(canvas, barDatasets, lineDatasets, xLabels) {
   if (!canvas) return;
   const W = canvas.offsetWidth || 600,
     H = canvas.offsetHeight || 220,
@@ -252,11 +252,12 @@ export function drawBarsWithLine(canvas, barDatasets, lineDataset, xLabels) {
     cH = H - p.t - p.b,
     n = xLabels.length,
     gW = cW / n;
+  const linesArr = Array.isArray(lineDatasets) ? lineDatasets : [lineDatasets];
   const vis = barDatasets.filter(d => !d.hide);
   const mxBar =
     (Math.max(...xLabels.map((_, i) => vis.reduce((s, d) => s + (d.data[i] || 0), 0))) || 1) * 1.1;
-  const lineVals = lineDataset.data.filter(v => v != null && isFinite(v));
-  const mxLine = lineVals.length ? Math.max(...lineVals) * 1.1 : 1;
+  const allLineVals = linesArr.flatMap(ld => ld.data.filter(v => v != null && isFinite(v)));
+  const mxLine = allLineVals.length ? Math.max(...allLineVals) * 1.1 : 1;
   const ySBar = v => p.t + cH - (v / mxBar) * cH;
   const ySLine = v => p.t + cH - (v / mxLine) * cH;
   const surfaceColor =
@@ -279,7 +280,6 @@ export function drawBarsWithLine(canvas, barDatasets, lineDataset, xLabels) {
     ctx.font = "10px 'DM Sans',sans-serif";
     ctx.textAlign = 'right';
     ctx.fillText(fmtK(mxBar * (1 - i / 5)), p.l - 4, y + 3.5);
-    ctx.fillStyle = lineDataset.color;
     ctx.textAlign = 'left';
     ctx.fillText(fmtK(mxLine * (1 - i / 5)), W - p.r + 4, y + 3.5);
   }
@@ -306,24 +306,26 @@ export function drawBarsWithLine(canvas, barDatasets, lineDataset, xLabels) {
       base += v;
     });
   });
-  ctx.strokeStyle = lineDataset.color;
   ctx.lineWidth = 2;
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
-  ctx.setLineDash([6, 4]);
-  ctx.beginPath();
-  let started = false;
-  lineDataset.data.forEach((v, i) => {
-    if (v == null || !isFinite(v)) return;
-    const x = p.l + (i + 0.5) * gW;
-    const y = ySLine(v);
-    started ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-    started = true;
+  linesArr.forEach(ld => {
+    ctx.strokeStyle = ld.color;
+    ctx.setLineDash(ld.dashed ? [6, 4] : []);
+    ctx.beginPath();
+    let started = false;
+    ld.data.forEach((v, i) => {
+      if (v == null || !isFinite(v)) return;
+      const x = p.l + (i + 0.5) * gW;
+      const y = ySLine(v);
+      started ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      started = true;
+    });
+    ctx.stroke();
   });
-  ctx.stroke();
   ctx.setLineDash([]);
   canvas._meta = {
-    datasets: [...vis, lineDataset],
+    datasets: [...vis, ...linesArr],
     xLabels,
     xS: i => p.l + (i + 0.5) * gW,
     dpr,

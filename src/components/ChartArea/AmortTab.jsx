@@ -84,6 +84,13 @@ const LineSwatch = styled.span`
   vertical-align: middle;
 `;
 
+const AMORT_COLORS = {
+  interets: '#e2cbcb',
+  assurance: '#a30eff',
+  restant: '#ff0000',
+  rembourse: '#ffff00',
+};
+
 function aggregateByYear(amort, duree) {
   const cap = [],
     inter = [],
@@ -121,13 +128,26 @@ export default function AmortTab() {
           const idx = (i + 1) * 12 - 1;
           return idx < r.amort.length ? r.amort[idx].rest : 0;
         });
+        let cumCap = 0;
+        const capRembourse = cap.map(v => (cumCap += v));
 
         const amortDs = [
           { color: COL[k], label: t('amort.capital'), data: cap },
-          { color: '#ffe600', label: t('amort.interets'), data: inter },
-          { color: '#94a3b8', label: t('amort.assurance'), data: ass },
+          { color: AMORT_COLORS.interets, label: t('amort.interets'), data: inter },
+          { color: AMORT_COLORS.assurance, label: t('amort.assurance'), data: ass },
         ];
-        const restDs = { color: '#f1f5f9', label: t('charts.amortCap.title'), data: restByYear };
+        const restDs = {
+          color: AMORT_COLORS.restant,
+          label: t('charts.amortCap.title'),
+          data: restByYear,
+          dashed: false,
+        };
+        const capRemDs = {
+          color: AMORT_COLORS.rembourse,
+          label: t('amort.capitalRembourse'),
+          data: capRembourse,
+          dashed: false,
+        };
 
         return (
           <SimBlock key={k}>
@@ -148,20 +168,24 @@ export default function AmortTab() {
                   {t('amort.capital')}
                 </LegItem>
                 <LegItem>
-                  <Swatch $col="#dfdc2f" />
+                  <Swatch $col={AMORT_COLORS.interets} />
                   {t('amort.interets')}
                 </LegItem>
                 <LegItem>
-                  <Swatch $col="#94a3b8" />
+                  <Swatch $col={AMORT_COLORS.assurance} />
                   {t('amort.assurance')}
                 </LegItem>
                 <LegItem>
-                  <LineSwatch $col="#f1f5f9" />
+                  <LineSwatch $col={AMORT_COLORS.restant} />
                   {t('charts.amortCap.title')}
+                </LegItem>
+                <LegItem>
+                  <LineSwatch $col={AMORT_COLORS.rembourse} />
+                  {t('amort.capitalRembourse')}
                 </LegItem>
               </LegendRow>
               <CanvasChart
-                draw={c => drawBarsWithLine(c, amortDs, restDs, amortX)}
+                draw={c => drawBarsWithLine(c, amortDs, [restDs, capRemDs], amortX)}
                 deps={[r, p.duree, theme.name]}
                 height={220}
               />

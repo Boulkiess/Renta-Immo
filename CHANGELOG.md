@@ -2,7 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Onglet Amortissement — série "Capital remboursé"** : nouvelle courbe sur l'axe droit montrant le capital cumulativement remboursé (montant croissant, symétrique du capital restant dû). `drawBarsWithLine` accepte désormais un tableau de datasets ligne, chaque entrée portant une propriété `dashed` pour contrôler le style individuellement.
+
 ### Changed
+
+- **Onglet Amortissement — couleurs** : schéma de couleurs entièrement revu. Barres : intérêts `#e2cbcb`, assurance `#a30eff`. Courbes axe droit : capital restant dû `#ff0000` (continu), capital remboursé `#ffff00` (continu). Labels axe droit passés en couleur neutre (`mutedColor`). Couleurs centralisées dans la constante `AMORT_COLORS`.
 
 - **Onglet Amortissement** : fusion des deux graphiques (décomposition annuelle et capital restant dû) en un seul graphique à double ordonnée. L'axe gauche donne l'échelle des barres empilées (capital / intérêts / assurance) ; l'axe droit donne l'échelle de la courbe pointillée du capital restant dû. Les deux séries partagent désormais le même horizon temporel (durée du prêt), ce qui rend la lecture plus naturelle.
 

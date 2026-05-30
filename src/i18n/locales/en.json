@@ -338,7 +338,8 @@
   "amort": {
     "capital": "Capital",
     "interets": "Interest",
-    "assurance": "Insurance"
+    "assurance": "Insurance",
+    "capitalRembourse": "Capital repaid"
   },
   "import": {
     "error": "Import error:\n{{msg}}",
