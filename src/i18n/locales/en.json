@@ -76,73 +76,190 @@
     "Résidence principale": "Primary residence"
   },
   "fields": {
-    "prixAchat":       { "label": "Purchase price" },
-    "fraisNotaire":    { "label": "Notary fees" },
-    "travaux":         { "label": "Renovation works" },
-    "fraisAgence":     { "label": "Buyer's agent fees" },
-    "apport":          { "label": "Down payment" },
-    "taux":            { "label": "Interest rate" },
-    "duree":           { "label": "Duration (yrs)" },
-    "assurance":       { "label": "Mortgage insurance" },
-    "revalBien":       { "label": "Property appreciation %/yr" },
-    "fraisVente":      { "label": "Selling agent fees" },
-    "loyer":           { "label": "Gross monthly rent" },
-    "vacance":         { "label": "Vacancy rate" },
-    "taxeFonciere":    { "label": "Property tax (€/yr)" },
-    "chargesCopro":    { "label": "HOA fees (€/yr)" },
-    "assurPNO":        { "label": "Landlord insurance (€/yr)" },
-    "fraisGestion":    { "label": "Property management" },
-    "provision":       { "label": "Maintenance reserve (€/yr)" },
-    "revalLoyer":      { "label": "Rent increase %/yr" },
-    "tmi":             { "label": "Income tax bracket" },
-    "ps":              { "label": "Social contributions" },
-    "amortBien":       { "label": "Property depreciation %/yr" },
-    "amortTravaux":    { "label": "Works depreciation %/yr" },
-    "impotPV":         { "label": "Capital gains tax" },
-    "psPV":            { "label": "Social contributions on gains" },
-    "taxeFonciereRP":  { "label": "Property tax" },
-    "chargesCoproRP":  { "label": "HOA fees (€/yr)" },
-    "assurHab":        { "label": "Home insurance (€/yr)" },
-    "provisionRP":     { "label": "Maintenance reserve (€/yr)" }
+    "prixAchat": { "label": "Purchase price" },
+    "fraisNotaire": { "label": "Notary fees" },
+    "travaux": { "label": "Renovation works" },
+    "fraisAgence": { "label": "Buyer's agent fees" },
+    "apport": { "label": "Down payment" },
+    "taux": { "label": "Interest rate" },
+    "duree": { "label": "Duration (yrs)" },
+    "assurance": { "label": "Mortgage insurance" },
+    "revalBien": { "label": "Property appreciation %/yr" },
+    "fraisVente": { "label": "Selling agent fees" },
+    "loyer": { "label": "Gross monthly rent" },
+    "vacance": { "label": "Vacancy rate" },
+    "taxeFonciere": { "label": "Property tax (€/yr)" },
+    "chargesCopro": { "label": "HOA fees (€/yr)" },
+    "assurPNO": { "label": "Landlord insurance (€/yr)" },
+    "fraisGestion": { "label": "Property management" },
+    "provision": { "label": "Maintenance reserve (€/yr)" },
+    "revalLoyer": { "label": "Rent increase %/yr" },
+    "tmi": { "label": "Income tax bracket" },
+    "ps": { "label": "Social contributions" },
+    "amortBien": { "label": "Property depreciation %/yr" },
+    "amortTravaux": { "label": "Works depreciation %/yr" },
+    "impotPV": { "label": "Capital gains tax" },
+    "psPV": { "label": "Social contributions on gains" },
+    "taxeFonciereRP": { "label": "Property tax" },
+    "chargesCoproRP": { "label": "HOA fees (€/yr)" },
+    "assurHab": { "label": "Home insurance (€/yr)" },
+    "provisionRP": { "label": "Maintenance reserve (€/yr)" }
   },
   "tooltips": {
-    "inflation":        { "title": "Inflation (CPI)", "body": "Used to relativize performance in real terms. Does not affect nominal cash flows." },
-    "regime":           { "title": "Rental tax regime", "body": "<b>LMNP Real</b>: deductible depreciation (property + works).<br><b>Micro-BIC</b>: 50% flat deduction.<br><b>Bare rental</b>: actual expenses, no depreciation." },
-    "tauxActu":         { "title": "Discount rate (NPV)", "body": "Rate used to calculate Net Present Value. Represents the opportunity cost of capital." },
-    "rendAlt":          { "title": "ETF / alternative investment return", "body": "Net annual return on the ETF portfolio. Historically ~7-8% gross ETF World, ~5-6% net after tax and inflation." },
-    "budgetMensuel":    { "title": "Monthly housing + investment budget", "body": "Fixed monthly envelope. The surplus not consumed by real costs is automatically invested in ETF." },
-    "investirSurplus":  { "title": "Invest surplus in ETF", "body": "If enabled: the difference between the monthly budget and real outflows is invested in ETF. The dashed line = pure ETF reference scenario." },
-    "apportETF":        { "title": "Pure ETF reference contribution", "body": "Starting capital for the pure ETF scenario. No property purchase — contribution + monthly surplus are compounded in ETF." },
-    "prixAchat":        { "title": "Net purchase price", "body": "Price paid to the seller, excluding notary and agency fees." },
-    "fraisNotaire":     { "title": "Notary fees", "body": "7-8% for existing properties, 2-3% for new builds. <b>Auto: 8% × purchase price.</b>" },
-    "travaux":          { "title": "Renovation works", "body": "Under LMNP Real, depreciable over several years.", "code": "Works depreciation = Works × Rate" },
-    "fraisAgence":      { "title": "Buyer's agent fees", "body": "Agent commission paid by the buyer." },
-    "apport":           { "title": "Down payment", "body": "Own capital invested. Reduces the loan amount but also the leverage." },
-    "taux":             { "title": "Nominal interest rate", "body": "Nominal loan rate. Auto mode: France average rates (updated 05/2026) — 7y 3.25% · 10y 3.30% · 15y 3.45% · 20y 3.55% · 25y 3.70%.", "code": "Payment = K×(r/12)/(1−(1+r/12)^−n)" },
-    "duree":            { "title": "Loan duration", "body": "Longer = lower monthly payment but higher total cost." },
-    "assurance":        { "title": "Mortgage insurance (PMI)", "body": "0.10-0.40%/yr of capital depending on profile.", "code": "Monthly insurance = Capital × rate / 12" },
-    "revalBien":        { "title": "Property appreciation", "body": "Annual increase assumption. ~2-3%/yr historical average in France.", "code": "Value year N = Price × (1+rate)^N" },
-    "fraisVente":       { "title": "Selling agent fees", "body": "3-7% of sale price. Negotiable or avoidable via private sale." },
-    "loyer":            { "title": "Gross monthly rent", "body": "Excluding recoverable charges. Key driver of profitability.", "code": "Gross yield = Rent×12 / Total cost" },
-    "vacance":          { "title": "Vacancy rate", "body": "5-8% in tight markets, 10-15% in rural areas.", "code": "Collected rent = Gross rent × (1−vacancy)" },
-    "taxeFonciere":     { "title": "Property tax", "body": "Annual local tax. Varies significantly by municipality. <b>Auto: 0.5% × purchase price.</b>" },
-    "chargesCopro":     { "title": "Non-recoverable HOA fees", "body": "Remain the owner's responsibility." },
-    "assurPNO":         { "title": "Landlord insurance", "body": "Mandatory in co-ownership. €100-300/yr." },
-    "fraisGestion":     { "title": "Property management", "body": "6-9% incl. tax of collected rents if using an agency." },
-    "provision":        { "title": "Maintenance reserve", "body": "Precautionary savings. Rule of thumb: ~1% of value/yr. <b>Auto: 0.5% × purchase price.</b>" },
-    "revalLoyer":       { "title": "Rent increase", "body": "Capped by the rent index. 1-4%/yr depending on inflation.", "code": "Rent year N = Rent × (1+rate)^(N−1)" },
-    "tmi":              { "title": "Income tax bracket", "body": "Marginal rate: 0%, 11%, 30%, 41% or 45%.", "code": "Tax = Taxable income × (bracket + social contributions)" },
-    "ps":               { "title": "Social contributions", "body": "17.2% on rental income (CSG+CRDS+solidarity)." },
-    "amortBien":        { "title": "Property depreciation", "body": "LMNP Real only. Typical 25-40 yrs → 2.5-4%/yr." },
-    "amortTravaux":     { "title": "Works depreciation", "body": "LMNP Real. Typical 7-10 yrs → 10-14%/yr." },
-    "impotPV":          { "title": "Capital gains tax", "body": "19% income tax + 17.2% social contributions = 36.2%. Progressive allowances. Primary residence exempt." },
-    "psPV":             { "title": "Social contributions on capital gains", "body": "17.2%. Full exemption after 30 years." },
-    "loyerPerso":       { "title": "Current rent you pay", "body": "Monthly rent you pay. Rental mode: subtracted from CF. Primary: savings if you buy.", "code": "Real CF (rental) = Rental CF − Personal rent\nSavings (primary) = Personal rent − Monthly payment" },
-    "revalLoyerPerso":  { "title": "Market rent revaluation %/yr", "body": "Annual increase of your rent. ~1-3%/yr indexed." },
-    "assurHab":         { "title": "Home insurance", "body": "Owner-occupier home insurance. €200-500/yr." },
-    "chargesCoproRP":   { "title": "HOA fees (primary residence)", "body": "All charges (no recoverable/non-recoverable split). €50-200/mo." },
-    "taxeFonciereRP":   { "title": "Property tax (primary residence)", "body": "Same tax as for rental. No housing tax since 2023 for primary residences. <b>Auto: 0.5% × purchase price.</b>" },
-    "provisionRP":      { "title": "Maintenance reserve (primary)", "body": "Annual maintenance budget. ~1% of property value. <b>Auto: 0.5% × purchase price.</b>" }
+    "inflation": {
+      "title": "Inflation (CPI)",
+      "body": "Used to relativize performance in real terms. Does not affect nominal cash flows."
+    },
+    "regime": {
+      "title": "Rental tax regime",
+      "body": "<b>LMNP Real</b>: deductible depreciation (property + works).<br><b>Micro-BIC</b>: 50% flat deduction.<br><b>Bare rental</b>: actual expenses, no depreciation."
+    },
+    "tauxActu": {
+      "title": "Discount rate (NPV)",
+      "body": "Rate used to calculate Net Present Value. Represents the opportunity cost of capital."
+    },
+    "rendAlt": {
+      "title": "ETF / alternative investment return",
+      "body": "Net annual return on the ETF portfolio. Historically ~7-8% gross ETF World, ~5-6% net after tax and inflation."
+    },
+    "budgetMensuel": {
+      "title": "Monthly housing + investment budget",
+      "body": "Fixed monthly envelope. The surplus not consumed by real costs is automatically invested in ETF."
+    },
+    "investirSurplus": {
+      "title": "Invest surplus in ETF",
+      "body": "If enabled: the difference between the monthly budget and real outflows is invested in ETF. The dashed line = pure ETF reference scenario."
+    },
+    "apportETF": {
+      "title": "Pure ETF reference contribution",
+      "body": "Starting capital for the pure ETF scenario. No property purchase — contribution + monthly surplus are compounded in ETF."
+    },
+    "prixAchat": {
+      "title": "Net purchase price",
+      "body": "Price paid to the seller, excluding notary and agency fees."
+    },
+    "fraisNotaire": {
+      "title": "Notary fees",
+      "body": "7-8% for existing properties, 2-3% for new builds. <b>Auto: 8% × purchase price.</b>"
+    },
+    "travaux": {
+      "title": "Renovation works",
+      "body": "Under LMNP Real, depreciable over several years.",
+      "code": "Works depreciation = Works × Rate"
+    },
+    "fraisAgence": { "title": "Buyer's agent fees", "body": "Agent commission paid by the buyer." },
+    "apport": {
+      "title": "Down payment",
+      "body": "Own capital invested. Reduces the loan amount but also the leverage."
+    },
+    "taux": {
+      "title": "Nominal interest rate",
+      "body": "Nominal loan rate. Auto mode: France average rates (updated 05/2026) — 7y 3.25% · 10y 3.30% · 15y 3.45% · 20y 3.55% · 25y 3.70%.",
+      "code": "Payment = K×(r/12)/(1−(1+r/12)^−n)"
+    },
+    "duree": {
+      "title": "Loan duration",
+      "body": "Longer = lower monthly payment but higher total cost."
+    },
+    "assurance": {
+      "title": "Mortgage insurance (PMI)",
+      "body": "0.10-0.40%/yr of capital depending on profile.",
+      "code": "Monthly insurance = Capital × rate / 12"
+    },
+    "revalBien": {
+      "title": "Property appreciation",
+      "body": "Annual increase assumption. ~2-3%/yr historical average in France.",
+      "code": "Value year N = Price × (1+rate)^N"
+    },
+    "fraisVente": {
+      "title": "Selling agent fees",
+      "body": "3-7% of sale price. Negotiable or avoidable via private sale."
+    },
+    "loyer": {
+      "title": "Gross monthly rent",
+      "body": "Excluding recoverable charges. Key driver of profitability.",
+      "code": "Gross yield = Rent×12 / Total cost"
+    },
+    "vacance": {
+      "title": "Vacancy rate",
+      "body": "5-8% in tight markets, 10-15% in rural areas.",
+      "code": "Collected rent = Gross rent × (1−vacancy)"
+    },
+    "taxeFonciere": {
+      "title": "Property tax",
+      "body": "Annual local tax. Varies significantly by municipality. <b>Auto: 0.5% × purchase price.</b>"
+    },
+    "chargesCopro": {
+      "title": "Non-recoverable HOA fees",
+      "body": "Remain the owner's responsibility."
+    },
+    "assurPNO": {
+      "title": "Landlord insurance",
+      "body": "Mandatory in co-ownership. €100-300/yr."
+    },
+    "fraisGestion": {
+      "title": "Property management",
+      "body": "6-9% incl. tax of collected rents if using an agency."
+    },
+    "provision": {
+      "title": "Maintenance reserve",
+      "body": "Precautionary savings. Rule of thumb: ~1% of value/yr. <b>Auto: 0.5% × purchase price.</b>"
+    },
+    "revalLoyer": {
+      "title": "Rent increase",
+      "body": "Capped by the rent index. 1-4%/yr depending on inflation.",
+      "code": "Rent year N = Rent × (1+rate)^(N−1)"
+    },
+    "tmi": {
+      "title": "Income tax bracket",
+      "body": "Marginal rate: 0%, 11%, 30%, 41% or 45%.",
+      "code": "Tax = Taxable income × (bracket + social contributions)"
+    },
+    "ps": {
+      "title": "Social contributions",
+      "body": "17.2% on rental income (CSG+CRDS+solidarity)."
+    },
+    "amortBien": {
+      "title": "Property depreciation",
+      "body": "LMNP Real only. Typical 25-40 yrs → 2.5-4%/yr."
+    },
+    "amortTravaux": {
+      "title": "Works depreciation",
+      "body": "LMNP Real. Typical 7-10 yrs → 10-14%/yr."
+    },
+    "impotPV": {
+      "title": "Capital gains tax",
+      "body": "19% income tax + 17.2% social contributions = 36.2%. Progressive allowances. Primary residence exempt."
+    },
+    "psPV": {
+      "title": "Social contributions on capital gains",
+      "body": "17.2%. Full exemption after 30 years."
+    },
+    "loyerPerso": {
+      "title": "Current rent you pay",
+      "body": "Monthly rent you pay. Rental mode: subtracted from CF. Primary: savings if you buy.",
+      "code": "Real CF (rental) = Rental CF − Personal rent\nSavings (primary) = Personal rent − Monthly payment"
+    },
+    "revalLoyerPerso": {
+      "title": "Market rent revaluation %/yr",
+      "body": "Annual increase of your rent. ~1-3%/yr indexed."
+    },
+    "assurHab": {
+      "title": "Home insurance",
+      "body": "Owner-occupier home insurance. €200-500/yr."
+    },
+    "chargesCoproRP": {
+      "title": "HOA fees (primary residence)",
+      "body": "All charges (no recoverable/non-recoverable split). €50-200/mo."
+    },
+    "taxeFonciereRP": {
+      "title": "Property tax (primary residence)",
+      "body": "Same tax as for rental. No housing tax since 2023 for primary residences. <b>Auto: 0.5% × purchase price.</b>"
+    },
+    "provisionRP": {
+      "title": "Maintenance reserve (primary)",
+      "body": "Annual maintenance budget. ~1% of property value. <b>Auto: 0.5% × purchase price.</b>"
+    }
   },
   "charts": {
     "cf1": {

@@ -14,7 +14,20 @@ npm run build    # Production build → dist/
 npm run preview  # Preview the production build
 ```
 
-Deployment: pushing to `main` triggers GitHub Actions → Vite build → GitHub Pages.
+### Pipeline de vérification (clean code)
+
+| Commande               | Rôle                                                               | Quand                   |
+| ---------------------- | ------------------------------------------------------------------ | ----------------------- |
+| `npm run format`       | Reformate tous les fichiers avec Prettier                          | Nettoyage ponctuel      |
+| `npm run format:check` | Vérifie le formatage sans modifier (exit 1 si diff)                | CI                      |
+| `npm run lint`         | Rapport ESLint — erreurs bloquent la CI, warnings sont informatifs | CI / manuelle           |
+| `npm run lint:fix`     | Corrige automatiquement les problèmes ESLint corrigibles           | Après ajout de fichiers |
+| `npm run typecheck`    | TypeScript checkJs sur `src/engine/` + `src/state/`                | CI / manuelle           |
+| `npm run check`        | Pipeline complète : format:check + lint + typecheck                | **Avant chaque PR**     |
+
+Le hook pre-commit (Husky + lint-staged) reformate et lint automatiquement les fichiers stagés à chaque `git commit`.
+
+Deployment: pushing to `main` triggers GitHub Actions → `quality` job (format:check + lint + typecheck) → `build` job → GitHub Pages.
 
 ## Before every commit
 
@@ -78,62 +91,62 @@ src/
 
 ### Globaux (`g` / `G` dans le state)
 
-| Clé | Type | Défaut | Description |
-|-----|------|--------|-------------|
-| `regime` | `'lmnp' \| 'microbic' \| 'foncier'` | `'lmnp'` | Régime fiscal locatif (global, s'applique aux 3 sims) |
-| `horizon` | années (1–30) | `20` | Horizon de calcul pour VAN et MOIC |
-| `tauxActu` | % | `3` | Taux d'actualisation pour la VAN |
-| `rendAlt` | % | `6` | Rendement de l'investissement alternatif (ETF) |
-| `loyerPerso` | €/mois | `900` | Loyer personnel payé chaque mois |
-| `revalLoyerPerso` | % | `2` | Revalorisation annuelle du loyer personnel |
-| `budgetMensuel` | €/mois | `2500` | Budget mensuel disponible (sert à calculer le surplus vers ETF) |
-| `investirSurplus` | booléen | `true` | Réinvestir le surplus mensuel en ETF |
-| `apportETF` | € | `60 000` | Apport hypothétique investi en ETF dans le scénario de référence |
-| `inflation` | % | `2` | Inflation (non utilisée dans le moteur actuel — paramètre réservé) |
+| Clé               | Type                                | Défaut   | Description                                                        |
+| ----------------- | ----------------------------------- | -------- | ------------------------------------------------------------------ |
+| `regime`          | `'lmnp' \| 'microbic' \| 'foncier'` | `'lmnp'` | Régime fiscal locatif (global, s'applique aux 3 sims)              |
+| `horizon`         | années (1–30)                       | `20`     | Horizon de calcul pour VAN et MOIC                                 |
+| `tauxActu`        | %                                   | `3`      | Taux d'actualisation pour la VAN                                   |
+| `rendAlt`         | %                                   | `6`      | Rendement de l'investissement alternatif (ETF)                     |
+| `loyerPerso`      | €/mois                              | `900`    | Loyer personnel payé chaque mois                                   |
+| `revalLoyerPerso` | %                                   | `2`      | Revalorisation annuelle du loyer personnel                         |
+| `budgetMensuel`   | €/mois                              | `2500`   | Budget mensuel disponible (sert à calculer le surplus vers ETF)    |
+| `investirSurplus` | booléen                             | `true`   | Réinvestir le surplus mensuel en ETF                               |
+| `apportETF`       | €                                   | `60 000` | Apport hypothétique investi en ETF dans le scénario de référence   |
+| `inflation`       | %                                   | `2`      | Inflation (non utilisée dans le moteur actuel — paramètre réservé) |
 
 ### Par simulation (`p`) — Commun à `loc` et `rp`
 
-| Clé | Type | Défaut | Description |
-|-----|------|--------|-------------|
-| `mode` | `'loc' \| 'rp'` | — | Mode de la simulation |
-| `prixAchat` | € | `250 000` | Prix d'achat du bien |
-| `fraisNotaire` | € | `20 000` | Frais de notaire |
-| `travaux` | € | `15 000` | Montant des travaux |
-| `fraisAgence` | € | `0` | Frais d'agence à l'achat |
-| `apport` | € | `50 000` | Apport personnel |
-| `taux` | % | `3,85` | Taux d'intérêt annuel du crédit |
-| `duree` | années (5–30) | `20` | Durée du crédit |
-| `assurance` | % | `0,25` | Taux annuel d'assurance emprunteur (sur capital emprunté) |
-| `revalBien` | % | `2,0` | Revalorisation annuelle du bien |
-| `fraisVente` | % | `4` | Frais de vente (agence, diagnostics…) sur le prix de revente |
+| Clé            | Type            | Défaut    | Description                                                  |
+| -------------- | --------------- | --------- | ------------------------------------------------------------ |
+| `mode`         | `'loc' \| 'rp'` | —         | Mode de la simulation                                        |
+| `prixAchat`    | €               | `250 000` | Prix d'achat du bien                                         |
+| `fraisNotaire` | €               | `20 000`  | Frais de notaire                                             |
+| `travaux`      | €               | `15 000`  | Montant des travaux                                          |
+| `fraisAgence`  | €               | `0`       | Frais d'agence à l'achat                                     |
+| `apport`       | €               | `50 000`  | Apport personnel                                             |
+| `taux`         | %               | `3,85`    | Taux d'intérêt annuel du crédit                              |
+| `duree`        | années (5–30)   | `20`      | Durée du crédit                                              |
+| `assurance`    | %               | `0,25`    | Taux annuel d'assurance emprunteur (sur capital emprunté)    |
+| `revalBien`    | %               | `2,0`     | Revalorisation annuelle du bien                              |
+| `fraisVente`   | %               | `4`       | Frais de vente (agence, diagnostics…) sur le prix de revente |
 
 ### Par simulation (`p`) — Mode `loc` uniquement
 
-| Clé | Type | Défaut | Description |
-|-----|------|--------|-------------|
-| `loyer` | €/mois | `1 000` | Loyer mensuel brut |
-| `vacance` | % | `5` | Taux de vacance locative |
-| `taxeFonciere` | €/an | `1 200` | Taxe foncière |
-| `chargesCopro` | €/an | `800` | Charges de copropriété |
-| `assurPNO` | €/an | `200` | Assurance propriétaire non-occupant |
-| `fraisGestion` | % | `7` | Frais de gestion locative (% du loyer brut annuel) |
-| `provision` | €/an | `500` | Provision pour travaux / vacance imprévue |
-| `revalLoyer` | % | `1,5` | Revalorisation annuelle du loyer |
-| `tmi` | % | `30` | Taux marginal d'imposition (IR) |
-| `ps` | % | `17,2` | Prélèvements sociaux sur revenus locatifs |
-| `amortBien` | % | `2,5` | Taux d'amortissement comptable annuel du bien (LMNP réel) |
-| `amortTravaux` | % | `10` | Taux d'amortissement comptable annuel des travaux (LMNP réel) |
-| `impotPV` | % | `19` | Taux d'imposition de la plus-value immobilière |
-| `psPV` | % | `17,2` | Prélèvements sociaux sur la plus-value |
+| Clé            | Type   | Défaut  | Description                                                   |
+| -------------- | ------ | ------- | ------------------------------------------------------------- |
+| `loyer`        | €/mois | `1 000` | Loyer mensuel brut                                            |
+| `vacance`      | %      | `5`     | Taux de vacance locative                                      |
+| `taxeFonciere` | €/an   | `1 200` | Taxe foncière                                                 |
+| `chargesCopro` | €/an   | `800`   | Charges de copropriété                                        |
+| `assurPNO`     | €/an   | `200`   | Assurance propriétaire non-occupant                           |
+| `fraisGestion` | %      | `7`     | Frais de gestion locative (% du loyer brut annuel)            |
+| `provision`    | €/an   | `500`   | Provision pour travaux / vacance imprévue                     |
+| `revalLoyer`   | %      | `1,5`   | Revalorisation annuelle du loyer                              |
+| `tmi`          | %      | `30`    | Taux marginal d'imposition (IR)                               |
+| `ps`           | %      | `17,2`  | Prélèvements sociaux sur revenus locatifs                     |
+| `amortBien`    | %      | `2,5`   | Taux d'amortissement comptable annuel du bien (LMNP réel)     |
+| `amortTravaux` | %      | `10`    | Taux d'amortissement comptable annuel des travaux (LMNP réel) |
+| `impotPV`      | %      | `19`    | Taux d'imposition de la plus-value immobilière                |
+| `psPV`         | %      | `17,2`  | Prélèvements sociaux sur la plus-value                        |
 
 ### Par simulation (`p`) — Mode `rp` uniquement
 
-| Clé | Type | Défaut | Description |
-|-----|------|--------|-------------|
-| `taxeFonciereRP` | €/an | `1 200` | Taxe foncière RP |
+| Clé              | Type | Défaut  | Description               |
+| ---------------- | ---- | ------- | ------------------------- |
+| `taxeFonciereRP` | €/an | `1 200` | Taxe foncière RP          |
 | `chargesCoproRP` | €/an | `1 200` | Charges de copropriété RP |
-| `assurHab` | €/an | `300` | Assurance habitation |
-| `provisionRP` | €/an | `500` | Provision pour travaux RP |
+| `assurHab`       | €/an | `300`   | Assurance habitation      |
+| `provisionRP`    | €/an | `500`   | Provision pour travaux RP |
 
 ---
 
@@ -168,6 +181,7 @@ Attention : l'assurance est calculée sur le capital initial (non sur le capital
 ### Tableau d'amortissement (mensuel) ✅
 
 Pour chaque mois m = 1..nM :
+
 ```
 intérêts[m]   = capitalRestant[m-1] × τM
 amortCapital[m] = max(0, mens − intérêts[m])
@@ -175,6 +189,7 @@ capitalRestant[m] = max(0, capitalRestant[m-1] − amortCapital[m])
 ```
 
 KPIs dérivés :
+
 ```
 totInt = Σ intérêts[m]           (coût total des intérêts)
 totAss = Σ assM                  (coût total assurance = assM × nM)
@@ -212,6 +227,7 @@ impôt = RI × (tmi + ps) / 100
 ```
 
 **Simplifications (ne pas modifier sans décision explicite) :**
+
 - Les **intérêts d'emprunt** ne sont pas déduits du revenu imposable, ni en LMNP réel ni en Foncier nu, alors qu'ils sont déductibles en droit français. Cela **surestime l'impôt** (surtout les premières années). Choix délibéré pour limiter la complexité.
 - Les **abattements progressifs sur la plus-value** (−6%/an IR entre la 6e et la 21e année, −4% à la 22e, −1,65%/an PS entre la 6e et la 21e…) ne sont **pas appliqués**. La fiscalité PV est donc surestimée pour les détentions longues.
 - Le Micro-BIC est codé à 50% d'abattement : c'est le taux du meublé **non-classé**. Le meublé **classé tourisme** bénéficie de 71%. Non implémenté.
@@ -220,6 +236,7 @@ impôt = RI × (tmi + ps) / 100
 ### Cash flow annuel ✅
 
 **Mode `loc` :**
+
 ```
 loyerPersoAnn = loyerPerso × 12 × (1 + revalLoyerPerso/100)^(yr−1)
 cfN = le − chg − (mens×12) − (assM×12) − loyerPersoAnn − impôt
@@ -227,6 +244,7 @@ cfC = Σ cfN[1..yr]     (cash flow cumulé)
 ```
 
 **Mode `rp` :**
+
 ```
 cfN = −(chg + mens×12 + assM×12)     (toujours négatif)
 cfC = Σ cfN[1..yr]
@@ -293,10 +311,12 @@ cap[yr] = cap[yr−1] × (1 + rendAlt/100) + surplus
 Représente l'alternative : investir l'apport en ETF et placer le surplus mensuel après paiement du loyer.
 
 La fonction retourne deux valeurs par année :
+
 - `cap` : valeur brute (composition sans taxe) — utilisée dans ChartsTab (patrimoine), KpisTab, crossover, export
 - `capNet` : valeur nette après **PFU 30% sur la plus-value** (`capNet = cap − max(0, cap − totalContribs) × 0,30`) — utilisée uniquement dans **ReventeTab** (chart + table hover)
 
 **Simplifications restantes :**
+
 - Taux fixé à 30% flat (PFU CTO) — pas de distinction PEA 17,2% / CTO 30%
 - Pas de taxe annuelle (correct pour un ETF capitalisant : l'imposition n'a lieu qu'à la cession)
 - Le crossover compare `patTotal` immo (brut, avant impôt de cession) avec `cap` ETF (brut) — cohérence intentionnelle ; seule la ReventeTab utilise `capNet`
@@ -361,12 +381,12 @@ Mode rp  : cfM = loyerPerso − mens − assM             (différentiel vs. res
 
 Les 4 chips affichés dans le header de chaque SimPanel sont identiques pour les modes LOC et RP :
 
-| Chip | Formule | Couleur |
-|------|---------|---------|
-| Mensualité | `r.mens + r.assM` | couleur sim |
-| CF réel/mois | `r.flux[0].cfN / 12` | rouge si < 0, couleur sim sinon |
-| Effort/mois | `−r.flux[0].cfN / 12 − G.loyerPerso` | rouge si > 0, couleur sim sinon |
-| Patrimoine Xa | `r.flux[G.horizon−1].patTotal` | couleur sim |
+| Chip          | Formule                              | Couleur                         |
+| ------------- | ------------------------------------ | ------------------------------- |
+| Mensualité    | `r.mens + r.assM`                    | couleur sim                     |
+| CF réel/mois  | `r.flux[0].cfN / 12`                 | rouge si < 0, couleur sim sinon |
+| Effort/mois   | `−r.flux[0].cfN / 12 − G.loyerPerso` | rouge si > 0, couleur sim sinon |
+| Patrimoine Xa | `r.flux[G.horizon−1].patTotal`       | couleur sim                     |
 
 **Effort/mois** = surcoût mensuel vs. situation actuelle (louer à `loyerPerso`). Positif = tu dépenses plus qu'aujourd'hui. Négatif = l'investissement est moins cher que ta situation actuelle. Formule unifiée valide pour LOC et RP. Redondant avec CF réel/mois uniquement si `loyerPerso = 0`.
 
@@ -397,6 +417,7 @@ Indique quand les flux opérationnels cumulés repassent en positif (hors valeur
 When the user's request matches an available skill, invoke it via the Skill tool. When in doubt, invoke the skill.
 
 Key routing rules:
+
 - Product ideas/brainstorming → invoke /office-hours
 - Strategy/scope → invoke /plan-ceo-review
 - Architecture → invoke /plan-eng-review

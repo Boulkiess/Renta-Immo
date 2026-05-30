@@ -76,73 +76,187 @@
     "Résidence principale": "Résidence principale"
   },
   "fields": {
-    "prixAchat":       { "label": "Prix d'achat" },
-    "fraisNotaire":    { "label": "Frais de notaire" },
-    "travaux":         { "label": "Travaux" },
-    "fraisAgence":     { "label": "Frais d'agence achat" },
-    "apport":          { "label": "Apport personnel" },
-    "taux":            { "label": "Taux intérêt" },
-    "duree":           { "label": "Durée (ans)" },
-    "assurance":       { "label": "Assurance emprunteur" },
-    "revalBien":       { "label": "Reval. bien %/an" },
-    "fraisVente":      { "label": "Frais agence vente" },
-    "loyer":           { "label": "Loyer mensuel brut" },
-    "vacance":         { "label": "Taux vacance" },
-    "taxeFonciere":    { "label": "Taxe foncière (€/an)" },
-    "chargesCopro":    { "label": "Charges copro (€/an)" },
-    "assurPNO":        { "label": "Assurance PNO (€/an)" },
-    "fraisGestion":    { "label": "Gestion locative" },
-    "provision":       { "label": "Provision travaux (€/an)" },
-    "revalLoyer":      { "label": "Reval. loyer %/an" },
-    "tmi":             { "label": "TMI" },
-    "ps":              { "label": "Prélèvements sociaux" },
-    "amortBien":       { "label": "Amort. bien %/an" },
-    "amortTravaux":    { "label": "Amort. travaux %/an" },
-    "impotPV":         { "label": "Impôt plus-value" },
-    "psPV":            { "label": "PS sur plus-value" },
-    "taxeFonciereRP":  { "label": "Taxe foncière" },
-    "chargesCoproRP":  { "label": "Charges copro (€/an)" },
-    "assurHab":        { "label": "Assurance habitation (€/an)" },
-    "provisionRP":     { "label": "Provision travaux (€/an)" }
+    "prixAchat": { "label": "Prix d'achat" },
+    "fraisNotaire": { "label": "Frais de notaire" },
+    "travaux": { "label": "Travaux" },
+    "fraisAgence": { "label": "Frais d'agence achat" },
+    "apport": { "label": "Apport personnel" },
+    "taux": { "label": "Taux intérêt" },
+    "duree": { "label": "Durée (ans)" },
+    "assurance": { "label": "Assurance emprunteur" },
+    "revalBien": { "label": "Reval. bien %/an" },
+    "fraisVente": { "label": "Frais agence vente" },
+    "loyer": { "label": "Loyer mensuel brut" },
+    "vacance": { "label": "Taux vacance" },
+    "taxeFonciere": { "label": "Taxe foncière (€/an)" },
+    "chargesCopro": { "label": "Charges copro (€/an)" },
+    "assurPNO": { "label": "Assurance PNO (€/an)" },
+    "fraisGestion": { "label": "Gestion locative" },
+    "provision": { "label": "Provision travaux (€/an)" },
+    "revalLoyer": { "label": "Reval. loyer %/an" },
+    "tmi": { "label": "TMI" },
+    "ps": { "label": "Prélèvements sociaux" },
+    "amortBien": { "label": "Amort. bien %/an" },
+    "amortTravaux": { "label": "Amort. travaux %/an" },
+    "impotPV": { "label": "Impôt plus-value" },
+    "psPV": { "label": "PS sur plus-value" },
+    "taxeFonciereRP": { "label": "Taxe foncière" },
+    "chargesCoproRP": { "label": "Charges copro (€/an)" },
+    "assurHab": { "label": "Assurance habitation (€/an)" },
+    "provisionRP": { "label": "Provision travaux (€/an)" }
   },
   "tooltips": {
-    "inflation":        { "title": "Inflation (IPC)", "body": "Utilisé pour relativiser les performances en euros constants. N'affecte pas les flux nominaux calculés." },
-    "regime":           { "title": "Régime fiscal locatif", "body": "<b>LMNP Réel</b> : amortissements déductibles (bien + travaux).<br><b>Micro-BIC</b> : abattement 50%.<br><b>Foncier nu réel</b> : charges réelles, sans amortissement." },
-    "tauxActu":         { "title": "Taux d'actualisation (VAN)", "body": "Taux utilisé pour calculer la Valeur Actuelle Nette. Représente le coût d'opportunité du capital." },
-    "rendAlt":          { "title": "Rendement ETF / placement alternatif", "body": "Rendement annuel net du portefeuille ETF. Historiquement ~7-8% brut ETF World, ~5-6% net après impôts et inflation." },
-    "budgetMensuel":    { "title": "Budget mensuel logement+investissement", "body": "Enveloppe mensuelle fixe. Le surplus non consommé par les coûts réels est automatiquement investi en ETF." },
-    "investirSurplus":  { "title": "Investir le surplus en ETF", "body": "Si activé : la différence entre le budget mensuel et les sorties réelles est investie en ETF. Le tiret = scénario ETF pur de référence." },
-    "apportETF":        { "title": "Apport ETF pur (référence)", "body": "Capital de départ du scénario ETF pur. Pas d'achat immo, l'apport + le surplus mensuel sont capitalisés en ETF." },
-    "prixAchat":        { "title": "Prix d'achat net vendeur", "body": "Prix payé au vendeur, hors frais de notaire et d'agence." },
-    "fraisNotaire":     { "title": "Frais de notaire", "body": "7-8% dans l'ancien, 2-3% dans le neuf. <b>Auto : 8% × prix d'achat.</b>" },
-    "travaux":          { "title": "Travaux de rénovation", "body": "En LMNP Réel, amortissables sur plusieurs années.", "code": "Amort. travaux = Travaux × Taux amort." },
-    "fraisAgence":      { "title": "Frais d'agence acheteur", "body": "Honoraires d'agence à charge de l'acheteur." },
-    "apport":           { "title": "Apport personnel", "body": "Capital propre investi. Réduit le montant emprunté mais aussi le levier." },
-    "taux":             { "title": "Taux d'intérêt nominal", "body": "Taux nominal du prêt. Mode auto : taux moyens France (MAJ 05/2026) — 7a 3,25% · 10a 3,30% · 15a 3,45% · 20a 3,55% · 25a 3,70%.", "code": "Mensualité = K×(τ/12)/(1−(1+τ/12)^−n)" },
-    "duree":            { "title": "Durée du prêt", "body": "Plus long = mensualité plus faible mais coût total plus élevé." },
-    "assurance":        { "title": "Assurance emprunteur (ADI)", "body": "0.10-0.40%/an du capital selon profil.", "code": "Assurance mens. = Capital × taux / 12" },
-    "revalBien":        { "title": "Revalorisation du bien", "body": "Hypothèse de hausse annuelle. ~2-3%/an historique en France.", "code": "Valeur an N = Prix × (1+taux)^N" },
-    "fraisVente":       { "title": "Frais d'agence vente", "body": "3-7% du prix de vente. Négociable ou évitable en PAP." },
-    "loyer":            { "title": "Loyer mensuel brut", "body": "Hors charges récupérables. Levier n°1 de la rentabilité.", "code": "Rdt brut = Loyer×12 / Coût total" },
-    "vacance":          { "title": "Vacance locative", "body": "5-8% en zone tendue, 10-15% en zone rurale.", "code": "Loyer encaissé = Loyer brut × (1−vacance)" },
-    "taxeFonciere":     { "title": "Taxe foncière", "body": "Impôt local annuel. Varie fortement selon la commune. <b>Auto : 0,5% × prix d'achat.</b>" },
-    "chargesCopro":     { "title": "Charges copro non récupérables", "body": "Restent à charge du propriétaire." },
-    "assurPNO":         { "title": "Assurance PNO", "body": "Obligatoire en copropriété. 100-300€/an." },
-    "fraisGestion":     { "title": "Gestion locative", "body": "6-9% TTC des loyers encaissés si agence." },
-    "provision":        { "title": "Provision travaux", "body": "Épargne de précaution. Règle : ~1% valeur/an. <b>Auto : 0,5% × prix d'achat.</b>" },
-    "revalLoyer":       { "title": "Revalorisation loyer", "body": "Plafonnée à l'IRL. 1-4%/an selon inflation.", "code": "Loyer an N = Loyer × (1+taux)^(N−1)" },
-    "tmi":              { "title": "TMI", "body": "Tranche marginale : 0%, 11%, 30%, 41% ou 45%.", "code": "Impôts = Rev. imposable × (TMI+PS)" },
-    "ps":               { "title": "Prélèvements sociaux", "body": "17.2% sur les revenus fonciers (CSG+CRDS+solidarité)." },
-    "amortBien":        { "title": "Amortissement bien", "body": "LMNP Réel uniquement. Typique 25-40 ans → 2.5-4%/an." },
-    "amortTravaux":     { "title": "Amortissement travaux", "body": "LMNP Réel. Typique 7-10 ans → 10-14%/an." },
-    "impotPV":          { "title": "Impôt plus-value", "body": "19% IR + 17.2% PS = 36.2%. Abattements progressifs. RP exonérée." },
-    "psPV":             { "title": "PS sur plus-value", "body": "17.2%. Exonération totale après 30 ans." },
-    "loyerPerso":       { "title": "Loyer actuel (que vous payez)", "body": "Le loyer mensuel que vous payez. En locatif : soustrait du CF. En RP : économie réalisée si vous achetez.", "code": "CF réel (loc) = CF locatif − Loyer perso\nÉconomie (RP) = Loyer perso − Mensualité" },
-    "revalLoyerPerso":  { "title": "Revalorisation loyer marché %/an", "body": "Hausse annuelle de votre loyer. ~1-3%/an indexé IRL." },
-    "assurHab":         { "title": "Assurance habitation", "body": "Assurance multirisque habitation propriétaire occupant. 200-500€/an." },
-    "chargesCoproRP":   { "title": "Charges copropriété RP", "body": "Totalité des charges (pas de distinction récupérable/non). 50-200€/mois." },
-    "taxeFonciereRP":   { "title": "Taxe foncière RP", "body": "Même impôt que pour un locatif. Pas de taxe d'habitation depuis 2023 pour les RP. <b>Auto : 0,5% × prix d'achat.</b>" },
-    "provisionRP":      { "title": "Provision travaux RP", "body": "Budget annuel pour l'entretien. ~1% de la valeur du bien. <b>Auto : 0,5% × prix d'achat.</b>" }
+    "inflation": {
+      "title": "Inflation (IPC)",
+      "body": "Utilisé pour relativiser les performances en euros constants. N'affecte pas les flux nominaux calculés."
+    },
+    "regime": {
+      "title": "Régime fiscal locatif",
+      "body": "<b>LMNP Réel</b> : amortissements déductibles (bien + travaux).<br><b>Micro-BIC</b> : abattement 50%.<br><b>Foncier nu réel</b> : charges réelles, sans amortissement."
+    },
+    "tauxActu": {
+      "title": "Taux d'actualisation (VAN)",
+      "body": "Taux utilisé pour calculer la Valeur Actuelle Nette. Représente le coût d'opportunité du capital."
+    },
+    "rendAlt": {
+      "title": "Rendement ETF / placement alternatif",
+      "body": "Rendement annuel net du portefeuille ETF. Historiquement ~7-8% brut ETF World, ~5-6% net après impôts et inflation."
+    },
+    "budgetMensuel": {
+      "title": "Budget mensuel logement+investissement",
+      "body": "Enveloppe mensuelle fixe. Le surplus non consommé par les coûts réels est automatiquement investi en ETF."
+    },
+    "investirSurplus": {
+      "title": "Investir le surplus en ETF",
+      "body": "Si activé : la différence entre le budget mensuel et les sorties réelles est investie en ETF. Le tiret = scénario ETF pur de référence."
+    },
+    "apportETF": {
+      "title": "Apport ETF pur (référence)",
+      "body": "Capital de départ du scénario ETF pur. Pas d'achat immo, l'apport + le surplus mensuel sont capitalisés en ETF."
+    },
+    "prixAchat": {
+      "title": "Prix d'achat net vendeur",
+      "body": "Prix payé au vendeur, hors frais de notaire et d'agence."
+    },
+    "fraisNotaire": {
+      "title": "Frais de notaire",
+      "body": "7-8% dans l'ancien, 2-3% dans le neuf. <b>Auto : 8% × prix d'achat.</b>"
+    },
+    "travaux": {
+      "title": "Travaux de rénovation",
+      "body": "En LMNP Réel, amortissables sur plusieurs années.",
+      "code": "Amort. travaux = Travaux × Taux amort."
+    },
+    "fraisAgence": {
+      "title": "Frais d'agence acheteur",
+      "body": "Honoraires d'agence à charge de l'acheteur."
+    },
+    "apport": {
+      "title": "Apport personnel",
+      "body": "Capital propre investi. Réduit le montant emprunté mais aussi le levier."
+    },
+    "taux": {
+      "title": "Taux d'intérêt nominal",
+      "body": "Taux nominal du prêt. Mode auto : taux moyens France (MAJ 05/2026) — 7a 3,25% · 10a 3,30% · 15a 3,45% · 20a 3,55% · 25a 3,70%.",
+      "code": "Mensualité = K×(τ/12)/(1−(1+τ/12)^−n)"
+    },
+    "duree": {
+      "title": "Durée du prêt",
+      "body": "Plus long = mensualité plus faible mais coût total plus élevé."
+    },
+    "assurance": {
+      "title": "Assurance emprunteur (ADI)",
+      "body": "0.10-0.40%/an du capital selon profil.",
+      "code": "Assurance mens. = Capital × taux / 12"
+    },
+    "revalBien": {
+      "title": "Revalorisation du bien",
+      "body": "Hypothèse de hausse annuelle. ~2-3%/an historique en France.",
+      "code": "Valeur an N = Prix × (1+taux)^N"
+    },
+    "fraisVente": {
+      "title": "Frais d'agence vente",
+      "body": "3-7% du prix de vente. Négociable ou évitable en PAP."
+    },
+    "loyer": {
+      "title": "Loyer mensuel brut",
+      "body": "Hors charges récupérables. Levier n°1 de la rentabilité.",
+      "code": "Rdt brut = Loyer×12 / Coût total"
+    },
+    "vacance": {
+      "title": "Vacance locative",
+      "body": "5-8% en zone tendue, 10-15% en zone rurale.",
+      "code": "Loyer encaissé = Loyer brut × (1−vacance)"
+    },
+    "taxeFonciere": {
+      "title": "Taxe foncière",
+      "body": "Impôt local annuel. Varie fortement selon la commune. <b>Auto : 0,5% × prix d'achat.</b>"
+    },
+    "chargesCopro": {
+      "title": "Charges copro non récupérables",
+      "body": "Restent à charge du propriétaire."
+    },
+    "assurPNO": { "title": "Assurance PNO", "body": "Obligatoire en copropriété. 100-300€/an." },
+    "fraisGestion": {
+      "title": "Gestion locative",
+      "body": "6-9% TTC des loyers encaissés si agence."
+    },
+    "provision": {
+      "title": "Provision travaux",
+      "body": "Épargne de précaution. Règle : ~1% valeur/an. <b>Auto : 0,5% × prix d'achat.</b>"
+    },
+    "revalLoyer": {
+      "title": "Revalorisation loyer",
+      "body": "Plafonnée à l'IRL. 1-4%/an selon inflation.",
+      "code": "Loyer an N = Loyer × (1+taux)^(N−1)"
+    },
+    "tmi": {
+      "title": "TMI",
+      "body": "Tranche marginale : 0%, 11%, 30%, 41% ou 45%.",
+      "code": "Impôts = Rev. imposable × (TMI+PS)"
+    },
+    "ps": {
+      "title": "Prélèvements sociaux",
+      "body": "17.2% sur les revenus fonciers (CSG+CRDS+solidarité)."
+    },
+    "amortBien": {
+      "title": "Amortissement bien",
+      "body": "LMNP Réel uniquement. Typique 25-40 ans → 2.5-4%/an."
+    },
+    "amortTravaux": {
+      "title": "Amortissement travaux",
+      "body": "LMNP Réel. Typique 7-10 ans → 10-14%/an."
+    },
+    "impotPV": {
+      "title": "Impôt plus-value",
+      "body": "19% IR + 17.2% PS = 36.2%. Abattements progressifs. RP exonérée."
+    },
+    "psPV": { "title": "PS sur plus-value", "body": "17.2%. Exonération totale après 30 ans." },
+    "loyerPerso": {
+      "title": "Loyer actuel (que vous payez)",
+      "body": "Le loyer mensuel que vous payez. En locatif : soustrait du CF. En RP : économie réalisée si vous achetez.",
+      "code": "CF réel (loc) = CF locatif − Loyer perso\nÉconomie (RP) = Loyer perso − Mensualité"
+    },
+    "revalLoyerPerso": {
+      "title": "Revalorisation loyer marché %/an",
+      "body": "Hausse annuelle de votre loyer. ~1-3%/an indexé IRL."
+    },
+    "assurHab": {
+      "title": "Assurance habitation",
+      "body": "Assurance multirisque habitation propriétaire occupant. 200-500€/an."
+    },
+    "chargesCoproRP": {
+      "title": "Charges copropriété RP",
+      "body": "Totalité des charges (pas de distinction récupérable/non). 50-200€/mois."
+    },
+    "taxeFonciereRP": {
+      "title": "Taxe foncière RP",
+      "body": "Même impôt que pour un locatif. Pas de taxe d'habitation depuis 2023 pour les RP. <b>Auto : 0,5% × prix d'achat.</b>"
+    },
+    "provisionRP": {
+      "title": "Provision travaux RP",
+      "body": "Budget annuel pour l'entretien. ~1% de la valeur du bien. <b>Auto : 0,5% × prix d'achat.</b>"
+    }
   },
   "charts": {
     "cf1": {

@@ -30,7 +30,11 @@ export default function CanvasChart({ draw, deps = [], height }) {
     if (!canvas) return;
     attachHover(canvas);
     return () => {
-      if (canvas._tip) { canvas._tip.remove(); canvas._tip = null; canvas._hov = false; }
+      if (canvas._tip) {
+        canvas._tip.remove();
+        canvas._tip = null;
+        canvas._hov = false;
+      }
     };
   }, []);
 
@@ -40,7 +44,10 @@ export default function CanvasChart({ draw, deps = [], height }) {
 
   return (
     <div ref={wrapRef} style={wrapStyle}>
-      <canvas ref={ref} style={{ position: 'absolute', width: '100%', height: '100%', display: 'block' }} />
+      <canvas
+        ref={ref}
+        style={{ position: 'absolute', width: '100%', height: '100%', display: 'block' }}
+      />
     </div>
   );
 }

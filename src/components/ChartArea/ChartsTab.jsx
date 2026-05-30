@@ -6,17 +6,38 @@ import { drawLine, drawBars } from '../../engine/charts.js';
 import CanvasChart from '../common/CanvasChart.jsx';
 
 const Grid = styled.div`
-  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
   background: ${({ theme }) => theme.border};
-  flex: 1; min-height: 0; overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 `;
 
 const Card = styled.div`
-  background: ${({ theme }) => theme.surface}; padding: 10px 10px 6px; overflow: hidden; display: flex; flex-direction: column;
+  background: ${({ theme }) => theme.surface};
+  padding: 10px 10px 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 `;
 
-const ChartTitle = styled.div`font-size: 11px; font-weight: 700; color: ${({ theme }) => theme.text}; margin-bottom: 2px; flex-shrink: 0;`;
-const ChartDesc = styled.div`font-size: 10px; color: ${({ theme }) => theme.muted}; margin-bottom: 6px; line-height: 1.4; flex-shrink: 0;`;
+const ChartTitle = styled.div`
+  font-size: 11px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.text};
+  margin-bottom: 2px;
+  flex-shrink: 0;
+`;
+const ChartDesc = styled.div`
+  font-size: 10px;
+  color: ${({ theme }) => theme.muted};
+  margin-bottom: 6px;
+  line-height: 1.4;
+  flex-shrink: 0;
+`;
 
 const X_LABELS = Array.from({ length: 30 }, (_, i) => String(i + 1));
 
@@ -28,14 +49,38 @@ export default function ChartsTab() {
 
   const activeKeys = KEYS.filter(k => sims[k].enabled);
 
-  const cfCumDs   = () => activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.cfC) }));
-  const patDs     = () => {
-    const ds = activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.patTotal) }));
-    ds.push({ color: '#94a3b8', dashed: true, label: 'ETF pur', data: etfPurGlobal.map(e => e.cap) });
+  const cfCumDs = () =>
+    activeKeys.map(k => ({
+      color: COL[k],
+      label: sims[k].label,
+      data: RES[k].flux.map(f => f.cfC),
+    }));
+  const patDs = () => {
+    const ds = activeKeys.map(k => ({
+      color: COL[k],
+      label: sims[k].label,
+      data: RES[k].flux.map(f => f.patTotal),
+    }));
+    ds.push({
+      color: '#94a3b8',
+      dashed: true,
+      label: 'ETF pur',
+      data: etfPurGlobal.map(e => e.cap),
+    });
     return ds;
   };
-  const cfAnnDs   = () => activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.cfN) }));
-  const vbDs      = () => activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.vb) }));
+  const cfAnnDs = () =>
+    activeKeys.map(k => ({
+      color: COL[k],
+      label: sims[k].label,
+      data: RES[k].flux.map(f => f.cfN),
+    }));
+  const vbDs = () =>
+    activeKeys.map(k => ({
+      color: COL[k],
+      label: sims[k].label,
+      data: RES[k].flux.map(f => f.vb),
+    }));
 
   return (
     <Grid>

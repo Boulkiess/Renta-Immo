@@ -6,12 +6,29 @@ import { drawLine } from '../../engine/charts.js';
 import { fmtE, fmtK } from '../../engine/utils.js';
 import CanvasChart from '../common/CanvasChart.jsx';
 
-const Wrap = styled.div`overflow-y: auto; flex: 1; padding: 12px;`;
-const Title = styled.div`font-size: 11px; font-weight: 700; margin-bottom: 2px;`;
-const Desc = styled.div`font-size: 10px; color: ${({ theme }) => theme.muted}; margin-bottom: 8px; line-height: 1.4;`;
+const Wrap = styled.div`
+  overflow-y: auto;
+  flex: 1;
+  padding: 12px;
+`;
+const Title = styled.div`
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 2px;
+`;
+const Desc = styled.div`
+  font-size: 10px;
+  color: ${({ theme }) => theme.muted};
+  margin-bottom: 8px;
+  line-height: 1.4;
+`;
 const SubTitle = styled.div`
-  font-size: 10px; font-weight: 700; color: ${({ theme }) => theme.muted};
-  margin: 14px 0 6px; text-transform: uppercase; letter-spacing: .5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.muted};
+  margin: 14px 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `;
 
 const X_LABELS = Array.from({ length: 30 }, (_, i) => String(i + 1));
@@ -24,8 +41,17 @@ export default function ReventeTab() {
   const activeKeys = KEYS.filter(k => sims[k].enabled);
 
   function datasets() {
-    const ds = activeKeys.map(k => ({ color: COL[k], label: sims[k].label, data: RES[k].flux.map(f => f.bilanTotal) }));
-    ds.push({ color: '#94a3b8', dashed: true, label: 'ETF pur (net)', data: etfPurGlobal.map(e => e.capNet) });
+    const ds = activeKeys.map(k => ({
+      color: COL[k],
+      label: sims[k].label,
+      data: RES[k].flux.map(f => f.bilanTotal),
+    }));
+    ds.push({
+      color: '#94a3b8',
+      dashed: true,
+      label: 'ETF pur (net)',
+      data: etfPurGlobal.map(e => e.capNet),
+    });
     return ds;
   }
 
@@ -44,11 +70,30 @@ export default function ReventeTab() {
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
         <thead>
           <tr>
-            <th style={{ textAlign: 'left', padding: '5px 8px', borderBottom: '1px solid var(--border)', fontSize: 10, fontWeight: 600, color: 'var(--muted)' }}>
+            <th
+              style={{
+                textAlign: 'left',
+                padding: '5px 8px',
+                borderBottom: '1px solid var(--border)',
+                fontSize: 10,
+                fontWeight: 600,
+                color: 'var(--muted)',
+              }}
+            >
               Année
             </th>
             {activeKeys.map(k => (
-              <th key={k} style={{ color: COL[k], textAlign: 'right', padding: '5px 8px', borderBottom: '1px solid var(--border)', fontWeight: 800, fontSize: 10 }}>
+              <th
+                key={k}
+                style={{
+                  color: COL[k],
+                  textAlign: 'right',
+                  padding: '5px 8px',
+                  borderBottom: '1px solid var(--border)',
+                  fontWeight: 800,
+                  fontSize: 10,
+                }}
+              >
                 {sims[k].label}
               </th>
             ))}

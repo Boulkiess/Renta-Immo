@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react';
 import { DEFAULT_G, DEFAULT_SIMS, KEYS, resolveAutoFields } from './definitions.js';
 import { compute, computeEtfPur, crossoverYear } from '../engine/compute.js';
 
@@ -9,13 +17,17 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     return JSON.parse(raw);
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 function saveState({ G, sims, curTab, openGrp }) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ G, sims, curTab, openGrp }));
-  } catch {}
+  } catch (_e) {
+    // localStorage can throw in private browsing — ignore silently
+  }
 }
 
 const AppContext = createContext(null);
@@ -30,31 +42,39 @@ export function AppProvider({ children }) {
     C: { ...DEFAULT_SIMS.C, ...saved?.sims?.C },
   }));
   const [curTab, setCurTab] = useState(() => saved?.curTab ?? 'charts');
-  const [openGrp, setOpenGrp] = useState(() => saved?.openGrp ?? { A: 'Acquisition', B: 'Acquisition', C: 'Acquisition' });
+  const [openGrp, setOpenGrp] = useState(
+    () => saved?.openGrp ?? { A: 'Acquisition', B: 'Acquisition', C: 'Acquisition' }
+  );
 
   const etfPurGlobal = useMemo(() => computeEtfPur(G), [G]);
 
   /** resolvedSims: auto fields replaced by computed values. Use for display and compute(). */
   const resolvedSims = useMemo(() => {
     const r = {};
-    KEYS.forEach(k => { r[k] = resolveAutoFields(sims[k]); });
+    KEYS.forEach(k => {
+      r[k] = resolveAutoFields(sims[k]);
+    });
     return r;
   }, [sims]);
 
   /** RES: financial engine results, always computed from resolved (auto-applied) params. */
   const RES = useMemo(() => {
     const r = {};
-    KEYS.forEach(k => { r[k] = compute(resolvedSims[k], G); });
+    KEYS.forEach(k => {
+      r[k] = compute(resolvedSims[k], G);
+    });
     return r;
   }, [resolvedSims, G]);
 
   const crossovers = useMemo(() => {
     const r = {};
-    KEYS.forEach(k => { r[k] = crossoverYear(RES[k], etfPurGlobal, G); });
+    KEYS.forEach(k => {
+      r[k] = crossoverYear(RES[k], etfPurGlobal, G);
+    });
     return r;
   }, [RES, etfPurGlobal, G]);
 
-  const updateG = useCallback((updates) => {
+  const updateG = useCallback(updates => {
     setG(prev => ({ ...prev, ...updates }));
   }, []);
 
@@ -80,7 +100,9 @@ export function AppProvider({ children }) {
   }, []);
 
   const stateRef = useRef({ G, sims, curTab, openGrp });
-  useEffect(() => { stateRef.current = { G, sims, curTab, openGrp }; });
+  useEffect(() => {
+    stateRef.current = { G, sims, curTab, openGrp };
+  });
   useEffect(() => {
     const save = () => saveState(stateRef.current);
     window.addEventListener('beforeunload', save);
@@ -91,13 +113,24 @@ export function AppProvider({ children }) {
   }, []);
 
   return (
-    <AppContext.Provider value={{
-      G, updateG,
-      sims, resolvedSims, updateSim, updateSimBulk, toggleAutoField,
-      curTab, setCurTab,
-      openGrp, toggleOpenGrp,
-      RES, etfPurGlobal, crossovers,
-    }}>
+    <AppContext.Provider
+      value={{
+        G,
+        updateG,
+        sims,
+        resolvedSims,
+        updateSim,
+        updateSimBulk,
+        toggleAutoField,
+        curTab,
+        setCurTab,
+        openGrp,
+        toggleOpenGrp,
+        RES,
+        etfPurGlobal,
+        crossovers,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );
