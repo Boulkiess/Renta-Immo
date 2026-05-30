@@ -125,7 +125,8 @@ export default function KpisTab() {
   const etfSurplusAtYr = yr =>
     Math.max(
       0,
-      G.budgetMensuel * 12 - G.loyerPerso * 12 * Math.pow(1 + G.revalLoyerPerso / 100, yr - 1)
+      G.budgetMensuel * 12 * Math.pow(1 + G.revalBudget / 100, yr - 1) -
+        G.loyerPerso * 12 * Math.pow(1 + G.revalLoyerPerso / 100, yr - 1)
     );
   let etfVan = -G.apportETF;
   let etfSurplusTotal = 0;

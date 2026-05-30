@@ -10,6 +10,7 @@ export const DEFAULT_G = {
   loyerPerso: 900,
   revalLoyerPerso: 2,
   budgetMensuel: 2500,
+  revalBudget: 0,
   investirSurplus: true,
   apportETF: 60000,
 };

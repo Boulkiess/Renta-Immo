@@ -34,7 +34,8 @@ export function computeEtfPur(g) {
   const r = g.rendAlt / 100;
   for (let yr = 1; yr <= 30; yr++) {
     const lpa = g.loyerPerso * 12 * Math.pow(1 + g.revalLoyerPerso / 100, yr - 1);
-    const surplus = Math.max(0, g.budgetMensuel * 12 - lpa);
+    const budgetAnn = g.budgetMensuel * 12 * Math.pow(1 + g.revalBudget / 100, yr - 1);
+    const surplus = Math.max(0, budgetAnn - lpa);
     cap = cap * (1 + r) + surplus;
     totalContribs += surplus;
     const gain = Math.max(0, cap - totalContribs);
@@ -98,7 +99,8 @@ export function compute(p, g) {
     cfC += cfN;
 
     const realOutAnn = p.mode === 'loc' ? -cfN : chg + ann + asp;
-    const surplusAnn = Math.max(0, g.budgetMensuel * 12 - realOutAnn);
+    const budgetAnn = g.budgetMensuel * 12 * Math.pow(1 + g.revalBudget / 100, yr - 1);
+    const surplusAnn = Math.max(0, budgetAnn - realOutAnn);
     etfCap = etfCap * (1 + rAlt) + (g.investirSurplus ? surplusAnn : 0);
 
     const pr = (p.prixAchat + p.travaux) * Math.pow(1 + p.revalBien / 100, yr);

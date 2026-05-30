@@ -352,6 +352,28 @@ export default function GlobalStrip() {
           </DraggableUnit>
         </Field>
 
+        <Field>
+          <InfoButton tooltipKey="revalBudget" />
+          <Label>{t('global.revalBudget')}</Label>
+          <NumInput
+            type="number"
+            min="0"
+            max="10"
+            step="0.1"
+            value={G.revalBudget}
+            onChange={e => updateG({ revalBudget: +e.target.value })}
+          />
+          <DraggableUnit
+            min={0}
+            max={10}
+            step={0.1}
+            val={G.revalBudget}
+            onChange={v => updateG({ revalBudget: v })}
+          >
+            {u.perYear}
+          </DraggableUnit>
+        </Field>
+
         <Field style={{ gap: 8 }}>
           <InfoButton tooltipKey="investirSurplus" />
           <Label>{t('global.investirSurplus')}</Label>

@@ -73,7 +73,7 @@ src/
 ### Key data shapes
 
 - `p` (simulation params) — `{ mode, prixAchat, fraisNotaire, travaux, apport, taux, duree, loyer, … }` — see `mkDef()` in `definitions.js`
-- `g` (globals) — `{ loyerPerso, revalLoyerPerso, budgetMensuel, investirSurplus, apportETF, rendAlt, tauxActu, horizon, regime, inflation }`
+- `g` (globals) — `{ loyerPerso, revalLoyerPerso, budgetMensuel, revalBudget, investirSurplus, apportETF, rendAlt, tauxActu, horizon, regime, inflation }`
 - `compute()` return — `{ flux[30], cfM, mens, assM, tri10/15/20, van, moic, revente[], … }`
 - `flux[yr]` — `{ cfN, cfC, le, chg, ann, imp, vb, rest, patNet, patTotal, etfPoche, reventeNet, bilanRevente, bilanTotal }`
 
@@ -102,6 +102,7 @@ src/
 | `loyerPerso`      | €/mois                              | `900`    | Loyer personnel payé chaque mois                                   |
 | `revalLoyerPerso` | %                                   | `2`      | Revalorisation annuelle du loyer personnel                         |
 | `budgetMensuel`   | €/mois                              | `2500`   | Budget mensuel disponible (sert à calculer le surplus vers ETF)    |
+| `revalBudget`     | %                                   | `0`      | Revalorisation annuelle du budget (hausses de salaire)             |
 | `investirSurplus` | booléen                             | `true`   | Réinvestir le surplus mensuel en ETF                               |
 | `apportETF`       | €                                   | `60 000` | Apport hypothétique investi en ETF dans le scénario de référence   |
 | `inflation`       | %                                   | `2`      | Inflation (non utilisée dans le moteur actuel — paramètre réservé) |
@@ -258,9 +259,10 @@ le  = loyerPersoAnn                   (loyer économisé, affiché mais non comp
 ### Surplus et poche ETF ✅
 
 ```
-realOutAnn  = −cfN                       (mode loc : sorties nettes réelles)
-            = chg + mens×12 + assM×12    (mode rp)
-surplusAnn  = max(0, budgetMensuel×12 − realOutAnn)
+realOutAnn  = −cfN                                              (mode loc : sorties nettes réelles)
+            = chg + mens×12 + assM×12                          (mode rp)
+budgetAnn   = budgetMensuel×12 × (1 + revalBudget/100)^(yr−1)  (budget revalorisé chaque année)
+surplusAnn  = max(0, budgetAnn − realOutAnn)
 etfCap[yr]  = etfCap[yr-1] × (1 + rendAlt/100) + (investirSurplus ? surplusAnn : 0)
 ```
 
@@ -304,10 +306,11 @@ patTotal = (vb − capitalRestant) + etfCap        (patrimoine brut : equity + p
 ### Scénario ETF pur — `computeEtfPur(g)` ⚠️
 
 ```
-cap[0]  = apportETF
-lpa[yr] = loyerPerso × 12 × (1 + revalLoyerPerso/100)^(yr−1)
-surplus = max(0, budgetMensuel×12 − lpa[yr])
-cap[yr] = cap[yr−1] × (1 + rendAlt/100) + surplus
+cap[0]      = apportETF
+lpa[yr]     = loyerPerso × 12 × (1 + revalLoyerPerso/100)^(yr−1)
+budgetAnn   = budgetMensuel × 12 × (1 + revalBudget/100)^(yr−1)
+surplus     = max(0, budgetAnn − lpa[yr])
+cap[yr]     = cap[yr−1] × (1 + rendAlt/100) + surplus
 ```
 
 Représente l'alternative : investir l'apport en ETF et placer le surplus mensuel après paiement du loyer.
@@ -353,7 +356,7 @@ TRI_real_ETF = (1 + rendAlt/100) / (1 + inflation/100) − 1
 **VAN ETF :**
 
 ```
-surplusAnn[t] = max(0, budgetMensuel×12 − loyerPerso×12×(1+revalLoyerPerso/100)^{t−1})
+surplusAnn[t] = max(0, budgetMensuel×12×(1+revalBudget/100)^{t−1} − loyerPerso×12×(1+revalLoyerPerso/100)^{t−1})
 
 VAN_ETF = −apportETF
         + Σ_{t=1}^{horizon} (−surplusAnn[t]) / (1+tauxActu/100)^t

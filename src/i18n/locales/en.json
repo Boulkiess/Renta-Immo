@@ -37,6 +37,7 @@
     "loyerPerso": "Current rent paid",
     "revalLoyerPerso": "Rent revaluation",
     "budgetMensuel": "Monthly budget",
+    "revalBudget": "Budget growth",
     "investirSurplus": "Surplus→ETF",
     "apportETF": "Pure ETF contribution",
     "units": {
@@ -125,6 +126,10 @@
     "budgetMensuel": {
       "title": "Monthly housing + investment budget",
       "body": "Fixed monthly envelope. The surplus not consumed by real costs is automatically invested in ETF."
+    },
+    "revalBudget": {
+      "title": "Annual budget growth %/yr",
+      "body": "Annual increase of your available budget (salary raises). Grows the ETF surplus each year. 0% = fixed budget."
     },
     "investirSurplus": {
       "title": "Invest surplus in ETF",

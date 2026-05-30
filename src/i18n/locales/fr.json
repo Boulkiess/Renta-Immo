@@ -37,6 +37,7 @@
     "loyerPerso": "Loyer actuel payé",
     "revalLoyerPerso": "Reval. loyer",
     "budgetMensuel": "Budget mensuel",
+    "revalBudget": "Reval. budget",
     "investirSurplus": "Surplus→ETF",
     "apportETF": "Apport ETF pur",
     "units": {
@@ -125,6 +126,10 @@
     "budgetMensuel": {
       "title": "Budget mensuel logement+investissement",
       "body": "Enveloppe mensuelle fixe. Le surplus non consommé par les coûts réels est automatiquement investi en ETF."
+    },
+    "revalBudget": {
+      "title": "Revalorisation annuelle du budget %/an",
+      "body": "Hausse annuelle du budget disponible (augmentations de salaire). Augmente le surplus investi en ETF chaque année. 0% = budget fixe."
     },
     "investirSurplus": {
       "title": "Investir le surplus en ETF",
