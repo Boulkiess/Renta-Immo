@@ -47,17 +47,24 @@ const SimsPane = styled.div`
 `;
 
 export default function App() {
-  const [theme, setTheme] = useState(darkTheme);
+  const [theme, setTheme] = useState(() =>
+    localStorage.getItem('immorenta_theme') === 'light' ? lightTheme : darkTheme
+  );
+
+  function toggleTheme() {
+    setTheme(t => {
+      const next = t.name === 'dark' ? lightTheme : darkTheme;
+      localStorage.setItem('immorenta_theme', next.name);
+      return next;
+    });
+  }
 
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
       <AppProvider>
         <AppWrap>
-          <NavBar
-            currentThemeName={theme.name}
-            onToggleTheme={() => setTheme(t => (t.name === 'dark' ? lightTheme : darkTheme))}
-          />
+          <NavBar currentThemeName={theme.name} onToggleTheme={toggleTheme} />
           <GlobalStrip />
           <Main>
             <SimsPane>

@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Persistance thème et langue** : le thème (dark/light) et la langue (fr/en) sont désormais sauvegardés dans `localStorage` (`immorenta_theme`, `immorenta_lang`) et restaurés automatiquement au rechargement de la page.
+
+### Added
+
 - **Onglet Amortissement — série "Capital remboursé"** : nouvelle courbe sur l'axe droit montrant le capital cumulativement remboursé (montant croissant, symétrique du capital restant dû). `drawBarsWithLine` accepte désormais un tableau de datasets ligne, chaque entrée portant une propriété `dashed` pour contrôler le style individuellement.
 
 ### Changed

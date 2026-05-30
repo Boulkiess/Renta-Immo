@@ -241,7 +241,10 @@ export default function NavBar({ currentThemeName, onToggleTheme }) {
             <LangBtn
               key={lng}
               $active={i18n.language === lng}
-              onClick={() => i18n.changeLanguage(lng)}
+              onClick={() => {
+                i18n.changeLanguage(lng);
+                localStorage.setItem('immorenta_lang', lng);
+              }}
             >
               {t(`lang.${lng}`)}
             </LangBtn>
