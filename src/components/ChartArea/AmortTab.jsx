@@ -2,7 +2,7 @@ import styled, { useTheme } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
 import { COL, KEYS } from '../../state/definitions.js';
-import { drawBars, drawLine } from '../../engine/charts.js';
+import { drawBarsWithLine } from '../../engine/charts.js';
 import CanvasChart from '../common/CanvasChart.jsx';
 
 const Wrap = styled.div`
@@ -75,11 +75,13 @@ const Swatch = styled.span`
   border-radius: 2px;
   background: ${({ $col }) => $col};
 `;
-
-const Divider = styled.div`
-  height: 1px;
-  background: ${({ theme }) => theme.border};
-  margin: 0 14px;
+const LineSwatch = styled.span`
+  display: inline-block;
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: ${({ $col }) => $col};
+  vertical-align: middle;
 `;
 
 function aggregateByYear(amort, duree) {
@@ -115,15 +117,17 @@ export default function AmortTab() {
         const r = RES[k];
         const { cap, inter, ass } = aggregateByYear(r.amort, p.duree);
         const amortX = Array.from({ length: p.duree }, (_, i) => String(i + 1));
-        const capX = r.flux.map(f => String(f.yr));
-        const capData = r.flux.map(f => f.rest);
+        const restByYear = Array.from({ length: p.duree }, (_, i) => {
+          const idx = (i + 1) * 12 - 1;
+          return idx < r.amort.length ? r.amort[idx].rest : 0;
+        });
 
         const amortDs = [
           { color: COL[k], label: t('amort.capital'), data: cap },
           { color: '#ffe600', label: t('amort.interets'), data: inter },
           { color: '#94a3b8', label: t('amort.assurance'), data: ass },
         ];
-        const capDs = [{ color: COL[k], label: t('amort.capital'), data: capData }];
+        const restDs = { color: '#f1f5f9', label: t('charts.amortCap.title'), data: restByYear };
 
         return (
           <SimBlock key={k}>
@@ -151,22 +155,15 @@ export default function AmortTab() {
                   <Swatch $col="#94a3b8" />
                   {t('amort.assurance')}
                 </LegItem>
+                <LegItem>
+                  <LineSwatch $col="#f1f5f9" />
+                  {t('charts.amortCap.title')}
+                </LegItem>
               </LegendRow>
               <CanvasChart
-                draw={c => drawBars(c, amortDs, amortX, true)}
+                draw={c => drawBarsWithLine(c, amortDs, restDs, amortX)}
                 deps={[r, p.duree, theme.name]}
-                height={180}
-              />
-            </ChartSection>
-
-            <Divider />
-
-            <ChartSection>
-              <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.amortCap.title') }} />
-              <CanvasChart
-                draw={c => drawLine(c, capDs, capX)}
-                deps={[r, p.duree, theme.name]}
-                height={120}
+                height={220}
               />
             </ChartSection>
           </SimBlock>

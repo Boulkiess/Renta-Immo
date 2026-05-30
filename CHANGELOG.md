@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Onglet Amortissement** : fusion des deux graphiques (décomposition annuelle et capital restant dû) en un seul graphique à double ordonnée. L'axe gauche donne l'échelle des barres empilées (capital / intérêts / assurance) ; l'axe droit donne l'échelle de la courbe pointillée du capital restant dû. Les deux séries partagent désormais le même horizon temporel (durée du prêt), ce qui rend la lecture plus naturelle.
+
 ### Added
 
 - **Setup clean code** : pipeline de qualité complète ajoutée au projet.

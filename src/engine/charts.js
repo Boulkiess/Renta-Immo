@@ -237,3 +237,96 @@ export function drawBars(canvas, datasets, xLabels, stacked) {
   }
   canvas._meta = { datasets: vis, xLabels, xS: i => p.l + (i + 0.5) * gW, dpr, W };
 }
+
+export function drawBarsWithLine(canvas, barDatasets, lineDataset, xLabels) {
+  if (!canvas) return;
+  const W = canvas.offsetWidth || 600,
+    H = canvas.offsetHeight || 220,
+    dpr = devicePixelRatio || 1;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const p = { l: 60, r: 56, t: 12, b: 26 },
+    cW = W - p.l - p.r,
+    cH = H - p.t - p.b,
+    n = xLabels.length,
+    gW = cW / n;
+  const vis = barDatasets.filter(d => !d.hide);
+  const mxBar =
+    (Math.max(...xLabels.map((_, i) => vis.reduce((s, d) => s + (d.data[i] || 0), 0))) || 1) * 1.1;
+  const lineVals = lineDataset.data.filter(v => v != null && isFinite(v));
+  const mxLine = lineVals.length ? Math.max(...lineVals) * 1.1 : 1;
+  const ySBar = v => p.t + cH - (v / mxBar) * cH;
+  const ySLine = v => p.t + cH - (v / mxLine) * cH;
+  const surfaceColor =
+    getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#0f172a';
+  const borderColor =
+    getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#1e293b';
+  const mutedColor =
+    getComputedStyle(document.documentElement).getPropertyValue('--subtle').trim() || '#4b5563';
+  ctx.fillStyle = surfaceColor;
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const y = p.t + (i / 5) * cH;
+    ctx.beginPath();
+    ctx.moveTo(p.l, y);
+    ctx.lineTo(W - p.r, y);
+    ctx.stroke();
+    ctx.fillStyle = mutedColor;
+    ctx.font = "10px 'DM Sans',sans-serif";
+    ctx.textAlign = 'right';
+    ctx.fillText(fmtK(mxBar * (1 - i / 5)), p.l - 4, y + 3.5);
+    ctx.fillStyle = lineDataset.color;
+    ctx.textAlign = 'left';
+    ctx.fillText(fmtK(mxLine * (1 - i / 5)), W - p.r + 4, y + 3.5);
+  }
+  const step = Math.max(1, Math.ceil(n / 8));
+  ctx.fillStyle = mutedColor;
+  ctx.textAlign = 'center';
+  xLabels.forEach((l, i) => {
+    if (i % step === 0 || i === n - 1) ctx.fillText(l, p.l + (i + 0.5) * gW, H - 5);
+  });
+  xLabels.forEach((_, i) => {
+    let base = 0;
+    vis.forEach(ds => {
+      const v = ds.data[i] || 0,
+        x = p.l + i * gW + gW * 0.08,
+        bW = gW * 0.84,
+        y = ySBar(base + v),
+        h = Math.max(0, ySBar(base) - ySBar(base + v));
+      if (h > 0.5) {
+        ctx.fillStyle = ds.color;
+        ctx.beginPath();
+        ctx.roundRect(x, y, bW, h, [0]);
+        ctx.fill();
+      }
+      base += v;
+    });
+  });
+  ctx.strokeStyle = lineDataset.color;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  let started = false;
+  lineDataset.data.forEach((v, i) => {
+    if (v == null || !isFinite(v)) return;
+    const x = p.l + (i + 0.5) * gW;
+    const y = ySLine(v);
+    started ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    started = true;
+  });
+  ctx.stroke();
+  ctx.setLineDash([]);
+  canvas._meta = {
+    datasets: [...vis, lineDataset],
+    xLabels,
+    xS: i => p.l + (i + 0.5) * gW,
+    dpr,
+    W,
+  };
+}
