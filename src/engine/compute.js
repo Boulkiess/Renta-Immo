@@ -163,6 +163,17 @@ export function calcMoic(flux, irrFlows, horizon, apport) {
 export function compute(p, g) {
   const ct = p.prixAchat + p.fraisNotaire + p.travaux + p.fraisAgence + (p.fraisDossier ?? 0);
   const emp = Math.max(0, ct - p.apport);
+  // Capital réellement immobilisé dans le bien : plafonné au coût total. Un apport
+  // qui dépasse `ct` (achat comptant sur-financé) laisse un reliquat de cash. Ce
+  // reliquat ne fait pas partie du rendement du bien (TRI/VAN/MOIC, patNet, bilans
+  // opérationnels restent calés sur apportInvesti).
+  const apportInvesti = Math.min(p.apport, ct);
+  // Reliquat d'apport au-delà du coût d'acquisition : investi en ETF si le toggle
+  // surplus→ETF est actif (sinon conservé en cash, hors modèle). Il alimente la
+  // poche ETF (patTotal / bilanTotal) ; la mise de départ totale devient alors
+  // apportInvesti + etfSeed (= p.apport quand le reliquat est investi).
+  const etfSeed = g.investirSurplus ? Math.max(0, p.apport - ct) : 0;
+  const apportTotal = apportInvesti + etfSeed;
   const tM = p.taux / 100 / 12,
     nM = p.duree * 12;
   const mens =
@@ -176,9 +187,9 @@ export function compute(p, g) {
   const flux = [];
   let cfC = 0;
   let irrCfC = 0; // cumul des flux ajustés (cfN + loyerPersoAnn) — base TRI/VAN/MOIC
-  const irrFlows = [-p.apport];
+  const irrFlows = [-apportInvesti];
   const rAlt = g.rendAlt / 100;
-  let etfCap = 0;
+  let etfCap = etfSeed; // reliquat d'apport investi en ETF dès l'année 0 (compose comme apportETF)
   let amortReport = 0; // report d'amortissement LMNP non utilisé (années déficitaires)
 
   for (let yr = 1; yr <= 30; yr++) {
@@ -227,12 +238,12 @@ export function compute(p, g) {
 
     const { pr, reventeNet } = computeResale(p, rest, yr);
     irrCfC += cfN + loyerPersoAnn;
-    const bilanRevente = reventeNet + cfC - p.apport;
-    const bilanTotal = reventeNet + etfCap - p.apport;
+    const bilanRevente = reventeNet + cfC - apportInvesti;
+    const bilanTotal = reventeNet + etfCap - apportTotal;
     // bilanCash : bilan revente en cash sur la même base que TRI/VAN/MOIC — le
     // loyer perso (LOC : coût subi / RP : loyer économisé) est réintégré, ce qui
     // rend le passage à zéro interprétable comme « durée de détention pour ne pas perdre ».
-    const bilanCash = reventeNet + irrCfC - p.apport;
+    const bilanCash = reventeNet + irrCfC - apportInvesti;
     const patTotal = vb - rest + etfCap;
 
     flux.push({
@@ -243,10 +254,10 @@ export function compute(p, g) {
       imp,
       cfN,
       cfC,
-      coc: p.apport > 0 ? (cfN / p.apport) * 100 : null,
+      coc: apportInvesti > 0 ? (cfN / apportInvesti) * 100 : null,
       vb,
       rest,
-      patNet: vb - rest + cfC - p.apport,
+      patNet: vb - rest + cfC - apportInvesti,
       patTotal,
       etfPoche: etfCap,
       reventeNet,
@@ -298,7 +309,7 @@ export function compute(p, g) {
     tri15: calcTRI(flux, irrFlows, 15),
     tri20: calcTRI(flux, irrFlows, 20),
     van: calcVAN(flux, irrFlows, g, g.horizon),
-    moic: calcMoic(flux, irrFlows, g.horizon, p.apport),
+    moic: calcMoic(flux, irrFlows, g.horizon, apportInvesti),
     revente: flux.map(f => ({ yr: f.yr, pr: f.pr, rest: f.rest, bilanRevente: f.bilanRevente })),
   };
 }

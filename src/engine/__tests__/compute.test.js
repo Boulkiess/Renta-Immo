@@ -123,6 +123,66 @@ describe('compute() — mensualité de crédit (annuité constante)', () => {
   });
 });
 
+describe('compute() — apport plafonné au coût total (sur-financement)', () => {
+  const base = makeLoc({
+    prixAchat: 200000,
+    fraisNotaire: 15000,
+    travaux: 10000,
+    fraisAgence: 0,
+    fraisDossier: 0,
+  });
+  const ct = 200000 + 15000 + 10000; // 225000
+  const excess = 80000;
+
+  // Bien acheté comptant : une fois l'apport ≥ ct, le crédit est nul. Le reliquat
+  // d'apport n'appartient pas au rendement du bien : les métriques opérationnelles
+  // (TRI/VAN/MOIC, patNet, coc, bilans hors ETF) ne doivent PAS bouger.
+  it('le reliquat ne touche pas les métriques opérationnelles du bien', () => {
+    const atCt = compute({ ...base, apport: ct }, makeG());
+    const above = compute({ ...base, apport: ct + excess }, makeG());
+
+    expect(above.emp).toBe(0);
+    expect(atCt.emp).toBe(0);
+    expect(above.tri10).toBe(atCt.tri10);
+    expect(above.tri20).toBe(atCt.tri20);
+    expect(above.van).toBe(atCt.van);
+    expect(above.moic).toBe(atCt.moic);
+    expect(above.beRevente).toBe(atCt.beRevente);
+    above.flux.forEach((f, i) => {
+      expect(f.patNet).toBeCloseTo(atCt.flux[i].patNet, 6);
+      expect(f.coc).toBeCloseTo(atCt.flux[i].coc, 6);
+      expect(f.bilanRevente).toBeCloseTo(atCt.flux[i].bilanRevente, 6);
+      expect(f.bilanCash).toBeCloseTo(atCt.flux[i].bilanCash, 6);
+    });
+  });
+
+  // Toggle surplus→ETF actif : le reliquat est investi en ETF dès l'année 0 et
+  // compose au rendAlt. patTotal gagne le reliquat composé ; bilanTotal gagne ce
+  // même montant moins la mise supplémentaire (le reliquat est aussi un coût).
+  it('investit le reliquat en ETF quand investirSurplus est actif', () => {
+    const g = makeG({ investirSurplus: true, rendAlt: 6 });
+    const atCt = compute({ ...base, apport: ct }, g);
+    const above = compute({ ...base, apport: ct + excess }, g);
+    above.flux.forEach((f, i) => {
+      const compounded = excess * Math.pow(1.06, i + 1);
+      expect(f.patTotal).toBeCloseTo(atCt.flux[i].patTotal + compounded, 4);
+      expect(f.etfPoche).toBeCloseTo(atCt.flux[i].etfPoche + compounded, 4);
+      expect(f.bilanTotal).toBeCloseTo(atCt.flux[i].bilanTotal + compounded - excess, 4);
+    });
+  });
+
+  // Toggle désactivé : le reliquat reste du cash hors modèle → aucune courbe ne bouge.
+  it('ignore le reliquat quand investirSurplus est désactivé', () => {
+    const g = makeG({ investirSurplus: false });
+    const atCt = compute({ ...base, apport: ct }, g);
+    const above = compute({ ...base, apport: ct + excess }, g);
+    above.flux.forEach((f, i) => {
+      expect(f.patTotal).toBeCloseTo(atCt.flux[i].patTotal, 6);
+      expect(f.bilanTotal).toBeCloseTo(atCt.flux[i].bilanTotal, 6);
+    });
+  });
+});
+
 describe('compute() — report de déficit LMNP', () => {
   it('déduit amortissements + reporte les déficits → impôt ≤ régime nu chaque année', () => {
     const lmnp = compute(makeLoc(), makeG({ regime: 'lmnp' }));

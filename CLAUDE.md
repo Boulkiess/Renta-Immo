@@ -167,9 +167,16 @@ Toutes les formules ci-dessous sont implémentées dans `engine/compute.js`. ✅
 ### Coût et emprunt
 
 ```
-ct  = prixAchat + fraisNotaire + travaux + fraisAgence + fraisDossier   ✅ coût total d'acquisition
-emp = max(0, ct − apport)                                                ✅ montant emprunté
+ct            = prixAchat + fraisNotaire + travaux + fraisAgence + fraisDossier   ✅ coût total d'acquisition
+emp           = max(0, ct − apport)                                              ✅ montant emprunté
+apportInvesti = min(apport, ct)                                                   ✅ capital immobilisé dans le bien
+etfSeed       = investirSurplus ? max(0, apport − ct) : 0                          ✅ reliquat investi en ETF
+apportTotal   = apportInvesti + etfSeed                                           ✅ mise de départ totale
 ```
+
+**`apportInvesti` (capital plafonné)** : un apport qui dépasse `ct` (achat comptant sur-financé) laisse un reliquat de cash. Au-delà de `ct`, le crédit est déjà nul ; ce reliquat ne fait pas partie du rendement du bien. Les métriques **opérationnelles** — `patNet`, `bilanRevente`, `bilanCash`, dénominateur de `coc`/`MOIC`, flux initial du TRI/VAN — utilisent **`apportInvesti`**, jamais `p.apport`.
+
+**`etfSeed` (reliquat → ETF)** : si le toggle `investirSurplus` est actif, le reliquat `max(0, apport − ct)` est investi dans la poche ETF dès l'année 0 (`etfCap` démarre à `etfSeed` au lieu de 0) et compose au `rendAlt` comme `apportETF`. Sinon il reste du cash hors modèle (`etfSeed = 0`). Les métriques **patrimoniales totales** qui incluent la poche ETF — `patTotal` (brut) et `bilanTotal` (`reventeNet + etfCap − apportTotal`) — reflètent donc ce reliquat composé, avec `apportTotal` comme mise de départ. Conséquence : au-delà de `ct`, les métriques opérationnelles sont figées ; seules `patTotal`/`bilanTotal` évoluent, et uniquement si le reliquat est effectivement investi.
 
 ### Mensualité crédit (annuité constante) ✅
 
@@ -286,7 +293,7 @@ surplusAnn  = max(0, budgetAnn − realOutAnn)
 etfCap[yr]  = etfCap[yr-1] × (1 + rendAlt/100) + (investirSurplus ? surplusAnn : 0)
 ```
 
-`etfCap` démarre à 0 dans `compute()` (l'apport est investi dans le bien, pas en ETF).
+`etfCap` démarre à `etfSeed` dans `compute()` — soit 0 (cas normal : l'apport est investi dans le bien), soit le reliquat d'apport au-delà de `ct` quand `investirSurplus` est actif (cf. § « Coût et emprunt »).
 
 ### Valeur du bien et revente ⚠️
 
@@ -322,10 +329,12 @@ reventeNet = pr − capitalRestant − fa − iPV                ✅
 ### Bilans à la revente ✅
 
 ```
-bilanRevente = reventeNet + cfC    − apport   (gain net opérationnel : vente + flux cumulés bruts − mise de départ)
-bilanTotal   = reventeNet + etfCap  − apport   (gain net global : vente + ETF accumulé − mise de départ)
-bilanCash    = reventeNet + irrCfC  − apport   (gain net cash, base TRI/VAN : irrCfC = Σ(cfN + loyerPersoAnn))
+bilanRevente = reventeNet + cfC    − apportInvesti   (gain net opérationnel : vente + flux cumulés bruts − mise dans le bien)
+bilanTotal   = reventeNet + etfCap  − apportTotal     (gain net global : vente + ETF accumulé − mise de départ totale)
+bilanCash    = reventeNet + irrCfC  − apportInvesti   (gain net cash, base TRI/VAN : irrCfC = Σ(cfN + loyerPersoAnn))
 ```
+
+Note : ces bilans soustraient `apportInvesti` (capital dans le bien), sauf `bilanTotal` qui soustrait `apportTotal` (capital bien + reliquat ETF) car son `etfCap` inclut le reliquat investi — cf. § « Coût et emprunt ». Dans le cas normal `apport ≤ ct`, `apportInvesti = apportTotal = apport` : ces formules se réduisent à `− apport`.
 
 `bilanRevente` suppose que les flux positifs restent en cash (flux **bruts** `cfC`, loyer perso inclus comme coût). `bilanTotal` suppose qu'ils sont réinvestis en ETF (via le mécanisme surplus). Ces deux métriques sont affichées dans **KpisTab** (section Patrimoine) à l'horizon choisi.
 
@@ -533,7 +542,8 @@ Durée de détention minimale pour que la revente ne soit pas perdante (en nomin
 - **`compute()` est une fonction pure** : ne jamais y introduire de side effects ni d'état.
 - **`flux[]` est indexé 0-based** : `flux[0]` = année 1, `flux[yr-1]` = année yr.
 - **`amort[]` est mensuel** : `amort[m-1]` = mois m. Pour l'année yr, le capital restant de fin d'année est `amort[yr×12 - 1].rest`.
-- **`etfCap` démarre à 0** dans `compute()`, jamais à `apportETF` (l'apport est immobilisé dans le bien).
+- **`etfCap` démarre à `etfSeed`** dans `compute()` (0 dans le cas normal, jamais `apportETF`). `etfSeed > 0` uniquement quand `apport > ct` ET `investirSurplus` actif — le reliquat d'apport est alors investi en ETF (cf. § « Coût et emprunt »).
+- **Apport sur-financé** : `apportInvesti = min(apport, ct)` pour les métriques opérationnelles ; `apportTotal = apportInvesti + etfSeed` pour `bilanTotal`. Ne jamais utiliser `p.apport` brut dans le moteur — toujours l'une de ces deux grandeurs plafonnées.
 - **`reventeNet` utilise `pr` (avec travaux)**, pas `vb` (sans travaux). Ne jamais substituer.
 - **RP : `cfN` est toujours ≤ 0**, le loyer économisé est stocké dans `le` pour affichage mais n'entre pas dans `cfN`.
 - La **valeur résiduelle du capital restant** après la durée du prêt est 0 : `amort[nM-1].rest ≈ 0`.
