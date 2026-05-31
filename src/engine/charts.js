@@ -1,6 +1,6 @@
 import { fmtK } from './utils.js';
 
-export function drawLine(canvas, datasets, xLabels, annotations = []) {
+export function drawLine(canvas, datasets, xLabels, annotations = [], opts = {}) {
   if (!canvas) return;
   const W = canvas.offsetWidth || 600,
     H = canvas.offsetHeight || 220,
@@ -23,8 +23,10 @@ export function drawLine(canvas, datasets, xLabels, annotations = []) {
   }
   let mn = Math.min(...all),
     mx = Math.max(...all);
+  // baseZero anchors the y-axis at 0 (origin visible) instead of auto-scaling to the data min.
+  if (opts.baseZero) mn = Math.min(0, mn);
   const rng = mx - mn || 1;
-  mn -= rng * 0.07;
+  if (!opts.baseZero) mn -= rng * 0.07;
   mx += rng * 0.07;
   const xS = i => p.l + (i / Math.max(xLabels.length - 1, 1)) * cW;
   const yS = v => p.t + cH - ((v - mn) / (mx - mn)) * cH;

@@ -19,6 +19,7 @@
 
 ### Changed
 
+- **Graphe « Valeur du bien dans le temps »** : l'axe Y est désormais ancré à 0 (origine visible) au lieu de s'auto-caler sur le minimum des données. Nouvelle option `baseZero` sur `drawLine` (`engine/charts.js`), appliquée uniquement à ce graphe ; les trois autres courbes de l'onglet Comparaison conservent l'auto-scaling.
 - **Découpe des god-components** (comportement strictement inchangé — golden-master + filet jsdom verts) :
   - `ChartArea/KpisTab.jsx` (541 l.) → dossier `KpisTab/` : `index.jsx` (orchestration), `kpiSections.js` (données pures, `t` injecté), `KpiTable.jsx`, `KpiRow.jsx`, `SummaryCards.jsx`, `kpiFormat.js`, `KpisTab.styles.js`.
   - `SimPanel/SimPanel.jsx` (421 l.) → dispatcher mince + `DisabledPanel`/`CollapsedPanel`/`FullPanel`/`HeaderKpis`, styles dans `SimPanel.styles.js`, icônes SVG partagées dans `icons.jsx`. Suppression de la copie locale de `fmtE` (import depuis `engine/utils`).

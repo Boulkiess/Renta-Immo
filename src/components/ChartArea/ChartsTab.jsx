@@ -152,7 +152,10 @@ export default function ChartsTab() {
             }}
           />
         )}
-        <CanvasChart draw={c => drawLine(c, vbDs(), X_LABELS)} deps={deps} />
+        <CanvasChart
+          draw={c => drawLine(c, vbDs(), X_LABELS, [], { baseZero: true })}
+          deps={deps}
+        />
       </Card>
     </Grid>
   );
