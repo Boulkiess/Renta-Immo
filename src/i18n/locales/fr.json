@@ -346,8 +346,8 @@
     },
     "kpi.coc": {
       "title": "Cash-on-cash return (an 1)",
-      "body": "Rendement annuel du flux net opérationnel de l'année 1 rapporté à l'apport initial. Indicateur simple et immédiat : combien rapporte le bien en cash cette année par euro investi. Ne tient pas compte de la valeur de revente ni de l'actualisation.",
-      "code": "coc = cfN[an 1] / apport × 100"
+      "body": "Rendement annuel du flux net opérationnel de l'année 1 rapporté à l'apport initial. Indicateur simple et immédiat : combien rapporte le bien en cash cette année par euro investi. Ne tient pas compte de la valeur de revente ni de l'actualisation. Colonne ETF : un ETF capitalisant ne distribue aucun cash, le seul décaissement réel de l'année est le loyer perso → −loyerPerso / apportETF (effort cash, négatif).",
+      "code": "coc = cfN[an 1] / apport × 100   (ETF : −loyerPerso×12 / apportETF × 100)"
     },
     "kpi.beRevente": {
       "title": "Break-even revente",

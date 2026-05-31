@@ -349,8 +349,8 @@
     },
     "kpi.coc": {
       "title": "Cash-on-cash return (yr 1)",
-      "body": "Annual yield of the year-1 net operating cash flow relative to the initial down payment. Simple and immediate: how much cash the property generates per euro invested this year. Does not account for resale value or time value of money.",
-      "code": "coc = cfN[yr 1] / downPayment × 100"
+      "body": "Annual yield of the year-1 net operating cash flow relative to the initial down payment. Simple and immediate: how much cash the property generates per euro invested this year. Does not account for resale value or time value of money. ETF column: a capitalising ETF distributes no cash, so the only real year-1 outflow is the personal rent → −personalRent / etfDownPayment (cash effort, negative).",
+      "code": "coc = cfN[yr 1] / downPayment × 100   (ETF: −personalRent×12 / etfDownPayment × 100)"
     },
     "kpi.beRevente": {
       "title": "Resale break-even",

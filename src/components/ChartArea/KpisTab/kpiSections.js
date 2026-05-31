@@ -102,7 +102,10 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
           better: 'max',
           neg: true,
           tooltipKey: 'kpi.coc',
-          etfVal: null,
+          // ETF: effort cash year 1 mirroring the immo cfN (which subtracts loyerPerso)
+          // → only real outflow is the personal rent, no cash distributed by a capitalising ETF.
+          etfVal: G.apportETF > 0 ? (-(G.loyerPerso * 12) / G.apportETF) * 100 : null,
+          etfFmt: v => fmtP(v),
         },
         {
           label: t('kpisTable.effortRP'),
