@@ -5,9 +5,9 @@ Items identifiés lors de l'audit clean-code (cf. plan de refactoring) mais hors
 
 ## Découpe des god-functions / god-components
 
-- [ ] **`compute()`** (~171 l.) → sous-fonctions pures : amortissement, cashflow loc/rp, plus-value, TRI/VAN/MOIC.
-- [ ] **`KpisTab.jsx`** (~540 l.) → sous-composants + sortir la math ETF (TRI/VAN/MOIC) du composant vers le moteur.
-- [ ] **`SimPanel.jsx` / `GlobalStrip.jsx` / `FieldGroup.jsx`** → styled-components externalisés + sous-composants data-driven.
+- [x] **`compute()`** → îlots purs exportés (`buildAmortization`, `computeResale`, `calcTRI/VAN/calcMoic`) + boucle 30 ans orchestratrice ; `surplusAt`/`computeEtfKpis` extraits.
+- [x] **`KpisTab.jsx`** → dossier `KpisTab/` (sous-composants + `kpiSections.js`) ; math ETF (TRI/VAN/MOIC) déplacée vers `engine/compute.js` (`computeEtfKpis`).
+- [x] **`SimPanel.jsx` / `GlobalStrip.jsx` / `FieldGroup.jsx`** → styled-components externalisés (`*.styles.js`) + SimPanel scindé en branches (Disabled/Collapsed/Full + HeaderKpis).
 
 ## Rendu & I/O
 
@@ -16,4 +16,4 @@ Items identifiés lors de l'audit clean-code (cf. plan de refactoring) mais hors
 
 ## Tests
 
-- [ ] **Tests composants (jsdom)** : interaction drag (clamp, shift×10), toggle auto-field, round-trip import→state.
+- [x] **Tests composants (jsdom)** : harness `renderWithProviders` + tests `KpisTab`/`SimPanel`/`GlobalStrip`/`FieldGroup` (toggle auto-field, slider, flèches shift×10) ; math drag (clamp/shift×10) testée via `nextDragValue`. _Reste à faire : round-trip import→state._

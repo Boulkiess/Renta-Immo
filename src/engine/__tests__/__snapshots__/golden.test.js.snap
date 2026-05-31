@@ -4144,6 +4144,36 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
 }
 `;
 
+exports[`golden-master — computeEtfKpis() > KPIs ETF à horizon 10 1`] = `
+{
+  "moic": 2.7788552032196816,
+  "surplusTotal": 181743.01320283115,
+  "tri": 0.06,
+  "triReal": 0.03921568627450989,
+  "van": 43781.50329358442,
+}
+`;
+
+exports[`golden-master — computeEtfKpis() > KPIs ETF à horizon 20 1`] = `
+{
+  "moic": 8.22811129473654,
+  "surplusTotal": 337588.40617168864,
+  "tri": 0.06,
+  "triReal": 0.03921568627450989,
+  "van": 145380.92441504973,
+}
+`;
+
+exports[`golden-master — computeEtfKpis() > KPIs ETF à horizon 30 1`] = `
+{
+  "moic": 19.880255387809346,
+  "surplusTotal": 461864.7445841888,
+  "tri": 0.06,
+  "triReal": 0.03921568627450989,
+  "van": 307735.4902120737,
+}
+`;
+
 exports[`golden-master — computeEtfPur() > scénario ETF de référence (30 ans) 1`] = `
 [
   {

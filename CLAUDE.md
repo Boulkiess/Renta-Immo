@@ -49,8 +49,9 @@ src/
     AppContext.jsx       React context: sims, G (globals), dispatch actions
     definitions.js      mkDef(), GRP_COMMON/LOC/RP, field metadata, I (info registry)
   engine/
-    compute.js          Financial engine: compute(p,g), computeEtfPur(g), crossoverYear()
-                        + helpers exportés (testables): irr(), abattementIR/PS(), impLoc()
+    compute.js          Financial engine: compute(p,g), computeEtfPur(g), computeEtfKpis(g), crossoverYear()
+                        + helpers exportés (testables): irr(), abattementIR/PS(), impLoc(), surplusAt(),
+                          buildAmortization(), computeResale(), calcTRI(), calcVAN(), calcMoic()
     charts.js           Canvas renderers: drawLine(), drawBars(), attachHover()
     utils.js            Formatters: fmtE(), fmtK(), fmtP(), fmtTRI()
     io.js               Export/import handlers (CSV, JSON, YAML)
@@ -368,7 +369,7 @@ La fonction retourne deux valeurs par année :
 
 ### Colonne ETF pur — KpisTab ✅
 
-Le tableau de l'onglet Comparaison affiche une colonne **ETF pur** à droite des colonnes simulation. Les valeurs sont calculées **dans `KpisTab.jsx`** (pas dans `compute.js`) à partir de `etfPurGlobal` et `G`.
+Le tableau de l'onglet Comparaison affiche une colonne **ETF pur** à droite des colonnes simulation. Les KPIs financiers ETF (TRI/VAN/MOIC) sont calculés **dans `engine/compute.js` via `computeEtfKpis(g)`** (déplacés du composant vers le moteur pour passer sous le golden-master). `KpisTab/index.jsx` appelle `computeEtfKpis(G)` et passe le résultat à `buildSections()`. Les lignes simples (rendement, CF) restent dérivées de `G` dans `kpiSections.js`.
 
 #### Rendements & Cashflow
 

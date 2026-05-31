@@ -13,6 +13,16 @@ const ABAT_FULL = 100; // exonération totale
 // Revalorisation composée : base × (1 + taux%)^périodes
 const revalorise = (base, ratePct, periods) => base * Math.pow(1 + ratePct / 100, periods);
 
+// Surplus annuel du scénario de RÉFÉRENCE ETF : budget revalorisé − loyer perso revalorisé.
+// ⚠️ Ne PAS confondre avec le surplus in-loop de compute() (budget − sorties réelles du bien) :
+// ce sont deux grandeurs distinctes. surplusAt() unifie uniquement computeEtfPur + computeEtfKpis.
+export const surplusAt = (g, yr) =>
+  Math.max(
+    0,
+    revalorise(g.budgetMensuel * 12, g.revalBudget, yr - 1) -
+      revalorise(g.loyerPerso * 12, g.revalLoyerPerso, yr - 1)
+  );
+
 export function irr(flows, guess = 0.1, maxIter = 100, tol = 1e-7) {
   let r = guess;
   for (let i = 0; i < maxIter; i++) {
@@ -60,9 +70,7 @@ export function computeEtfPur(g) {
   let totalContribs = g.apportETF;
   const r = g.rendAlt / 100;
   for (let yr = 1; yr <= 30; yr++) {
-    const lpa = revalorise(g.loyerPerso * 12, g.revalLoyerPerso, yr - 1);
-    const budgetAnn = revalorise(g.budgetMensuel * 12, g.revalBudget, yr - 1);
-    const surplus = Math.max(0, budgetAnn - lpa);
+    const surplus = surplusAt(g, yr);
     cap = cap * (1 + r) + surplus;
     totalContribs += surplus;
     const gain = Math.max(0, cap - totalContribs);
@@ -70,6 +78,86 @@ export function computeEtfPur(g) {
     result.push({ yr, cap, capNet });
   }
   return result;
+}
+
+// KPIs ETF (TRI/VAN/MOIC) à l'horizon g.horizon — déplacés depuis KpisTab.jsx pour
+// passer sous le filet golden-master. Voir CLAUDE.md § « Colonne ETF pur — KpisTab ».
+//   TRI_ETF      = rendAlt (exact : les flux ETF s'annulent en VPN au taux rendAlt)
+//   TRI_real_ETF = (1 + rendAlt) / (1 + inflation) − 1
+//   VAN_ETF      = −apportETF + Σ (−surplusAt) / (1+tauxActu)^t + cap[hz] / (1+tauxActu)^hz
+//   MOIC_ETF     = (cap[hz] − Σ surplusAt) / apportETF   (null si apportETF = 0)
+export function computeEtfKpis(g) {
+  const hz = g.horizon;
+  const capHz = computeEtfPur(g)[hz - 1]?.cap ?? 0;
+  const tri = g.rendAlt / 100;
+  const triReal = (1 + tri) / (1 + g.inflation / 100) - 1;
+  let van = -g.apportETF;
+  let surplusTotal = 0;
+  for (let t = 1; t <= hz; t++) {
+    const s = surplusAt(g, t);
+    van += -s / Math.pow(1 + g.tauxActu / 100, t);
+    surplusTotal += s;
+  }
+  van += capHz / Math.pow(1 + g.tauxActu / 100, hz);
+  const moic = g.apportETF > 0 ? (capHz - surplusTotal) / g.apportETF : null;
+  return { tri, triReal, van, moic, surplusTotal };
+}
+
+// ── Îlots purs extraits de compute() (testés transitivement via golden-master) ──
+
+// Tableau d'amortissement mensuel (annuité constante). amort[m-1] = mois m.
+// Boucle ≥ 12 mois pour garantir au moins une année même sur prêt très court.
+export function buildAmortization(emp, tM, nM, mens, assM) {
+  const amort = [];
+  let cap = emp;
+  for (let m = 1; m <= Math.max(nM, 12); m++) {
+    const inter = cap * tM;
+    const capM = Math.max(0, mens - inter);
+    cap = Math.max(0, cap - capM);
+    amort.push({ inter, cap: capM, assur: assM, rest: cap });
+  }
+  return amort;
+}
+
+// Revente à l'année yr : prix de revente (travaux inclus), frais, plus-value
+// imposée puis produit net. iPV avec abattements progressifs en mode 'loc' ; RP exonérée.
+export function computeResale(p, rest, yr) {
+  const pr = revalorise(p.prixAchat + p.travaux, p.revalBien, yr);
+  const fa = pr * (p.fraisVente / 100);
+  const pvB = Math.max(0, pr - p.prixAchat - p.travaux);
+  let iPV = 0;
+  if (p.mode === 'loc') {
+    const abIR = Math.min(100, abattementIR(yr));
+    const abPS = Math.min(100, abattementPS(yr));
+    iPV = (pvB * (p.impotPV * (1 - abIR / 100) + p.psPV * (1 - abPS / 100))) / 100;
+  }
+  return { pr, fa, reventeNet: pr - rest - fa - iPV };
+}
+
+// TRI / VAN / MOIC à un horizon. Purs. flux 0-based ; irrFlows[0] = −apport.
+export function calcTRI(flux, irrFlows, horizon) {
+  if (horizon > 30 || horizon < 1) return null;
+  const flows = [...irrFlows.slice(0, horizon + 1)];
+  flows[horizon] += flux[horizon - 1].reventeNet;
+  return irr(flows);
+}
+
+export function calcVAN(flux, irrFlows, g, horizon) {
+  if (horizon > 30 || horizon < 1) return null;
+  const r = g.tauxActu / 100;
+  let van = irrFlows[0]; // −apport
+  for (let t = 1; t <= horizon && t <= 30; t++) {
+    let cf = irrFlows[t]; // mêmes flux que le TRI : loyerPersoAnn réintégré
+    if (t === horizon) cf += flux[t - 1].reventeNet;
+    van += cf / Math.pow(1 + r, t);
+  }
+  return van;
+}
+
+export function calcMoic(flux, irrFlows, horizon, apport) {
+  const last = flux[horizon - 1];
+  if (!last) return 0;
+  return (last.reventeNet + irrFlows.slice(1, horizon + 1).reduce((a, b) => a + b, 0)) / apport;
 }
 
 export function compute(p, g) {
@@ -81,14 +169,7 @@ export function compute(p, g) {
     emp > 0 && tM > 0 ? (emp * tM) / (1 - Math.pow(1 + tM, -nM)) : emp > 0 ? emp / nM : 0;
   const assM = (emp * (p.assurance / 100)) / 12;
 
-  const amort = [];
-  let cap = emp;
-  for (let m = 1; m <= Math.max(nM, 12); m++) {
-    const inter = cap * tM,
-      capM = Math.max(0, mens - inter);
-    cap = Math.max(0, cap - capM);
-    amort.push({ inter, cap: capM, assur: assM, rest: cap });
-  }
+  const amort = buildAmortization(emp, tM, nM, mens, assM);
 
   const ab = p.prixAchat * (p.amortBien / 100),
     at = p.travaux * (p.amortTravaux / 100);
@@ -143,16 +224,7 @@ export function compute(p, g) {
     const surplusAnn = Math.max(0, budgetAnn - realOutAnn);
     etfCap = etfCap * (1 + rAlt) + (g.investirSurplus ? surplusAnn : 0);
 
-    const pr = revalorise(p.prixAchat + p.travaux, p.revalBien, yr);
-    const fa = pr * (p.fraisVente / 100);
-    const pvB = Math.max(0, pr - p.prixAchat - p.travaux);
-    let iPV = 0;
-    if (p.mode === 'loc') {
-      const abIR = Math.min(100, abattementIR(yr));
-      const abPS = Math.min(100, abattementPS(yr));
-      iPV = (pvB * (p.impotPV * (1 - abIR / 100) + p.psPV * (1 - abPS / 100))) / 100;
-    }
-    const reventeNet = pr - rest - fa - iPV;
+    const { pr, reventeNet } = computeResale(p, rest, yr);
     const bilanRevente = reventeNet + cfC - p.apport;
     const bilanTotal = reventeNet + etfCap - p.apport;
     const patTotal = vb - rest + etfCap;
@@ -181,25 +253,6 @@ export function compute(p, g) {
     // LOC: removes personal rent from costs (sunk cost unrelated to the investment)
     // RP: adds saved rent as a benefit (you no longer pay it)
     irrFlows.push(cfN + loyerPersoAnn);
-  }
-
-  function calcTRI(horizon) {
-    if (horizon > 30 || horizon < 1) return null;
-    const flows = [...irrFlows.slice(0, horizon + 1)];
-    flows[horizon] += flux[horizon - 1].reventeNet;
-    return irr(flows);
-  }
-
-  function calcVAN(horizon) {
-    if (horizon > 30 || horizon < 1) return null;
-    const r = g.tauxActu / 100;
-    let van = irrFlows[0]; // -apport
-    for (let t = 1; t <= horizon && t <= 30; t++) {
-      let cf = irrFlows[t]; // same flows as TRI: loyerPersoAnn excluded in LOC mode
-      if (t === horizon) cf += flux[t - 1].reventeNet;
-      van += cf / Math.pow(1 + r, t);
-    }
-    return van;
   }
 
   const totInt = amort.reduce((s, m) => s + m.inter, 0);
@@ -232,15 +285,11 @@ export function compute(p, g) {
     be: be >= 0 ? be + 1 : null,
     flux,
     amort,
-    tri10: calcTRI(10),
-    tri15: calcTRI(15),
-    tri20: calcTRI(20),
-    van: calcVAN(g.horizon),
-    moic: flux[g.horizon - 1]
-      ? (flux[g.horizon - 1].reventeNet +
-          irrFlows.slice(1, g.horizon + 1).reduce((a, b) => a + b, 0)) /
-        p.apport
-      : 0,
+    tri10: calcTRI(flux, irrFlows, 10),
+    tri15: calcTRI(flux, irrFlows, 15),
+    tri20: calcTRI(flux, irrFlows, 20),
+    van: calcVAN(flux, irrFlows, g, g.horizon),
+    moic: calcMoic(flux, irrFlows, g.horizon, p.apport),
     revente: flux.map(f => ({ yr: f.yr, pr: f.pr, rest: f.rest, bilanRevente: f.bilanRevente })),
   };
 }

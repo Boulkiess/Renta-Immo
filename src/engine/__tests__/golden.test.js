@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { compute, computeEtfPur } from '../compute.js';
+import { compute, computeEtfPur, computeEtfKpis } from '../compute.js';
 import { mkDef } from '../../state/definitions.js';
 
 // Golden-master : fige le comportement complet du moteur. Toute dérive lors d'un
@@ -52,5 +52,11 @@ describe('golden-master — compute()', () => {
 describe('golden-master — computeEtfPur()', () => {
   it('scénario ETF de référence (30 ans)', () => {
     expect(computeEtfPur(G)).toMatchSnapshot();
+  });
+});
+
+describe('golden-master — computeEtfKpis()', () => {
+  it.each([10, 20, 30])('KPIs ETF à horizon %i', hz => {
+    expect(computeEtfKpis({ ...G, horizon: hz })).toMatchSnapshot();
   });
 });

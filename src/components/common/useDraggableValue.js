@@ -10,6 +10,18 @@ export const stepDecimals = st => {
 };
 
 /**
+ * Math pure du glissement : applique un déplacement vertical à une valeur.
+ * `raw` accumule (non clampé) ; `clamped` est la valeur émise (bornée, arrondie).
+ * Shift ⇒ pas ×10. Extrait pour être testable sans DOM (cf. D7).
+ */
+export function nextDragValue(currentVal, movementY, step, shiftKey, min, max, dec) {
+  const mult = shiftKey ? 10 : 1;
+  const raw = currentVal - (movementY * mult * step) / PIXELS_PER_STEP;
+  const clamped = Math.min(max, Math.max(min, +raw.toFixed(dec)));
+  return { raw, clamped };
+}
+
+/**
  * Logique de glissement vertical (pointer-lock) pour ajuster une valeur numérique.
  * Mutualise le code dupliqué entre FieldGroup et GlobalStrip.
  * Retourne `{ onMouseDown }` à brancher sur l'élément déclencheur (ex. l'unité).
@@ -27,10 +39,17 @@ export function useDraggableValue({ val, min, max, step, onChange }) {
 
     const handleMove = mv => {
       if (!mv.movementY) return;
-      const mult = mv.shiftKey ? 10 : 1;
-      dragRef.current.currentVal -= (mv.movementY * mult * step) / PIXELS_PER_STEP;
-      const next = Math.min(max, Math.max(min, +dragRef.current.currentVal.toFixed(dec)));
-      onChange(next);
+      const { raw, clamped } = nextDragValue(
+        dragRef.current.currentVal,
+        mv.movementY,
+        step,
+        mv.shiftKey,
+        min,
+        max,
+        dec
+      );
+      dragRef.current.currentVal = raw;
+      onChange(clamped);
     };
 
     const cleanup = () => {

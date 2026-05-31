@@ -4,12 +4,20 @@
 
 ### Added
 
+- **Filet de tests composants (jsdom)** : harness `src/test-utils/renderWithProviders.jsx` (providers réels theme + i18n + AppContext, seed via localStorage) + `kpiNormalize.js`. Tests jsdom sur `KpisTab`, `SimPanel` (3 branches), `GlobalStrip`, `FieldGroup` (toggle auto, slider, flèches shift×10). Env `jsdom` par fichier via docblock `// @vitest-environment jsdom`, env moteur restant `node`. Suite passée de 40 à 91 tests.
+- `engine/compute.js` : `computeEtfKpis(g)` (TRI/VAN/MOIC ETF) et `surplusAt(g, yr)` (surplus annuel de référence ETF) extraits et exportés — testés (caractérisation paramétrée + golden-master). La math ETF quitte `KpisTab` pour le moteur.
+- `engine/compute.js` : îlots purs exportés `buildAmortization`, `computeResale`, `calcTRI`, `calcVAN`, `calcMoic` — `compute()` devient un orchestrateur mince autour de la boucle 30 ans.
+- `components/common/useDraggableValue.js` : `nextDragValue()` pur (math clamp/shift×10) extrait et testé sans DOM.
 - Filet de tests **Vitest** sur le moteur financier : assertions vérité-terrain (`irr`, abattements art. 150 VC CGI, `impLoc` 3 régimes, annuité, report LMNP, exonération PV) + golden-master figeant `compute`/`computeEtfPur` et `buildExportData` (`src/engine/__tests__/`). Scripts `npm run test` / `npm run test:watch`, intégrés à `npm run check` et au job `quality` de la CI.
 - `src/components/common/useDraggableValue.js` : hook mutualisant la logique de glissement (pointer-lock) auparavant dupliquée entre `FieldGroup` et `GlobalStrip`.
 - `TODO.md` : suivi des refactors différés (découpe des god-functions/composants, charts.js, io.js).
 
 ### Changed
 
+- **Découpe des god-components** (comportement strictement inchangé — golden-master + filet jsdom verts) :
+  - `ChartArea/KpisTab.jsx` (541 l.) → dossier `KpisTab/` : `index.jsx` (orchestration), `kpiSections.js` (données pures, `t` injecté), `KpiTable.jsx`, `KpiRow.jsx`, `SummaryCards.jsx`, `kpiFormat.js`, `KpisTab.styles.js`.
+  - `SimPanel/SimPanel.jsx` (421 l.) → dispatcher mince + `DisabledPanel`/`CollapsedPanel`/`FullPanel`/`HeaderKpis`, styles dans `SimPanel.styles.js`, icônes SVG partagées dans `icons.jsx`. Suppression de la copie locale de `fmtE` (import depuis `engine/utils`).
+  - `GlobalStrip.jsx` (405 l.) et `FieldGroup.jsx` (301 l.) : styled-components externalisés dans `*.styles.js`.
 - `engine/compute.js` : helpers purs (`irr`, `abattementIR`, `abattementPS`, `impLoc`) désormais exportés (testables) ; extraction d'un helper `revalorise()` et de constantes fiscales nommées (`PFU_RATE`, `MICROBIC_ABATTEMENT`, barème d'abattement) — comportement strictement inchangé (golden-master identique).
 
 ### Fixed

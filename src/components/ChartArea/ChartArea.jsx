@@ -3,7 +3,7 @@ import { useApp } from '../../state/AppContext.jsx';
 import { COL, KEYS } from '../../state/definitions.js';
 import Legend from '../Legend/Legend.jsx';
 import ChartsTab from './ChartsTab.jsx';
-import KpisTab from './KpisTab.jsx';
+import KpisTab from './KpisTab/index.jsx';
 import ReventeTab from './ReventeTab.jsx';
 import AmortTab from './AmortTab.jsx';
 

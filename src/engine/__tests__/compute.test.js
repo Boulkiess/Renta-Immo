@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { compute, computeEtfPur, irr, abattementIR, abattementPS, impLoc } from '../compute.js';
+import {
+  compute,
+  computeEtfPur,
+  computeEtfKpis,
+  surplusAt,
+  irr,
+  abattementIR,
+  abattementPS,
+  impLoc,
+} from '../compute.js';
 import { mkDef } from '../../state/definitions.js';
 
 // Globals par défaut (cf. CLAUDE.md) — surchargés au besoin dans chaque test.
@@ -198,5 +207,53 @@ describe('computeEtfPur() — scénario de référence ETF', () => {
     const etf = computeEtfPur(g);
     const gain = etf[0].cap - 60000;
     expect(etf[0].capNet).toBeCloseTo(etf[0].cap - gain * 0.3, 4);
+  });
+});
+
+describe('surplusAt() — surplus annuel de référence ETF (budget − loyer perso)', () => {
+  it('année 1 : budget − loyer perso, sans revalorisation', () => {
+    // 2500×12 − 900×12 = 30000 − 10800 = 19200
+    expect(surplusAt(makeG(), 1)).toBeCloseTo(19200, 6);
+  });
+
+  it('revalorise budget et loyer perso indépendamment', () => {
+    const g = makeG({ revalBudget: 1, revalLoyerPerso: 2 });
+    const expected = 2500 * 12 * Math.pow(1.01, 4) - 900 * 12 * Math.pow(1.02, 4);
+    expect(surplusAt(g, 5)).toBeCloseTo(expected, 6);
+  });
+
+  it('clampe à 0 quand le loyer perso dépasse le budget', () => {
+    expect(surplusAt(makeG({ budgetMensuel: 500, loyerPerso: 900 }), 1)).toBe(0);
+  });
+});
+
+describe('computeEtfKpis() — KPIs ETF (caractérisation + invariants)', () => {
+  it('TRI = rendAlt et TRI réel = (1+rendAlt)/(1+inflation)−1', () => {
+    const g = makeG({ rendAlt: 6, inflation: 2 });
+    const { tri, triReal } = computeEtfKpis(g);
+    expect(tri).toBeCloseTo(0.06, 12);
+    expect(triReal).toBeCloseTo(1.06 / 1.02 - 1, 12);
+  });
+
+  it('VAN = 0 quand tauxActu = rendAlt (invariant algébrique exact)', () => {
+    const g = makeG({ tauxActu: 6, rendAlt: 6 });
+    expect(computeEtfKpis(g).van).toBeCloseTo(0, 4);
+  });
+
+  it('MOIC = (1+rendAlt)^horizon quand le surplus est nul', () => {
+    // loyerPerso ≥ budget → surplus 0 → cap[hz] = apportETF×(1+r)^hz → MOIC = (1+r)^hz
+    const g = makeG({ budgetMensuel: 500, loyerPerso: 900, rendAlt: 6, horizon: 20 });
+    expect(computeEtfKpis(g).moic).toBeCloseTo(Math.pow(1.06, 20), 6);
+  });
+
+  it('MOIC = null quand apportETF = 0 (pas de division par zéro)', () => {
+    expect(computeEtfKpis(makeG({ apportETF: 0 })).moic).toBeNull();
+  });
+
+  it('horizon 30 : VAN et MOIC finis, surplus total positif', () => {
+    const { van, moic, surplusTotal } = computeEtfKpis(makeG({ horizon: 30 }));
+    expect(Number.isFinite(van)).toBe(true);
+    expect(Number.isFinite(moic)).toBe(true);
+    expect(surplusTotal).toBeGreaterThan(0);
   });
 });
