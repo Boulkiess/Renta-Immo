@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
 import { COL, KEYS } from '../../state/definitions.js';
 import { drawLine } from '../../engine/charts.js';
-import { fmtE, fmtK } from '../../engine/utils.js';
+import { fmtE, fmtK, deflate } from '../../engine/utils.js';
 import CanvasChart from '../common/CanvasChart.jsx';
 
 const Wrap = styled.div`
@@ -36,21 +36,25 @@ const KEY_YEARS = [5, 10, 15, 20, 25, 30];
 
 export default function ReventeTab() {
   const { t } = useTranslation();
-  const { sims, RES, etfPurGlobal } = useApp();
+  const { sims, RES, etfPurGlobal, G } = useApp();
   const theme = useTheme();
   const activeKeys = KEYS.filter(k => sims[k].enabled);
+
+  // In real mode, deflate each value by inflation (flux index i is year i+1).
+  const real = G.displayReal;
+  const dfl = (v, i) => (real ? deflate(v, i + 1, G.inflation) : v);
 
   function datasets() {
     const ds = activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map(f => f.bilanTotal),
+      data: RES[k].flux.map((f, i) => dfl(f.bilanTotal, i)),
     }));
     ds.push({
       color: '#94a3b8',
       dashed: true,
       label: 'ETF pur (net)',
-      data: etfPurGlobal.map(e => e.capNet),
+      data: etfPurGlobal.map((e, i) => dfl(e.capNet, i)),
     });
     return ds;
   }
@@ -59,7 +63,7 @@ export default function ReventeTab() {
     return activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map(f => f.bilanCash),
+      data: RES[k].flux.map((f, i) => dfl(f.bilanCash, i)),
     }));
   }
 
@@ -80,7 +84,7 @@ export default function ReventeTab() {
       <Desc dangerouslySetInnerHTML={{ __html: t('charts.revente.desc') }} />
       <CanvasChart
         draw={c => drawLine(c, datasets(), X_LABELS)}
-        deps={[sims, RES, etfPurGlobal, theme.name]}
+        deps={[sims, RES, etfPurGlobal, G, theme.name]}
         height={220}
       />
 
@@ -91,7 +95,7 @@ export default function ReventeTab() {
       <Desc dangerouslySetInnerHTML={{ __html: t('charts.reventeCash.desc') }} />
       <CanvasChart
         draw={c => drawLine(c, cashDatasets(), X_LABELS, cashAnnotations())}
-        deps={[sims, RES, theme.name]}
+        deps={[sims, RES, G, theme.name]}
         height={220}
       />
 

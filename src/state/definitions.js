@@ -14,6 +14,7 @@ export const DEFAULT_G = {
   revalCharges: 2,
   investirSurplus: true,
   apportETF: 60000,
+  displayReal: false,
 };
 
 export const AUTOABLE_FIELDS = new Set([

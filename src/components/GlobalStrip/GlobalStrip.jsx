@@ -76,6 +76,12 @@ export default function GlobalStrip() {
           </DraggableUnit>
         </Field>
 
+        <Field style={{ gap: 8 }}>
+          <InfoButton tooltipKey="displayReal" />
+          <Label>{t('global.displayReal')}</Label>
+          <Toggle checked={G.displayReal} onChange={v => updateG({ displayReal: v })} />
+        </Field>
+
         <Field>
           <InfoButton tooltipKey="regime" />
           <Label>{t('global.regime')}</Label>

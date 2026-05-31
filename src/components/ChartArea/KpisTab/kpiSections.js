@@ -29,6 +29,10 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
   const realTri = tri => (tri === null ? null : (1 + tri) / (1 + infl) - 1);
   const deflate = (v, yr) => (v == null ? null : v / Math.pow(1 + infl, yr));
 
+  // Nominal/real display toggle: in real mode, emphasize the real rows (color)
+  // and mute the nominal ones; in nominal mode, the reverse (current default).
+  const real = G.displayReal;
+
   return [
     {
       cat: t('kpisTable.coutTotal').startsWith('C') ? 'Coûts & Financement' : 'Costs & Financing',
@@ -126,6 +130,7 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.tri',
+          muted: real,
           etfVal: etfKpis.tri,
           etfFmt: v => fmtTRI(v),
         },
@@ -135,7 +140,7 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.triReal',
-          muted: true,
+          muted: !real,
           etfVal: etfKpis.triReal,
           etfFmt: v => fmtTRI(v),
         },
@@ -145,6 +150,7 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.tri',
+          muted: real,
           etfVal: etfKpis.tri,
           etfFmt: v => fmtTRI(v),
         },
@@ -154,7 +160,7 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.triReal',
-          muted: true,
+          muted: !real,
           etfVal: etfKpis.triReal,
           etfFmt: v => fmtTRI(v),
         },
@@ -164,6 +170,7 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.tri',
+          muted: real,
           etfVal: etfKpis.tri,
           etfFmt: v => fmtTRI(v),
         },
@@ -173,7 +180,7 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
           better: 'max',
           neg: false,
           tooltipKey: 'kpi.triReal',
-          muted: true,
+          muted: !real,
           etfVal: etfKpis.triReal,
           etfFmt: v => fmtTRI(v),
         },
@@ -229,6 +236,7 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
           better: 'max',
           neg: true,
           tooltipKey: 'kpi.patTotal',
+          muted: real,
           etfVal: etfHz,
         },
         {
@@ -237,7 +245,7 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
           better: 'max',
           neg: true,
           tooltipKey: 'kpi.patReal',
-          muted: true,
+          muted: !real,
           etfVal: deflate(etfHz, hz),
         },
         ...(hz < 30
@@ -248,6 +256,7 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
                 better: 'max',
                 neg: true,
                 tooltipKey: 'kpi.patTotal',
+                muted: real,
                 etfVal: etf30,
               },
               {
@@ -256,7 +265,7 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
                 better: 'max',
                 neg: true,
                 tooltipKey: 'kpi.patReal',
-                muted: true,
+                muted: !real,
                 etfVal: deflate(etf30, 30),
               },
             ]

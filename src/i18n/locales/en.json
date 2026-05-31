@@ -25,6 +25,7 @@
   "global": {
     "title": "Global",
     "inflation": "Inflation",
+    "displayReal": "Real",
     "regime": "Tax regime",
     "regimes": {
       "lmnp": "LMNP Real",
@@ -115,6 +116,11 @@
     "inflation": {
       "title": "Inflation (CPI)",
       "body": "Annual inflation rate. Appreciation and alternative return rates are nominal (e.g. 2% appreciation + 2% inflation = 0% real gain). Used to display real-terms indicators: real IRR (Fisher) and constant-euro wealth in KPIs and charts."
+    },
+    "displayReal": {
+      "title": "Nominal / real display",
+      "body": "When on: charts (Comparison and Resale) are shown in constant euros, deflated by inflation. In KPI tables, emphasis moves to the real rows. No effect on the calculation engine (always nominal). No-op when inflation = 0.",
+      "code": "real_value = nominal_value / (1 + inflation/100)^year"
     },
     "regime": {
       "title": "Rental tax regime",

@@ -25,6 +25,7 @@
   "global": {
     "title": "Global",
     "inflation": "Inflation",
+    "displayReal": "Réel",
     "regime": "Régime fiscal",
     "regimes": {
       "lmnp": "LMNP Réel",
@@ -115,6 +116,11 @@
     "inflation": {
       "title": "Inflation (IPC)",
       "body": "Taux d'inflation annuel. Les taux de revalorisation et de rendement alternatif sont nominaux (ex : 2% revalo + 2% inflation = 0% de gain réel). L'inflation est utilisée pour afficher les indicateurs réels : TRI réel (Fisher) et patrimoine en euros constants dans les KPIs et graphiques."
+    },
+    "displayReal": {
+      "title": "Affichage nominal / réel",
+      "body": "Si activé : les courbes (Comparaison et Revente) sont affichées en euros constants, déflatées par l'inflation. Dans les tableaux KPI, l'emphase passe sur les lignes réelles. Sans effet sur le moteur de calcul (toujours nominal). No-op si inflation = 0.",
+      "code": "valeur_réelle = valeur_nominale / (1 + inflation/100)^année"
     },
     "regime": {
       "title": "Régime fiscal locatif",

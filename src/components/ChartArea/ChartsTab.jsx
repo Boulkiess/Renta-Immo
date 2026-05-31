@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
 import { COL, KEYS } from '../../state/definitions.js';
 import { drawLine, drawBars } from '../../engine/charts.js';
+import { deflate } from '../../engine/utils.js';
 import CanvasChart from '../common/CanvasChart.jsx';
 
 const Grid = styled.div`
@@ -58,26 +59,32 @@ export default function ChartsTab() {
 
   const activeKeys = KEYS.filter(k => sims[k].enabled);
 
+  // In real mode, deflate each value by inflation (flux index i is year i+1).
+  const real = G.displayReal;
+  const dfl = (v, i) => (real ? deflate(v, i + 1, G.inflation) : v);
+
   const cfCumDs = () =>
     activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map(f => f.cfC),
+      data: RES[k].flux.map((f, i) => dfl(f.cfC, i)),
     }));
   const patDs = () => {
     const infl = G.inflation / 100;
     const ds = activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map(f => f.patTotal),
+      data: RES[k].flux.map((f, i) => dfl(f.patTotal, i)),
     }));
     ds.push({
       color: '#94a3b8',
       dashed: true,
       label: 'ETF pur',
-      data: etfPurGlobal.map(e => e.cap),
+      data: etfPurGlobal.map((e, i) => dfl(e.cap, i)),
     });
-    if (infl > 0) {
+    // In nominal mode only, add a secondary dashed line for the real ETF value.
+    // In real mode the main line is already deflated, so this would be redundant.
+    if (!real && infl > 0) {
       ds.push({
         color: '#94a3b840',
         dashed: true,
@@ -91,13 +98,13 @@ export default function ChartsTab() {
     activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map(f => f.cfN),
+      data: RES[k].flux.map((f, i) => dfl(f.cfN, i)),
     }));
   const vbDs = () =>
     activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map(f => f.vb),
+      data: RES[k].flux.map((f, i) => dfl(f.vb, i)),
     }));
 
   return (
@@ -111,7 +118,7 @@ export default function ChartsTab() {
       <Card>
         <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.pat.title') }} />
         <ChartDesc dangerouslySetInnerHTML={{ __html: t('charts.pat.desc') }} />
-        {G.inflation > 0 && (
+        {G.inflation > 0 && !real && (
           <ChartNote
             dangerouslySetInnerHTML={{
               __html: t('charts.pat.realNote', { inflation: G.inflation }),
@@ -138,7 +145,7 @@ export default function ChartsTab() {
       <Card>
         <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.vb.title') }} />
         <ChartDesc dangerouslySetInnerHTML={{ __html: t('charts.vb.desc') }} />
-        {G.inflation > 0 && (
+        {G.inflation > 0 && !real && (
           <ChartNote
             dangerouslySetInnerHTML={{
               __html: t('charts.vb.realNote', { inflation: G.inflation }),

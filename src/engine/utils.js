@@ -15,3 +15,6 @@ export const fmtK = v => {
 };
 export const fmtP = v => (!isFinite(v) || isNaN(v) ? '—' : v.toFixed(2) + '%');
 export const fmtTRI = v => (v === null ? 'N/C' : (v * 100).toFixed(2) + '%');
+
+// Deflate a nominal value into constant euros. yr is 1-based (year 1 → exponent 1).
+export const deflate = (v, yr, infl) => (v == null ? null : v / Math.pow(1 + infl / 100, yr));

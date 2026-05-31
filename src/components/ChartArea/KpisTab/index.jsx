@@ -40,7 +40,14 @@ export default function KpisTab() {
         />
       </TableWrap>
 
-      <SummaryCards activeKeys={activeKeys} sims={sims} RES={RES} hz={hz} infl={infl} />
+      <SummaryCards
+        activeKeys={activeKeys}
+        sims={sims}
+        RES={RES}
+        hz={hz}
+        infl={infl}
+        real={G.displayReal}
+      />
     </Wrap>
   );
 }
