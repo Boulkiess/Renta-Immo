@@ -1,6 +1,19 @@
 // Pure financial engine — all functions receive global settings (g) as parameter
 
-function irr(flows, guess = 0.1, maxIter = 100, tol = 1e-7) {
+// ── Constantes fiscales ───────────────────────────────────────
+const PFU_RATE = 0.3; // flat tax (PFU) sur la plus-value ETF (CTO)
+const MICROBIC_ABATTEMENT = 0.5; // abattement forfaitaire Micro-BIC (meublé non classé)
+// Abattements progressifs sur la plus-value immobilière (art. 150 VC CGI)
+const ABAT_IR_PER_YEAR = 6; // %/an, années 6→21 (96 % cumulés à la 21e)
+const ABAT_PS_PER_YEAR = 1.65; // %/an, années 6→21
+const ABAT_PS_AT_22 = (21 - 5) * ABAT_PS_PER_YEAR + 1.6; // 28,0 % cumulés à la 22e (bonus PS 1,6)
+const ABAT_PS_LATE_PER_YEAR = 9; // %/an, années 23→30
+const ABAT_FULL = 100; // exonération totale
+
+// Revalorisation composée : base × (1 + taux%)^périodes
+const revalorise = (base, ratePct, periods) => base * Math.pow(1 + ratePct / 100, periods);
+
+export function irr(flows, guess = 0.1, maxIter = 100, tol = 1e-7) {
   let r = guess;
   for (let i = 0; i < maxIter; i++) {
     let npv = 0,
@@ -19,25 +32,24 @@ function irr(flows, guess = 0.1, maxIter = 100, tol = 1e-7) {
   return null;
 }
 
-// Abattements progressifs sur la plus-value immobilière (art. 150 VC CGI)
-function abattementIR(yr) {
+export function abattementIR(yr) {
   if (yr <= 5) return 0;
-  if (yr <= 21) return (yr - 5) * 6; // 6 %/an de la 6e à la 21e → 96 %
-  return 100; // 4 % à la 22e = exonération totale
+  if (yr <= 21) return (yr - 5) * ABAT_IR_PER_YEAR; // 6 %/an de la 6e à la 21e → 96 %
+  return ABAT_FULL; // 4 % à la 22e = exonération totale
 }
 
-function abattementPS(yr) {
+export function abattementPS(yr) {
   if (yr <= 5) return 0;
-  if (yr <= 21) return (yr - 5) * 1.65; // 1,65 %/an de la 6e à la 21e
-  if (yr === 22) return 16 * 1.65 + 1.6; // 28,0 %
-  if (yr <= 30) return 16 * 1.65 + 1.6 + (yr - 22) * 9; // 9 %/an de la 23e à la 30e
-  return 100;
+  if (yr <= 21) return (yr - 5) * ABAT_PS_PER_YEAR; // 1,65 %/an de la 6e à la 21e
+  if (yr === 22) return ABAT_PS_AT_22; // 28,0 %
+  if (yr <= 30) return ABAT_PS_AT_22 + (yr - 22) * ABAT_PS_LATE_PER_YEAR; // 9 %/an, 23e→30e
+  return ABAT_FULL;
 }
 
-function impLoc(le, chg, ab, at, tmi, ps, regime, intAnnuel = 0) {
+export function impLoc(le, chg, ab, at, tmi, ps, regime, intAnnuel = 0) {
   let ri;
   if (regime === 'lmnp') ri = Math.max(0, le - chg - ab - at - intAnnuel);
-  else if (regime === 'microbic') ri = Math.max(0, le * 0.5);
+  else if (regime === 'microbic') ri = Math.max(0, le * MICROBIC_ABATTEMENT);
   else ri = Math.max(0, le - chg - intAnnuel); // 'nu' (Foncier nu)
   return ri * ((tmi + ps) / 100);
 }
@@ -48,13 +60,13 @@ export function computeEtfPur(g) {
   let totalContribs = g.apportETF;
   const r = g.rendAlt / 100;
   for (let yr = 1; yr <= 30; yr++) {
-    const lpa = g.loyerPerso * 12 * Math.pow(1 + g.revalLoyerPerso / 100, yr - 1);
-    const budgetAnn = g.budgetMensuel * 12 * Math.pow(1 + g.revalBudget / 100, yr - 1);
+    const lpa = revalorise(g.loyerPerso * 12, g.revalLoyerPerso, yr - 1);
+    const budgetAnn = revalorise(g.budgetMensuel * 12, g.revalBudget, yr - 1);
     const surplus = Math.max(0, budgetAnn - lpa);
     cap = cap * (1 + r) + surplus;
     totalContribs += surplus;
     const gain = Math.max(0, cap - totalContribs);
-    const capNet = cap - gain * 0.3;
+    const capNet = cap - gain * PFU_RATE;
     result.push({ yr, cap, capNet });
   }
   return result;
@@ -92,8 +104,8 @@ export function compute(p, g) {
     const rest = amort[mi]?.rest ?? 0;
     const ann = yr <= p.duree ? mens * 12 : 0;
     const asp = yr <= p.duree ? assM * 12 : 0;
-    const vb = p.prixAchat * Math.pow(1 + p.revalBien / 100, yr);
-    const loyerPersoAnn = g.loyerPerso * 12 * Math.pow(1 + g.revalLoyerPerso / 100, yr - 1);
+    const vb = revalorise(p.prixAchat, p.revalBien, yr);
+    const loyerPersoAnn = revalorise(g.loyerPerso * 12, g.revalLoyerPerso, yr - 1);
 
     let cfN,
       le = 0,
@@ -101,9 +113,9 @@ export function compute(p, g) {
       imp = 0;
 
     if (p.mode === 'loc') {
-      const lb = p.loyer * 12 * Math.pow(1 + p.revalLoyer / 100, yr - 1);
+      const lb = revalorise(p.loyer * 12, p.revalLoyer, yr - 1);
       le = lb * (1 - p.vacance / 100);
-      const fC = Math.pow(1 + (g.revalCharges ?? 2) / 100, yr - 1);
+      const fC = revalorise(1, g.revalCharges ?? 2, yr - 1);
       chg =
         (p.taxeFonciere + p.chargesCopro + p.assurPNO + p.provision) * fC +
         lb * (p.fraisGestion / 100);
@@ -119,7 +131,7 @@ export function compute(p, g) {
       }
       cfN = le - chg - ann - asp - imp - loyerPersoAnn;
     } else {
-      const fCrp = Math.pow(1 + (g.revalCharges ?? 2) / 100, yr - 1);
+      const fCrp = revalorise(1, g.revalCharges ?? 2, yr - 1);
       chg = (p.taxeFonciereRP + p.chargesCoproRP + p.assurHab + p.provisionRP) * fCrp;
       cfN = -(chg + ann + asp);
       le = loyerPersoAnn;
@@ -127,11 +139,11 @@ export function compute(p, g) {
     cfC += cfN;
 
     const realOutAnn = p.mode === 'loc' ? -cfN : chg + ann + asp;
-    const budgetAnn = g.budgetMensuel * 12 * Math.pow(1 + g.revalBudget / 100, yr - 1);
+    const budgetAnn = revalorise(g.budgetMensuel * 12, g.revalBudget, yr - 1);
     const surplusAnn = Math.max(0, budgetAnn - realOutAnn);
     etfCap = etfCap * (1 + rAlt) + (g.investirSurplus ? surplusAnn : 0);
 
-    const pr = (p.prixAchat + p.travaux) * Math.pow(1 + p.revalBien / 100, yr);
+    const pr = revalorise(p.prixAchat + p.travaux, p.revalBien, yr);
     const fa = pr * (p.fraisVente / 100);
     const pvB = Math.max(0, pr - p.prixAchat - p.travaux);
     let iPV = 0;

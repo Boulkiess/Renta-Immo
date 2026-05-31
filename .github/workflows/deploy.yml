@@ -39,6 +39,9 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      - name: Test
+        run: npm run test
+
   build:
     needs: quality
     runs-on: ubuntu-latest

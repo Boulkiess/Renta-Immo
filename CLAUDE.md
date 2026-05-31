@@ -25,7 +25,8 @@ npm run preview  # Preview the production build
 | `npm run lint`         | Rapport ESLint — erreurs bloquent la CI, warnings sont informatifs | CI / manuelle           |
 | `npm run lint:fix`     | Corrige automatiquement les problèmes ESLint corrigibles           | Après ajout de fichiers |
 | `npm run typecheck`    | TypeScript checkJs sur `src/engine/` + `src/state/`                | CI / manuelle           |
-| `npm run check`        | Pipeline complète : format:check + lint + typecheck                | **Avant chaque PR**     |
+| `npm run test`         | Vitest : tests moteur (`src/engine/__tests__/`)                    | CI / manuelle           |
+| `npm run check`        | Pipeline complète : format:check + lint + typecheck + test         | **Avant chaque PR**     |
 
 Le hook pre-commit (Husky + lint-staged) reformate et lint automatiquement les fichiers stagés à chaque `git commit`.
 
@@ -49,16 +50,18 @@ src/
     definitions.js      mkDef(), GRP_COMMON/LOC/RP, field metadata, I (info registry)
   engine/
     compute.js          Financial engine: compute(p,g), computeEtfPur(g), crossoverYear()
+                        + helpers exportés (testables): irr(), abattementIR/PS(), impLoc()
     charts.js           Canvas renderers: drawLine(), drawBars(), attachHover()
     utils.js            Formatters: fmtE(), fmtK(), fmtP(), fmtTRI()
     io.js               Export/import handlers (CSV, JSON, YAML)
+    __tests__/          Vitest: compute (vérité-terrain), golden-master, io round-trip
   components/
     SimPanel/           Left-column simulation panel (sliders, KPI chips, mode switch)
     ChartArea/          Canvas chart wrappers (Charts, KPIs, Revente, Amort tabs)
     GlobalStrip/        Global settings bar (loyerPerso, budget, regime, horizon…)
     NavBar/             Tab navigation
     Legend/             Simulation legend
-    common/             Shared UI atoms
+    common/             Shared UI atoms (+ useDraggableValue hook)
   i18n/                 Translations (fr/en)
   theme/                Styled-components theme tokens
 ```

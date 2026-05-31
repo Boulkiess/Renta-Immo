@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { InfoButton } from '../common/Popover.jsx';
 import { useApp } from '../../state/AppContext.jsx';
 import { AUTOABLE_FIELDS, computeAutoValue } from '../../state/definitions.js';
+import { useDraggableValue, stepDecimals } from '../common/useDraggableValue.js';
 
 const Wrap = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.border};
@@ -161,12 +162,6 @@ const HintDismiss = styled.button.attrs({ type: 'button' })`
 
 const unitFor = tp => (tp === 'e' ? '€' : tp === '%' ? '%' : '');
 
-const stepDecimals = st => {
-  const s = st.toString();
-  const i = s.indexOf('.');
-  return i === -1 ? 0 : s.length - i - 1;
-};
-
 function NumInput({ field, val, isAuto, onChange }) {
   const dec = stepDecimals(field.st);
   // null = show formatted value; string = user is actively typing
@@ -198,51 +193,17 @@ function NumInput({ field, val, isAuto, onChange }) {
   );
 }
 
-const PIXELS_PER_STEP = 6;
-
 function DraggableUnit({ field, val, isAuto, onChange }) {
-  const dragRef = useRef(null);
-  const dec = stepDecimals(field.st);
-
-  const handleMouseDown = e => {
-    e.preventDefault();
-    const el = e.currentTarget;
-    dragRef.current = { currentVal: val };
-    el.requestPointerLock();
-    document.body.style.userSelect = 'none';
-
-    const handleMove = mv => {
-      if (!mv.movementY) return;
-      const mult = mv.shiftKey ? 10 : 1;
-      dragRef.current.currentVal -= (mv.movementY * mult * field.st) / PIXELS_PER_STEP;
-      const next = Math.min(field.mx, Math.max(field.mn, +dragRef.current.currentVal.toFixed(dec)));
-      onChange(next);
-    };
-
-    const cleanup = () => {
-      document.removeEventListener('mousemove', handleMove);
-      document.removeEventListener('mouseup', handleUp);
-      document.removeEventListener('pointerlockchange', onLockChange);
-      document.body.style.userSelect = '';
-      dragRef.current = null;
-    };
-
-    const handleUp = () => {
-      document.exitPointerLock();
-      cleanup();
-    };
-
-    const onLockChange = () => {
-      if (!document.pointerLockElement) cleanup();
-    };
-
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('mouseup', handleUp);
-    document.addEventListener('pointerlockchange', onLockChange);
-  };
+  const { onMouseDown } = useDraggableValue({
+    val,
+    min: field.mn,
+    max: field.mx,
+    step: field.st,
+    onChange,
+  });
 
   return (
-    <Unit onMouseDown={handleMouseDown} style={{ opacity: isAuto ? 0.6 : undefined }}>
+    <Unit onMouseDown={onMouseDown} style={{ opacity: isAuto ? 0.6 : undefined }}>
       {unitFor(field.tp)}
     </Unit>
   );

@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- Filet de tests **Vitest** sur le moteur financier : assertions vérité-terrain (`irr`, abattements art. 150 VC CGI, `impLoc` 3 régimes, annuité, report LMNP, exonération PV) + golden-master figeant `compute`/`computeEtfPur` et `buildExportData` (`src/engine/__tests__/`). Scripts `npm run test` / `npm run test:watch`, intégrés à `npm run check` et au job `quality` de la CI.
+- `src/components/common/useDraggableValue.js` : hook mutualisant la logique de glissement (pointer-lock) auparavant dupliquée entre `FieldGroup` et `GlobalStrip`.
+- `TODO.md` : suivi des refactors différés (découpe des god-functions/composants, charts.js, io.js).
+
+### Changed
+
+- `engine/compute.js` : helpers purs (`irr`, `abattementIR`, `abattementPS`, `impLoc`) désormais exportés (testables) ; extraction d'un helper `revalorise()` et de constantes fiscales nommées (`PFU_RATE`, `MICROBIC_ABATTEMENT`, barème d'abattement) — comportement strictement inchangé (golden-master identique).
+
 ### Fixed
 
 - **`fraisDossier` sans traduction** : le champ "Frais de dossier" s'affichait avec la clé brute `fraisDossier` dans le formulaire. Labels et tooltips ajoutés en français et anglais.

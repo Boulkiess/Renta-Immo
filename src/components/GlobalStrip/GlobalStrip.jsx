@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
 import { InfoButton } from '../common/Popover.jsx';
 import Toggle from '../common/Toggle.jsx';
+import { useDraggableValue } from '../common/useDraggableValue.js';
 
 const DARK_BG = '#0c1830';
 const LABEL_COL = '#9fb1d0';
@@ -114,56 +115,9 @@ const Unit = styled.span`
   }
 `;
 
-const stepDecimals = st => {
-  const s = st.toString();
-  const i = s.indexOf('.');
-  return i === -1 ? 0 : s.length - i - 1;
-};
-
-const PIXELS_PER_STEP = 6;
-
 function DraggableUnit({ min, max, step, val, onChange, children }) {
-  const dragRef = useRef(null);
-  const dec = stepDecimals(step);
-
-  const handleMouseDown = e => {
-    e.preventDefault();
-    const el = e.currentTarget;
-    dragRef.current = { currentVal: val };
-    el.requestPointerLock();
-    document.body.style.userSelect = 'none';
-
-    const handleMove = mv => {
-      if (!mv.movementY) return;
-      const mult = mv.shiftKey ? 10 : 1;
-      dragRef.current.currentVal -= (mv.movementY * mult * step) / PIXELS_PER_STEP;
-      const next = Math.min(max, Math.max(min, +dragRef.current.currentVal.toFixed(dec)));
-      onChange(next);
-    };
-
-    const cleanup = () => {
-      document.removeEventListener('mousemove', handleMove);
-      document.removeEventListener('mouseup', handleUp);
-      document.removeEventListener('pointerlockchange', onLockChange);
-      document.body.style.userSelect = '';
-      dragRef.current = null;
-    };
-
-    const handleUp = () => {
-      document.exitPointerLock();
-      cleanup();
-    };
-
-    const onLockChange = () => {
-      if (!document.pointerLockElement) cleanup();
-    };
-
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('mouseup', handleUp);
-    document.addEventListener('pointerlockchange', onLockChange);
-  };
-
-  return <Unit onMouseDown={handleMouseDown}>{children}</Unit>;
+  const { onMouseDown } = useDraggableValue({ val, min, max, step, onChange });
+  return <Unit onMouseDown={onMouseDown}>{children}</Unit>;
 }
 
 const Select = styled.select`
