@@ -55,6 +55,25 @@ export default function ReventeTab() {
     return ds;
   }
 
+  function cashDatasets() {
+    return activeKeys.map(k => ({
+      color: COL[k],
+      label: sims[k].label,
+      data: RES[k].flux.map(f => f.bilanCash),
+    }));
+  }
+
+  // Vertical markers at each sim's resale break-even year (bilanCash ≥ 0).
+  function cashAnnotations() {
+    return activeKeys
+      .filter(k => RES[k].beRevente != null)
+      .map(k => ({
+        x: RES[k].beRevente,
+        color: COL[k],
+        label: t('revente.yr', { n: RES[k].beRevente }),
+      }));
+  }
+
   return (
     <Wrap>
       <Title dangerouslySetInnerHTML={{ __html: t('charts.revente.title') }} />
@@ -62,6 +81,17 @@ export default function ReventeTab() {
       <CanvasChart
         draw={c => drawLine(c, datasets(), X_LABELS)}
         deps={[sims, RES, etfPurGlobal, theme.name]}
+        height={220}
+      />
+
+      <Title
+        style={{ marginTop: 18 }}
+        dangerouslySetInnerHTML={{ __html: t('charts.reventeCash.title') }}
+      />
+      <Desc dangerouslySetInnerHTML={{ __html: t('charts.reventeCash.desc') }} />
+      <CanvasChart
+        draw={c => drawLine(c, cashDatasets(), X_LABELS, cashAnnotations())}
+        deps={[sims, RES, theme.name]}
         height={220}
       />
 

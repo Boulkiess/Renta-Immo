@@ -340,6 +340,11 @@
       "body": "Rendement annuel du flux net opérationnel de l'année 1 rapporté à l'apport initial. Indicateur simple et immédiat : combien rapporte le bien en cash cette année par euro investi. Ne tient pas compte de la valeur de revente ni de l'actualisation.",
       "code": "coc = cfN[an 1] / apport × 100"
     },
+    "kpi.beRevente": {
+      "title": "Break-even revente",
+      "body": "Première année où revendre ne vous fait plus perdre d'argent, en valeur nominale et sur la base TRI/VAN (loyer économisé en RP / payé en LOC réintégré). Tient compte des frais d'achat et de vente. Ne tient pas compte du coût d'opportunité (un ETF peut faire mieux même si vous « ne perdez pas »).",
+      "code": "1ère année où reventeNet + Σ(cfN + loyerPerso) − apport ≥ 0"
+    },
     "kpi.bilanRevente": {
       "title": "Bilan revente",
       "body": "Gain net en cash si vous vendez à cet horizon : produit de cession net + flux cumulés − apport initial. Mesure ce que vous avez gagné en argent réel, hors valorisation non réalisée.",
@@ -408,6 +413,10 @@
       "title": "Bilan net selon l'année de revente",
       "desc": "Gain net si vous revendez cette année. RP exonérée d'impôt sur PV. Pointillés = ETF pur de référence."
     },
+    "reventeCash": {
+      "title": "Combien d'années pour ne pas perdre d'argent ?",
+      "desc": "Bilan en cash si vous revendez cette année, sur la même base que le TRI/VAN : revente nette + flux cumulés + loyer économisé (RP) ou − loyer payé (LOC) − apport. Le passage à zéro (marqueur vertical) = durée de détention minimale pour ne pas être perdant. Valeurs <b>nominales</b>, hors coût d'opportunité (vs ETF). <code>bilanCash = reventeNet + Σ(cfN + loyerPerso) − apport</code>"
+    },
     "reventeDetail": "Détail par année clé",
     "amort": {
       "title": "Décomposition annuelle du prêt",
@@ -445,6 +454,7 @@
     "tri20Real": "TRI 20a (réel)",
     "van": "VAN ({{tauxActu}}%, {{horizon}}a)",
     "moic": "MOIC {{horizon}}a",
+    "beRevente": "Break-even revente",
     "bilanReventeHz": "Bilan revente {{horizon}}a",
     "bilanTotalHz": "Bilan total revente {{horizon}}a",
     "patNet": "Patrimoine immo net {{horizon}}a",
@@ -468,7 +478,7 @@
     "etfPoche": "ETF poche :",
     "bilanTotal": "Bilan total :",
     "bilanImmo": "Bilan immo :",
-    "yr": "Yr {{n}}"
+    "yr": "An {{n}}"
   },
   "amort": {
     "capital": "Capital",

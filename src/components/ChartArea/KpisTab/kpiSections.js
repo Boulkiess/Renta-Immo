@@ -262,6 +262,14 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
             ]
           : []),
         {
+          label: t('kpisTable.beRevente'),
+          fmt: k => fmtBe(RES[k].beRevente),
+          better: 'min',
+          neg: false,
+          tooltipKey: 'kpi.beRevente',
+          etfVal: null,
+        },
+        {
           label: t('kpisTable.crossover'),
           fmt: k => fmtCross(crossovers[k]),
           better: 'min',

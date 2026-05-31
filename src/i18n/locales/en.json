@@ -343,6 +343,11 @@
       "body": "Annual yield of the year-1 net operating cash flow relative to the initial down payment. Simple and immediate: how much cash the property generates per euro invested this year. Does not account for resale value or time value of money.",
       "code": "coc = cfN[yr 1] / downPayment × 100"
     },
+    "kpi.beRevente": {
+      "title": "Resale break-even",
+      "body": "First year where reselling no longer makes you lose money, in nominal terms and on the IRR/NPV basis (saved rent for RP / paid rent for LOC reintegrated). Accounts for purchase and sale fees. Ignores opportunity cost (an ETF may do better even if you 'don't lose').",
+      "code": "first year where reventeNet + Σ(cfN + rent) − downPmt ≥ 0"
+    },
     "kpi.bilanRevente": {
       "title": "Net sale profit",
       "body": "Cash gain if you sell at this horizon: net sale proceeds + cumulative cash flows − initial down payment. Measures what you actually pocketed in cash.",
@@ -411,6 +416,10 @@
       "title": "Net profit by sale year",
       "desc": "Net gain if you sell this year. Primary residence exempt from capital gains. Dashed = pure ETF reference."
     },
+    "reventeCash": {
+      "title": "How many years before you stop losing money?",
+      "desc": "Cash balance if you resell this year, on the same basis as IRR/NPV: net resale + cumulative flows + saved rent (RP) or − paid rent (LOC) − down payment. The zero crossing (vertical marker) = minimum holding period to avoid a loss. <b>Nominal</b> values, excluding opportunity cost (vs ETF). <code>bilanCash = reventeNet + Σ(cfN + rent) − down payment</code>"
+    },
     "reventeDetail": "Detail by key year",
     "amort": {
       "title": "Annual loan breakdown",
@@ -448,6 +457,7 @@
     "tri20Real": "IRR 20y (real)",
     "van": "NPV ({{tauxActu}}%, {{horizon}}y)",
     "moic": "MOIC {{horizon}}y",
+    "beRevente": "Resale break-even",
     "bilanReventeHz": "Net sale profit {{horizon}}y",
     "bilanTotalHz": "Total sale profit {{horizon}}y",
     "patNet": "Net property wealth {{horizon}}y",

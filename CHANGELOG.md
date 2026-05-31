@@ -4,6 +4,8 @@
 
 ### Added
 
+- **Onglet Revente — second graphe « Combien d'années pour ne pas perdre d'argent ? »** : trace `bilanCash = reventeNet + Σ(cfN + loyerPersoAnn) − apport`, sur la même base de flux que TRI/VAN/MOIC (loyer perso neutralisé en LOC, loyer économisé crédité en RP). Le passage à zéro = durée de détention minimale pour ne pas être perdant (nominal, hors coût d'opportunité). Annotation verticale par sim à l'année de break-even. Clés i18n `charts.reventeCash.{title,desc}` (fr/en).
+- **`engine/compute.js`** : nouveau champ `flux[].bilanCash` et KPI `beRevente` (1ère année où `bilanCash ≥ 0`). Exposé comme ligne **Break-even revente** dans KpisTab (section Patrimoine) avec tooltip `kpi.beRevente`.
 - **Filet de tests composants (jsdom)** : harness `src/test-utils/renderWithProviders.jsx` (providers réels theme + i18n + AppContext, seed via localStorage) + `kpiNormalize.js`. Tests jsdom sur `KpisTab`, `SimPanel` (3 branches), `GlobalStrip`, `FieldGroup` (toggle auto, slider, flèches shift×10). Env `jsdom` par fichier via docblock `// @vitest-environment jsdom`, env moteur restant `node`. Suite passée de 40 à 91 tests.
 - `engine/compute.js` : `computeEtfKpis(g)` (TRI/VAN/MOIC ETF) et `surplusAt(g, yr)` (surplus annuel de référence ETF) extraits et exportés — testés (caractérisation paramétrée + golden-master). La math ETF quitte `KpisTab` pour le moteur.
 - `engine/compute.js` : îlots purs exportés `buildAmortization`, `computeResale`, `calcTRI`, `calcVAN`, `calcMoic` — `compute()` devient un orchestrateur mince autour de la boucle 30 ans.
@@ -22,6 +24,7 @@
 
 ### Fixed
 
+- **Traduction `revente.yr` en anglais dans le fichier français** : la clé valait `"Yr {{n}}"` en fr, affichant « Yr 9 » dans la table de détail et l'annotation du graphe Revente. Corrigée en `"An {{n}}"`.
 - **`fraisDossier` sans traduction** : le champ "Frais de dossier" s'affichait avec la clé brute `fraisDossier` dans le formulaire. Labels et tooltips ajoutés en français et anglais.
 - **`revalCharges` orphelin** : le paramètre de revalorisation des charges (2 %/an par défaut) influençait les calculs sans être visible ni modifiable. Un champ dédié est maintenant présent dans le GlobalStrip entre "Reval. budget" et "Surplus→ETF".
 - **Tooltips `bilanRevente` et `bilanTotal` incorrects** : les deux nouvelles lignes du tableau comparatif pointaient vers les tooltips de `patNet`/`patTotal`. Nouveaux tooltips dédiés avec la bonne formule.

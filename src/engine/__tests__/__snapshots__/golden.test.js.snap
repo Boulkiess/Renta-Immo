@@ -4,12 +4,14 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
 {
   "assM": 48.958333333333336,
   "be": null,
+  "beRevente": 9,
   "cfM": -1354.506449714165,
   "ct": 285000,
   "emp": 235000,
   "flux": [
     {
       "ann": 17454.07739656998,
+      "bilanCash": -29066.139600142484,
       "bilanRevente": -39866.13960014249,
       "bilanTotal": -9866.139600142487,
       "cfC": -20394.07739656998,
@@ -29,6 +31,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -27052.622504680152,
       "bilanRevente": -48868.62250468015,
       "bilanTotal": 11707.732851525652,
       "cfC": -40899.75479313996,
@@ -48,6 +51,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -24544.663853985738,
       "bilanRevente": -57596.98385398573,
       "bilanTotal": 34159.96753600401,
       "cfC": -61520.05618970994,
@@ -67,6 +71,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -21526.960488878198,
       "bilanRevente": -66040.32688887819,
       "bilanTotal": 57530.83821312834,
       "cfC": -82258.07794627993,
@@ -86,6 +91,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -17983.671574245796,
       "bilanRevente": -74187.30530224579,
       "bilanTotal": 81862.64502910434,
       "cfC": -103116.99040824991,
@@ -105,6 +111,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -13422.378838492165,
       "bilanRevente": -81550.08524105216,
       "bilanTotal": 107675.84268568398,
       "cfC": -124100.0395670009,
@@ -124,6 +131,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -8132.161010528391,
       "bilanRevente": -88422.4215411396,
       "bilanTotal": 134711.05968718068,
       "cfC": -145210.54875640062,
@@ -143,6 +151,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -2090.341466401136,
       "bilanRevente": -94786.40720762456,
       "bilanTotal": 163022.4499690109,
       "cfC": -166451.9203859931,
@@ -162,6 +171,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 4726.5153147836245,
       "bilanRevente": -100623.47174126428,
       "bilanTotal": 192666.80164280973,
       "cfC": -187827.63771164723,
@@ -181,6 +191,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 12342.630552356582,
       "bilanRevente": -105914.35624481228,
       "bilanTotal": 223703.67527960736,
       "cfC": -209341.2666444553,
@@ -200,6 +211,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 20783.038948698726,
       "bilanRevente": -110639.08758441353,
       "bilanTotal": 256195.549832804,
       "cfC": -230996.45759868892,
@@ -219,6 +231,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 30073.617493963407,
       "bilanRevente": -114776.95156981109,
       "bilanTotal": 290207.97663651814,
       "cfC": -252796.94737963716,
@@ -238,6 +251,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 40241.11532931274,
       "bilanRevente": -118306.46511573726,
       "bilanTotal": 325809.7419401935,
       "cfC": -274746.5611121677,
@@ -257,6 +271,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 51313.18470854391,
       "bilanRevente": -121205.34734540712,
       "bilanTotal": 363073.0384671495,
       "cfC": -296849.2142108707,
@@ -276,6 +291,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 63318.41309950483,
       "bilanRevente": -123450.48959552523,
       "bilanTotal": 402073.64651313255,
       "cfC": -319108.91439266125,
@@ -295,6 +311,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 76286.35646828762,
       "bilanRevente": -125017.92428064306,
       "bilanTotal": 442891.1251309746,
       "cfC": -341529.7637327369,
@@ -314,6 +331,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 90247.573790831,
       "bilanRevente": -125882.7925730783,
       "bilanTotal": 485609.0139792722,
       "cfC": -364115.96076480194,
@@ -333,6 +351,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 105233.66283827479,
       "bilanRevente": -126019.31085291266,
       "bilanTotal": 530315.0464466908,
       "cfC": -386871.80262649304,
@@ -352,6 +371,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 121277.2972841863,
       "bilanRevente": -125400.73588082491,
       "bilanTotal": 577101.3746991651,
       "cfC": -409801.6872509565,
@@ -371,6 +391,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 138412.2651836124,
       "bilanRevente": -123999.32864469901,
       "bilanTotal": 626064.8073350331,
       "cfC": -432910.1156055497,
@@ -390,6 +411,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 156960.17803502738,
       "bilanRevente": -121499.64766985027,
       "bilanTotal": 677593.7295323327,
       "cfC": -438747.61658208893,
@@ -409,6 +431,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 175435.52649819985,
       "bilanRevente": -119393.49572077533,
       "bilanTotal": 731320.6271186133,
       "cfC": -444772.98152250476,
@@ -428,6 +451,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 195131.84792744473,
       "bilanRevente": -116393.75473590998,
       "bilanTotal": 788676.8365824918,
       "cfC": -450991.03441524,
@@ -447,6 +471,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 215360.2515451921,
       "bilanRevente": -113195.86317142966,
       "bilanTotal": 849119.5015611618,
       "cfC": -457406.7117291436,
@@ -466,6 +491,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 236132.867547227,
       "bilanRevente": -109794.36946372723,
       "bilanTotal": 912815.5144490711,
       "cfC": -464025.06490308867,
@@ -485,6 +511,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 257462.10399904253,
       "bilanRevente": -106183.67775213078,
       "bilanTotal": 979941.2953012502,
       "cfC": -470851.2628889825,
@@ -504,6 +531,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 279360.65318097157,
       "bilanRevente": -102358.04420522519,
       "bilanTotal": 1050683.3514580196,
       "cfC": -477890.5947492911,
@@ -523,6 +551,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 301841.4980772114,
       "bilanRevente": -98311.57325670932,
       "bilanTotal": 1125238.8704613727,
       "cfC": -485148.4723102232,
@@ -542,6 +571,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 324917.91901197867,
       "bilanRevente": -94038.21374862047,
       "bilanTotal": 1203816.3482539332,
       "cfC": -492630.43287174264,
@@ -561,6 +591,7 @@ exports[`golden-master — compute() > loc · lmnp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 348603.500436103,
       "bilanRevente": -89531.75497970812,
       "bilanTotal": 1286636.2547706943,
       "cfC": -500342.14197560155,
@@ -596,12 +627,14 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
 {
   "assM": 48.958333333333336,
   "be": null,
+  "beRevente": 9,
   "cfM": -1354.506449714165,
   "ct": 285000,
   "emp": 235000,
   "flux": [
     {
       "ann": 17454.07739656998,
+      "bilanCash": -29066.139600142484,
       "bilanRevente": -39866.13960014249,
       "bilanTotal": -9866.139600142487,
       "cfC": -20394.07739656998,
@@ -621,6 +654,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -27052.622504680152,
       "bilanRevente": -48868.62250468015,
       "bilanTotal": 11707.732851525652,
       "cfC": -40899.75479313996,
@@ -640,6 +674,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -24544.663853985738,
       "bilanRevente": -57596.98385398573,
       "bilanTotal": 34159.96753600401,
       "cfC": -61520.05618970994,
@@ -659,6 +694,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -21526.960488878198,
       "bilanRevente": -66040.32688887819,
       "bilanTotal": 57530.83821312834,
       "cfC": -82258.07794627993,
@@ -678,6 +714,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -17983.671574245796,
       "bilanRevente": -74187.30530224579,
       "bilanTotal": 81862.64502910434,
       "cfC": -103116.99040824991,
@@ -697,6 +734,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -13422.378838492165,
       "bilanRevente": -81550.08524105216,
       "bilanTotal": 107675.84268568398,
       "cfC": -124100.0395670009,
@@ -716,6 +754,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -8132.161010528391,
       "bilanRevente": -88422.4215411396,
       "bilanTotal": 134711.05968718068,
       "cfC": -145210.54875640062,
@@ -735,6 +774,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -2090.341466401136,
       "bilanRevente": -94786.40720762456,
       "bilanTotal": 163022.4499690109,
       "cfC": -166451.9203859931,
@@ -754,6 +794,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 4726.5153147836245,
       "bilanRevente": -100623.47174126428,
       "bilanTotal": 192666.80164280973,
       "cfC": -187827.63771164723,
@@ -773,6 +814,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 12342.630552356582,
       "bilanRevente": -105914.35624481228,
       "bilanTotal": 223703.67527960736,
       "cfC": -209341.2666444553,
@@ -792,6 +834,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 20783.038948698726,
       "bilanRevente": -110639.08758441353,
       "bilanTotal": 256195.549832804,
       "cfC": -230996.45759868892,
@@ -811,6 +854,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 30073.617493963407,
       "bilanRevente": -114776.95156981109,
       "bilanTotal": 290207.97663651814,
       "cfC": -252796.94737963716,
@@ -830,6 +874,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 40241.11532931274,
       "bilanRevente": -118306.46511573726,
       "bilanTotal": 325809.7419401935,
       "cfC": -274746.5611121677,
@@ -849,6 +894,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 51313.18470854391,
       "bilanRevente": -121205.34734540712,
       "bilanTotal": 363073.0384671495,
       "cfC": -296849.2142108707,
@@ -868,6 +914,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 63318.41309950483,
       "bilanRevente": -123450.48959552523,
       "bilanTotal": 402073.64651313255,
       "cfC": -319108.91439266125,
@@ -887,6 +934,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 76286.35646828762,
       "bilanRevente": -125017.92428064306,
       "bilanTotal": 442891.1251309746,
       "cfC": -341529.7637327369,
@@ -906,6 +954,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 90247.573790831,
       "bilanRevente": -125882.7925730783,
       "bilanTotal": 485609.0139792722,
       "cfC": -364115.96076480194,
@@ -925,6 +974,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 105233.66283827479,
       "bilanRevente": -126019.31085291266,
       "bilanTotal": 530315.0464466908,
       "cfC": -386871.80262649304,
@@ -944,6 +994,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 121277.2972841863,
       "bilanRevente": -125400.73588082491,
       "bilanTotal": 577101.3746991651,
       "cfC": -409801.6872509565,
@@ -963,6 +1014,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 138412.2651836124,
       "bilanRevente": -123999.32864469901,
       "bilanTotal": 626064.8073350331,
       "cfC": -432910.1156055497,
@@ -982,6 +1034,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 156960.17803502738,
       "bilanRevente": -121499.64766985027,
       "bilanTotal": 677593.7295323327,
       "cfC": -438747.61658208893,
@@ -1001,6 +1054,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 175435.52649819985,
       "bilanRevente": -119393.49572077533,
       "bilanTotal": 731320.6271186133,
       "cfC": -444772.98152250476,
@@ -1020,6 +1074,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 195131.84792744473,
       "bilanRevente": -116393.75473590998,
       "bilanTotal": 788676.8365824918,
       "cfC": -450991.03441524,
@@ -1039,6 +1094,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 215360.2515451921,
       "bilanRevente": -113195.86317142966,
       "bilanTotal": 849119.5015611618,
       "cfC": -457406.7117291436,
@@ -1058,6 +1114,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 236132.867547227,
       "bilanRevente": -109794.36946372723,
       "bilanTotal": 912815.5144490711,
       "cfC": -464025.06490308867,
@@ -1077,6 +1134,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 257462.10399904253,
       "bilanRevente": -106183.67775213078,
       "bilanTotal": 979941.2953012502,
       "cfC": -470851.2628889825,
@@ -1096,6 +1154,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 279360.65318097157,
       "bilanRevente": -102358.04420522519,
       "bilanTotal": 1050683.3514580196,
       "cfC": -477890.5947492911,
@@ -1115,6 +1174,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 301841.4980772114,
       "bilanRevente": -98311.57325670932,
       "bilanTotal": 1125238.8704613727,
       "cfC": -485148.4723102232,
@@ -1134,6 +1194,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 324917.91901197867,
       "bilanRevente": -94038.21374862047,
       "bilanTotal": 1203816.3482539332,
       "cfC": -492630.43287174264,
@@ -1153,6 +1214,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 10 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 348603.500436103,
       "bilanRevente": -89531.75497970812,
       "bilanTotal": 1286636.2547706943,
       "cfC": -500342.14197560155,
@@ -1188,12 +1250,14 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
 {
   "assM": 48.958333333333336,
   "be": null,
+  "beRevente": 9,
   "cfM": -1354.506449714165,
   "ct": 285000,
   "emp": 235000,
   "flux": [
     {
       "ann": 17454.07739656998,
+      "bilanCash": -29066.139600142484,
       "bilanRevente": -39866.13960014249,
       "bilanTotal": -9866.139600142487,
       "cfC": -20394.07739656998,
@@ -1213,6 +1277,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -27052.622504680152,
       "bilanRevente": -48868.62250468015,
       "bilanTotal": 11707.732851525652,
       "cfC": -40899.75479313996,
@@ -1232,6 +1297,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -24544.663853985738,
       "bilanRevente": -57596.98385398573,
       "bilanTotal": 34159.96753600401,
       "cfC": -61520.05618970994,
@@ -1251,6 +1317,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -21526.960488878198,
       "bilanRevente": -66040.32688887819,
       "bilanTotal": 57530.83821312834,
       "cfC": -82258.07794627993,
@@ -1270,6 +1337,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -17983.671574245796,
       "bilanRevente": -74187.30530224579,
       "bilanTotal": 81862.64502910434,
       "cfC": -103116.99040824991,
@@ -1289,6 +1357,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -13422.378838492165,
       "bilanRevente": -81550.08524105216,
       "bilanTotal": 107675.84268568398,
       "cfC": -124100.0395670009,
@@ -1308,6 +1377,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -8132.161010528391,
       "bilanRevente": -88422.4215411396,
       "bilanTotal": 134711.05968718068,
       "cfC": -145210.54875640062,
@@ -1327,6 +1397,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -2090.341466401136,
       "bilanRevente": -94786.40720762456,
       "bilanTotal": 163022.4499690109,
       "cfC": -166451.9203859931,
@@ -1346,6 +1417,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 4726.5153147836245,
       "bilanRevente": -100623.47174126428,
       "bilanTotal": 192666.80164280973,
       "cfC": -187827.63771164723,
@@ -1365,6 +1437,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 12342.630552356582,
       "bilanRevente": -105914.35624481228,
       "bilanTotal": 223703.67527960736,
       "cfC": -209341.2666444553,
@@ -1384,6 +1457,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 20783.038948698726,
       "bilanRevente": -110639.08758441353,
       "bilanTotal": 256195.549832804,
       "cfC": -230996.45759868892,
@@ -1403,6 +1477,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 30073.617493963407,
       "bilanRevente": -114776.95156981109,
       "bilanTotal": 290207.97663651814,
       "cfC": -252796.94737963716,
@@ -1422,6 +1497,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 40241.11532931274,
       "bilanRevente": -118306.46511573726,
       "bilanTotal": 325809.7419401935,
       "cfC": -274746.5611121677,
@@ -1441,6 +1517,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 51313.18470854391,
       "bilanRevente": -121205.34734540712,
       "bilanTotal": 363073.0384671495,
       "cfC": -296849.2142108707,
@@ -1460,6 +1537,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 63318.41309950483,
       "bilanRevente": -123450.48959552523,
       "bilanTotal": 402073.64651313255,
       "cfC": -319108.91439266125,
@@ -1479,6 +1557,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 76286.35646828762,
       "bilanRevente": -125017.92428064306,
       "bilanTotal": 442891.1251309746,
       "cfC": -341529.7637327369,
@@ -1498,6 +1577,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 90247.573790831,
       "bilanRevente": -125882.7925730783,
       "bilanTotal": 485609.0139792722,
       "cfC": -364115.96076480194,
@@ -1517,6 +1597,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 105233.66283827479,
       "bilanRevente": -126019.31085291266,
       "bilanTotal": 530315.0464466908,
       "cfC": -386871.80262649304,
@@ -1536,6 +1617,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 121277.2972841863,
       "bilanRevente": -125400.73588082491,
       "bilanTotal": 577101.3746991651,
       "cfC": -409801.6872509565,
@@ -1555,6 +1637,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 138412.2651836124,
       "bilanRevente": -123999.32864469901,
       "bilanTotal": 626064.8073350331,
       "cfC": -432910.1156055497,
@@ -1574,6 +1657,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 156960.17803502738,
       "bilanRevente": -121499.64766985027,
       "bilanTotal": 677593.7295323327,
       "cfC": -438747.61658208893,
@@ -1593,6 +1677,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 175435.52649819985,
       "bilanRevente": -119393.49572077533,
       "bilanTotal": 731320.6271186133,
       "cfC": -444772.98152250476,
@@ -1612,6 +1697,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 195131.84792744473,
       "bilanRevente": -116393.75473590998,
       "bilanTotal": 788676.8365824918,
       "cfC": -450991.03441524,
@@ -1631,6 +1717,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 215360.2515451921,
       "bilanRevente": -113195.86317142966,
       "bilanTotal": 849119.5015611618,
       "cfC": -457406.7117291436,
@@ -1650,6 +1737,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 236132.867547227,
       "bilanRevente": -109794.36946372723,
       "bilanTotal": 912815.5144490711,
       "cfC": -464025.06490308867,
@@ -1669,6 +1757,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 257462.10399904253,
       "bilanRevente": -106183.67775213078,
       "bilanTotal": 979941.2953012502,
       "cfC": -470851.2628889825,
@@ -1688,6 +1777,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 279360.65318097157,
       "bilanRevente": -102358.04420522519,
       "bilanTotal": 1050683.3514580196,
       "cfC": -477890.5947492911,
@@ -1707,6 +1797,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 301841.4980772114,
       "bilanRevente": -98311.57325670932,
       "bilanTotal": 1125238.8704613727,
       "cfC": -485148.4723102232,
@@ -1726,6 +1817,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 324917.91901197867,
       "bilanRevente": -94038.21374862047,
       "bilanTotal": 1203816.3482539332,
       "cfC": -492630.43287174264,
@@ -1745,6 +1837,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 20 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 348603.500436103,
       "bilanRevente": -89531.75497970812,
       "bilanTotal": 1286636.2547706943,
       "cfC": -500342.14197560155,
@@ -1780,12 +1873,14 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
 {
   "assM": 48.958333333333336,
   "be": null,
+  "beRevente": 9,
   "cfM": -1354.506449714165,
   "ct": 285000,
   "emp": 235000,
   "flux": [
     {
       "ann": 17454.07739656998,
+      "bilanCash": -29066.139600142484,
       "bilanRevente": -39866.13960014249,
       "bilanTotal": -9866.139600142487,
       "cfC": -20394.07739656998,
@@ -1805,6 +1900,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -27052.622504680152,
       "bilanRevente": -48868.62250468015,
       "bilanTotal": 11707.732851525652,
       "cfC": -40899.75479313996,
@@ -1824,6 +1920,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -24544.663853985738,
       "bilanRevente": -57596.98385398573,
       "bilanTotal": 34159.96753600401,
       "cfC": -61520.05618970994,
@@ -1843,6 +1940,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -21526.960488878198,
       "bilanRevente": -66040.32688887819,
       "bilanTotal": 57530.83821312834,
       "cfC": -82258.07794627993,
@@ -1862,6 +1960,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -17983.671574245796,
       "bilanRevente": -74187.30530224579,
       "bilanTotal": 81862.64502910434,
       "cfC": -103116.99040824991,
@@ -1881,6 +1980,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -13422.378838492165,
       "bilanRevente": -81550.08524105216,
       "bilanTotal": 107675.84268568398,
       "cfC": -124100.0395670009,
@@ -1900,6 +2000,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -8132.161010528391,
       "bilanRevente": -88422.4215411396,
       "bilanTotal": 134711.05968718068,
       "cfC": -145210.54875640062,
@@ -1919,6 +2020,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -2090.341466401136,
       "bilanRevente": -94786.40720762456,
       "bilanTotal": 163022.4499690109,
       "cfC": -166451.9203859931,
@@ -1938,6 +2040,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 4726.5153147836245,
       "bilanRevente": -100623.47174126428,
       "bilanTotal": 192666.80164280973,
       "cfC": -187827.63771164723,
@@ -1957,6 +2060,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 12342.630552356582,
       "bilanRevente": -105914.35624481228,
       "bilanTotal": 223703.67527960736,
       "cfC": -209341.2666444553,
@@ -1976,6 +2080,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 20783.038948698726,
       "bilanRevente": -110639.08758441353,
       "bilanTotal": 256195.549832804,
       "cfC": -230996.45759868892,
@@ -1995,6 +2100,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 30073.617493963407,
       "bilanRevente": -114776.95156981109,
       "bilanTotal": 290207.97663651814,
       "cfC": -252796.94737963716,
@@ -2014,6 +2120,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 40241.11532931274,
       "bilanRevente": -118306.46511573726,
       "bilanTotal": 325809.7419401935,
       "cfC": -274746.5611121677,
@@ -2033,6 +2140,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 51313.18470854391,
       "bilanRevente": -121205.34734540712,
       "bilanTotal": 363073.0384671495,
       "cfC": -296849.2142108707,
@@ -2052,6 +2160,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 63318.41309950483,
       "bilanRevente": -123450.48959552523,
       "bilanTotal": 402073.64651313255,
       "cfC": -319108.91439266125,
@@ -2071,6 +2180,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 76286.35646828762,
       "bilanRevente": -125017.92428064306,
       "bilanTotal": 442891.1251309746,
       "cfC": -341529.7637327369,
@@ -2090,6 +2200,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 90247.573790831,
       "bilanRevente": -125882.7925730783,
       "bilanTotal": 485609.0139792722,
       "cfC": -364115.96076480194,
@@ -2109,6 +2220,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 105233.66283827479,
       "bilanRevente": -126019.31085291266,
       "bilanTotal": 530315.0464466908,
       "cfC": -386871.80262649304,
@@ -2128,6 +2240,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 121277.2972841863,
       "bilanRevente": -125400.73588082491,
       "bilanTotal": 577101.3746991651,
       "cfC": -409801.6872509565,
@@ -2147,6 +2260,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 138412.2651836124,
       "bilanRevente": -123999.32864469901,
       "bilanTotal": 626064.8073350331,
       "cfC": -432910.1156055497,
@@ -2166,6 +2280,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 156960.17803502738,
       "bilanRevente": -121499.64766985027,
       "bilanTotal": 677593.7295323327,
       "cfC": -438747.61658208893,
@@ -2185,6 +2300,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 175435.52649819985,
       "bilanRevente": -119393.49572077533,
       "bilanTotal": 731320.6271186133,
       "cfC": -444772.98152250476,
@@ -2204,6 +2320,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 195131.84792744473,
       "bilanRevente": -116393.75473590998,
       "bilanTotal": 788676.8365824918,
       "cfC": -450991.03441524,
@@ -2223,6 +2340,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 215360.2515451921,
       "bilanRevente": -113195.86317142966,
       "bilanTotal": 849119.5015611618,
       "cfC": -457406.7117291436,
@@ -2242,6 +2360,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 236132.867547227,
       "bilanRevente": -109794.36946372723,
       "bilanTotal": 912815.5144490711,
       "cfC": -464025.06490308867,
@@ -2261,6 +2380,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 257462.10399904253,
       "bilanRevente": -106183.67775213078,
       "bilanTotal": 979941.2953012502,
       "cfC": -470851.2628889825,
@@ -2280,6 +2400,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 279360.65318097157,
       "bilanRevente": -102358.04420522519,
       "bilanTotal": 1050683.3514580196,
       "cfC": -477890.5947492911,
@@ -2299,6 +2420,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 301841.4980772114,
       "bilanRevente": -98311.57325670932,
       "bilanTotal": 1125238.8704613727,
       "cfC": -485148.4723102232,
@@ -2318,6 +2440,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 324917.91901197867,
       "bilanRevente": -94038.21374862047,
       "bilanTotal": 1203816.3482539332,
       "cfC": -492630.43287174264,
@@ -2337,6 +2460,7 @@ exports[`golden-master — compute() > loc · lmnp à horizon 30 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 348603.500436103,
       "bilanRevente": -89531.75497970812,
       "bilanTotal": 1286636.2547706943,
       "cfC": -500342.14197560155,
@@ -2372,12 +2496,14 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
 {
   "assM": 48.958333333333336,
   "be": null,
+  "beRevente": 13,
   "cfM": -1354.506449714165,
   "ct": 285000,
   "emp": 235000,
   "flux": [
     {
       "ann": 17454.07739656998,
+      "bilanCash": -31756.53960014248,
       "bilanRevente": -42556.53960014248,
       "bilanTotal": -12556.539600142482,
       "cfC": -23084.47739656998,
@@ -2397,6 +2523,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -32473.77850468015,
       "bilanRevente": -54289.77850468015,
       "bilanTotal": 6125.1528515256505,
       "cfC": -46320.91079313996,
@@ -2416,6 +2543,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -32737.537193985736,
       "bilanRevente": -65789.85719398574,
       "bilanTotal": 25470.715396004016,
       "cfC": -69712.92952970995,
@@ -2435,6 +2563,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -32533.1269289782,
       "bilanRevente": -77046.49332897819,
       "bilanTotal": 45506.93784462835,
       "cfC": -93264.24438637993,
@@ -2454,6 +2583,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -31845.330510947293,
       "bilanRevente": -88048.96423894729,
       "bilanTotal": 66261.81814189284,
       "cfC": -116978.64934495141,
@@ -2473,6 +2603,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -30182.362659244187,
       "bilanRevente": -98310.06906180417,
       "bilanTotal": 88240.64130118929,
       "cfC": -140860.0233877529,
@@ -2492,6 +2623,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -27833.944588591694,
       "bilanRevente": -108124.20511920287,
       "bilanTotal": 111167.946462305,
       "cfC": -164912.3323344639,
@@ -2511,6 +2643,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -24778.05179813539,
       "bilanRevente": -117474.11753935878,
       "bilanTotal": 135080.82319697173,
       "cfC": -189139.6307177273,
@@ -2530,6 +2663,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -20991.910671926642,
       "bilanRevente": -126341.89772797449,
       "bilanTotal": 160017.9616094722,
       "cfC": -213546.06369835744,
@@ -2549,6 +2683,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -16451.97182415433,
       "bilanRevente": -134708.95862132314,
       "bilanTotal": 186019.7284544689,
       "cfC": -238135.86902096614,
@@ -2568,6 +2703,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -11133.882463459857,
       "bilanRevente": -142556.00899657203,
       "bilanTotal": 213128.2471625096,
       "cfC": -262913.3790108474,
@@ -2587,6 +2723,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -5012.45773937754,
       "bilanRevente": -149863.02680315194,
       "bilanTotal": 241387.4819848237,
       "cfC": -287883.022612978,
@@ -2606,6 +2743,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 1938.3489674716839,
       "bilanRevente": -156609.2314775782,
       "bilanTotal": 270843.32648089726,
       "cfC": -313049.32747400866,
@@ -2625,6 +2763,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 9745.476851275249,
       "bilanRevente": -162773.05520267563,
       "bilanTotal": 301543.69658486784,
       "cfC": -338416.9220681392,
@@ -2644,6 +2783,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 18436.789624377154,
       "bilanRevente": -168332.11307065273,
       "bilanTotal": 333538.62850005494,
       "cfC": -363990.53786778875,
@@ -2663,6 +2803,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 28041.10864103303,
       "bilanRevente": -173263.17210789747,
       "bilanTotal": 366880.38168498536,
       "cfC": -389775.0115599913,
@@ -2682,6 +2823,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 38588.24724616759,
       "bilanRevente": -177542.11911774153,
       "bilanTotal": 401623.5472091148,
       "cfC": -415775.2873094652,
@@ -2701,6 +2843,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 50109.04639544146,
       "bilanRevente": -181143.92729574587,
       "bilanTotal": 437825.1617721539,
       "cfC": -441996.41906932625,
@@ -2720,6 +2863,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 62635.41159471049,
       "bilanRevente": -184042.6215703006,
       "bilanTotal": 475544.8276975136,
       "cfC": -468443.5729404322,
@@ -2739,6 +2883,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 76200.35120879448,
       "bilanRevente": -186211.24261951685,
       "bilanTotal": 514844.8392279404,
       "cfC": -495122.02958036755,
@@ -2758,6 +2903,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 91124.68535058718,
       "bilanRevente": -187335.14035429037,
       "bilanTotal": 556076.9846291923,
       "cfC": -504583.10926652903,
@@ -2777,6 +2923,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 105922.10142349306,
       "bilanRevente": -188906.92079548206,
       "bilanTotal": 598834.9451310178,
       "cfC": -514286.4065972115,
@@ -2796,6 +2943,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 121885.32147661733,
       "bilanRevente": -189640.2811867373,
       "bilanTotal": 644508.9122995199,
       "cfC": -524237.5608660673,
@@ -2815,6 +2963,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 138324.62719760233,
       "bilanRevente": -190231.4875190194,
       "bilanTotal": 692512.4039244491,
       "cfC": -534442.3360767333,
@@ -2834,6 +2983,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 155251.30883442337,
       "bilanRevente": -190675.9281765308,
       "bilanTotal": 742966.056588942,
       "cfC": -544906.6236158923,
@@ -2853,6 +3003,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 172676.92190554683,
       "bilanRevente": -190968.85984562646,
       "bilanTotal": 795997.246588821,
       "cfC": -555636.4449824782,
@@ -2872,6 +3023,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 190613.29335607344,
       "bilanRevente": -191105.40403012338,
       "bilanTotal": 851740.4820914424,
       "cfC": -566637.9545741893,
@@ -2891,6 +3043,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 209072.52785493978,
       "bilanRevente": -191080.543478981,
       "bilanTotal": 910337.8185354274,
       "cfC": -577917.4425324949,
@@ -2910,6 +3063,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 228067.014236373,
       "bilanRevente": -190889.11852422624,
       "bilanTotal": 971939.298659097,
       "cfC": -589481.3376473484,
@@ -2929,6 +3083,7 @@ exports[`golden-master — compute() > loc · microbic (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 247609.43208886322,
       "bilanRevente": -190525.82332694798,
       "bilanTotal": 1036703.4186285338,
       "cfC": -601336.2103228414,
@@ -2964,12 +3119,14 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
 {
   "assM": 48.958333333333336,
   "be": null,
+  "beRevente": 9,
   "cfM": -1354.506449714165,
   "ct": 285000,
   "emp": 235000,
   "flux": [
     {
       "ann": 17454.07739656998,
+      "bilanCash": -29066.139600142484,
       "bilanRevente": -39866.13960014249,
       "bilanTotal": -9866.139600142487,
       "cfC": -20394.07739656998,
@@ -2989,6 +3146,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -27052.622504680152,
       "bilanRevente": -48868.62250468015,
       "bilanTotal": 11707.732851525652,
       "cfC": -40899.75479313996,
@@ -3008,6 +3166,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -24544.663853985738,
       "bilanRevente": -57596.98385398573,
       "bilanTotal": 34159.96753600401,
       "cfC": -61520.05618970994,
@@ -3027,6 +3186,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -21641.095153394563,
       "bilanRevente": -66154.46155339456,
       "bilanTotal": 57416.703548611986,
       "cfC": -82372.2126107963,
@@ -3046,6 +3206,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -18428.26685617795,
       "bilanRevente": -74631.90058417796,
       "bilanTotal": 81411.20166730121,
       "cfC": -103561.58569018208,
@@ -3065,6 +3226,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -14420.8658366764,
       "bilanRevente": -82548.5722392364,
       "bilanTotal": 106643.4210059206,
       "cfC": -125098.52656518514,
@@ -3084,6 +3246,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -9915.336412392862,
       "bilanRevente": -90205.59694300406,
       "bilanTotal": 132832.00430295125,
       "cfC": -146993.72415826507,
@@ -3103,6 +3266,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -4896.6379786342,
       "bilanRevente": -97592.70371985763,
       "bilanTotal": 160007.5301513591,
       "cfC": -169258.21689822615,
@@ -3122,6 +3286,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 650.748158384813,
       "bilanRevente": -104699.2388976631,
       "bilanTotal": 188201.5159919331,
       "cfC": -191903.40486804605,
@@ -3141,6 +3306,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 6742.834801452758,
       "bilanRevente": -111514.15199571612,
       "bilanTotal": 217446.44389517308,
       "cfC": -214941.06239535913,
@@ -3160,6 +3326,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 13396.14544515124,
       "bilanRevente": -118025.98108796103,
       "bilanTotal": 247775.78681266,
       "cfC": -238383.35110223643,
@@ -3179,6 +3346,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 20627.731442058197,
       "bilanRevente": -124222.83762171632,
       "bilanTotal": 279224.0352868078,
       "cfC": -262242.8334315424,
@@ -3198,6 +3366,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 28455.18977367005,
       "bilanRevente": -130092.39067137995,
       "bilanTotal": 311826.72460576304,
       "cfC": -286532.4866678104,
@@ -3217,6 +3386,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 36896.6814481474,
       "bilanRevente": -135621.8506058036,
       "bilanTotal": 345620.46238789934,
       "cfC": -311265.71747126715,
@@ -3236,6 +3406,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 45970.95054781597,
       "bilanRevente": -140797.95214721406,
       "bilanTotal": 380642.956577835,
       "cfC": -336456.3769443501,
@@ -3255,6 +3426,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 55697.343950219394,
       "bilanRevente": -145606.93679871125,
       "bilanTotal": 416933.04383317987,
       "cfC": -362118.77625080507,
@@ -3274,6 +3446,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 66095.83174741146,
       "bilanRevente": -150034.5346164978,
       "bilanTotal": 454530.71827825846,
       "cfC": -388267.70280822145,
@@ -3293,6 +3466,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 77187.02838910455,
       "bilanRevente": -154065.94530208292,
       "bilanTotal": 493477.16059786547,
       "cfC": -414918.4370756633,
@@ -3312,6 +3486,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 88992.21457625608,
       "bilanRevente": -157685.81858875515,
       "bilanTotal": 533814.7674406504,
       "cfC": -442086.7699588867,
@@ -3331,6 +3506,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 101533.35993266388,
       "bilanRevente": -160878.23389564757,
       "bilanTotal": 575587.1810979891,
       "cfC": -469789.0208564983,
@@ -3350,6 +3526,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 115261.8077992661,
       "bilanRevente": -163198.0179056116,
       "bilanTotal": 619267.9807362533,
       "cfC": -480445.98681785027,
@@ -3369,6 +3546,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 128854.86775966082,
       "bilanRevente": -165974.15445931448,
       "bilanTotal": 664613.0448919914,
       "cfC": -491353.6402610439,
@@ -3388,6 +3566,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 143605.3241845296,
       "bilanRevente": -167920.27847882523,
       "bilanTotal": 713020.9344178964,
       "cfC": -502517.55815815524,
@@ -3407,6 +3586,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 158823.52580529742,
       "bilanRevente": -169732.5889113245,
       "bilanTotal": 763914.0432697111,
       "cfC": -513943.4374690384,
@@ -3426,6 +3606,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 174520.83478250948,
       "bilanRevente": -171406.40222844487,
       "bilanTotal": 817422.4216353106,
       "cfC": -525637.0976678063,
@@ -3445,6 +3626,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 190708.88356628348,
       "bilanRevente": -172936.89818489,
       "bilanTotal": 873683.4292506224,
       "cfC": -537604.4833217417,
@@ -3464,6 +3646,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 207399.5812065471,
       "bilanRevente": -174319.11617964983,
       "bilanTotal": 932842.1619026889,
       "cfC": -549851.6667237157,
@@ -3483,6 +3666,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 224605.11980822118,
       "bilanRevente": -175547.9515256997,
       "bilanTotal": 995051.9032381565,
       "cfC": -562384.8505792136,
@@ -3502,6 +3686,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 242337.98113463342,
       "bilanRevente": -176618.15162596584,
       "bilanTotal": 1060474.6033889689,
       "cfC": -575210.370749088,
@@ -3521,6 +3706,7 @@ exports[`golden-master — compute() > loc · nu (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 260610.9433625191,
       "bilanRevente": -177524.31205329217,
       "bilanTotal": 1129281.3860175933,
       "cfC": -588334.6990491856,
@@ -3556,12 +3742,14 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
 {
   "assM": 48.958333333333336,
   "be": null,
+  "beRevente": 7,
   "cfM": -554.5064497141651,
   "ct": 285000,
   "emp": 235000,
   "flux": [
     {
       "ann": 17454.07739656998,
+      "bilanCash": -27407.539600142485,
       "bilanRevente": -38207.53960014248,
       "bilanTotal": -8207.539600142482,
       "cfC": -20654.07739656998,
@@ -3581,6 +3769,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -23649.45050468015,
       "bilanRevente": -45465.45050468015,
       "bilanTotal": 15095.304851525652,
       "cfC": -41372.15479313996,
@@ -3600,6 +3789,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -19308.43641398571,
       "bilanRevente": -52360.75641398571,
       "bilanTotal": 39351.31497600404,
       "cfC": -62155.512189709945,
@@ -3619,6 +3809,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -14366.620620078182,
       "bilanRevente": -58879.98702007819,
       "bilanTotal": 64605.47792192837,
       "cfC": -83005.45518627993,
@@ -3638,6 +3829,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -8805.525209869767,
       "bilanRevente": -65009.15893786977,
       "bilanTotal": 90905.10658948036,
       "cfC": -103923.3154948499,
@@ -3657,6 +3849,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": -2606.0494924080267,
       "bilanRevente": -70733.75589496802,
       "bilanTotal": 118299.96663433214,
       "cfC": -124910.45146165988,
@@ -3676,6 +3869,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 4251.552379518049,
       "bilanRevente": -76038.70815109316,
       "bilanTotal": 146842.41064226543,
       "cfC": -145968.24859987467,
@@ -3695,6 +3889,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 11787.694624182303,
       "bilanRevente": -80908.37111704113,
       "bilanTotal": 176587.5198879265,
       "cfC": -167098.12013292234,
@@ -3714,6 +3909,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 20023.483914102428,
       "bilanRevente": -85326.50314194546,
       "bilanTotal": 207593.25411534487,
       "cfC": -188301.50754869956,
@@ -3733,6 +3929,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 28980.744360799872,
       "bilanRevente": -89276.24243636898,
       "bilanTotal": 239920.6098034368,
       "cfC": -209579.88116486094,
@@ -3752,6 +3949,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 38682.043435624844,
       "bilanRevente": -92740.0830974874,
       "bilanTotal": 273633.7874068151,
       "cfC": -230934.74070541415,
@@ -3771,6 +3969,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 49150.718862467824,
       "bilanRevente": -95699.85020130666,
       "bilanTotal": 308800.3680909291,
       "cfC": -252367.615888847,
@@ -3790,6 +3989,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 60410.90651956556,
       "bilanRevente": -98136.67392548441,
       "bilanTotal": 345491.50051095476,
       "cfC": -273880.06702801713,
@@ -3809,6 +4009,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 72487.56938904992,
       "bilanRevente": -100030.96266490108,
       "bilanTotal": 383782.09821604344,
       "cfC": -295473.6856420393,
@@ -3828,6 +4029,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 85406.52759438311,
       "bilanRevente": -101362.37510064692,
       "bilanTotal": 423751.04829463194,
       "cfC": -317150.0950804105,
@@ -3847,6 +4049,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 99194.48956738066,
       "bilanRevente": -102109.79118155001,
       "bilanTotal": 465481.43191262096,
       "cfC": -338910.9511596177,
@@ -3866,6 +4069,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 113879.08438813625,
       "bilanRevente": -102251.28197577305,
       "bilanTotal": 509060.75743447116,
       "cfC": -360757.94281247765,
@@ -3885,6 +4089,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 129488.89534284244,
       "bilanRevente": -101764.078348345,
       "bilanTotal": 554581.2068577652,
       "cfC": -382692.79275046336,
@@ -3904,6 +4109,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 146053.49474624463,
       "bilanRevente": -100624.53841876658,
       "bilanTotal": 602139.8963346825,
       "cfC": -404717.2581392774,
@@ -3923,6 +4129,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 17454.07739656998,
+      "bilanCash": 163603.48007726858,
       "bilanRevente": -98808.11375104287,
       "bilanTotal": 651839.1515992566,
       "cfC": -426833.13128793635,
@@ -3942,6 +4149,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 182457.18063744198,
       "bilanRevente": -96002.64506743569,
       "bilanTotal": 704073.4683266054,
       "cfC": -431588.16295506706,
@@ -3961,6 +4169,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 201687.95520881878,
       "bilanRevente": -93141.06701015646,
       "bilanTotal": 759044.3234102231,
       "cfC": -436438.2952555404,
@@ -3980,6 +4189,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 221303.34527162323,
       "bilanRevente": -90222.25739173155,
       "bilanTotal": 816907.9587385384,
       "cfC": -441385.43020202324,
@@ -3999,6 +4209,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 241311.0431356837,
       "bilanRevente": -87245.07158093818,
       "bilanTotal": 877829.8317050266,
       "cfC": -446431.5078474357,
@@ -4018,6 +4229,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 261718.89495702542,
       "bilanRevente": -84208.34205392894,
       "bilanTotal": 941985.1649583478,
       "cfC": -451578.50704575644,
@@ -4037,6 +4249,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 282534.90381479386,
       "bilanRevente": -81110.87793637958,
       "bilanTotal": 1009559.5290738884,
       "cfC": -456828.4462280436,
@@ -4056,6 +4269,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 303767.2328497177,
       "bilanRevente": -77951.46453647915,
       "bilanTotal": 1080749.4601207222,
       "cfC": -462183.38419397647,
@@ -4075,6 +4289,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 325424.2084653401,
       "bilanRevente": -74728.86286858073,
       "bilanTotal": 1155763.114216414,
       "cfC": -467645.420919228,
@@ -4094,6 +4309,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 347514.32359327486,
       "bilanRevente": -71441.80916732439,
       "bilanTotal": 1234820.9612876165,
       "cfC": -473216.6983789846,
@@ -4113,6 +4329,7 @@ exports[`golden-master — compute() > rp (horizon 20) 1`] = `
     },
     {
       "ann": 0,
+      "bilanCash": 370046.24102376844,
       "bilanRevente": -68089.01439204282,
       "bilanTotal": 1318156.5203874554,
       "cfC": -478899.40138793626,

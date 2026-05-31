@@ -175,6 +175,7 @@ export function compute(p, g) {
     at = p.travaux * (p.amortTravaux / 100);
   const flux = [];
   let cfC = 0;
+  let irrCfC = 0; // cumul des flux ajustés (cfN + loyerPersoAnn) — base TRI/VAN/MOIC
   const irrFlows = [-p.apport];
   const rAlt = g.rendAlt / 100;
   let etfCap = 0;
@@ -225,8 +226,13 @@ export function compute(p, g) {
     etfCap = etfCap * (1 + rAlt) + (g.investirSurplus ? surplusAnn : 0);
 
     const { pr, reventeNet } = computeResale(p, rest, yr);
+    irrCfC += cfN + loyerPersoAnn;
     const bilanRevente = reventeNet + cfC - p.apport;
     const bilanTotal = reventeNet + etfCap - p.apport;
+    // bilanCash : bilan revente en cash sur la même base que TRI/VAN/MOIC — le
+    // loyer perso (LOC : coût subi / RP : loyer économisé) est réintégré, ce qui
+    // rend le passage à zéro interprétable comme « durée de détention pour ne pas perdre ».
+    const bilanCash = reventeNet + irrCfC - p.apport;
     const patTotal = vb - rest + etfCap;
 
     flux.push({
@@ -246,6 +252,7 @@ export function compute(p, g) {
       reventeNet,
       bilanRevente,
       bilanTotal,
+      bilanCash,
       pr,
     });
 
@@ -271,6 +278,7 @@ export function compute(p, g) {
   }
   const cfM = p.mode === 'loc' ? p.loyer - mens - assM - g.loyerPerso : g.loyerPerso - mens - assM;
   const be = flux.findIndex(f => f.cfC >= 0);
+  const beRevente = flux.findIndex(f => f.bilanCash >= 0);
 
   return {
     ct,
@@ -283,6 +291,7 @@ export function compute(p, g) {
     rendNet,
     cfM,
     be: be >= 0 ? be + 1 : null,
+    beRevente: beRevente >= 0 ? beRevente + 1 : null,
     flux,
     amort,
     tri10: calcTRI(flux, irrFlows, 10),

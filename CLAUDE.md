@@ -321,11 +321,14 @@ reventeNet = pr − capitalRestant − fa − iPV                ✅
 ### Bilans à la revente ✅
 
 ```
-bilanRevente = reventeNet + cfC − apport      (gain net opérationnel : vente + flux cumulés − mise de départ)
-bilanTotal   = reventeNet + etfCap − apport   (gain net global : vente + ETF accumulé − mise de départ)
+bilanRevente = reventeNet + cfC    − apport   (gain net opérationnel : vente + flux cumulés bruts − mise de départ)
+bilanTotal   = reventeNet + etfCap  − apport   (gain net global : vente + ETF accumulé − mise de départ)
+bilanCash    = reventeNet + irrCfC  − apport   (gain net cash, base TRI/VAN : irrCfC = Σ(cfN + loyerPersoAnn))
 ```
 
-`bilanRevente` suppose que les flux positifs restent en cash. `bilanTotal` suppose qu'ils sont réinvestis en ETF (via le mécanisme surplus). Ces deux métriques sont affichées dans **KpisTab** (section Patrimoine) à l'horizon choisi.
+`bilanRevente` suppose que les flux positifs restent en cash (flux **bruts** `cfC`, loyer perso inclus comme coût). `bilanTotal` suppose qu'ils sont réinvestis en ETF (via le mécanisme surplus). Ces deux métriques sont affichées dans **KpisTab** (section Patrimoine) à l'horizon choisi.
+
+`bilanCash` utilise les **mêmes flux ajustés que TRI/VAN/MOIC** (`irrCfC = Σ(cfN + loyerPersoAnn)` — le loyer perso est réintégré : coût subi neutralisé en LOC, loyer économisé crédité en RP). Contrairement à `bilanRevente`, son passage à zéro est interprétable comme « durée de détention minimale pour ne pas perdre d'argent (nominal, hors coût d'opportunité) ». Tracé dans le 2ᵉ graphe de **ReventeTab** avec une annotation verticale par sim à l'année de break-even. ⚠️ Métrique **nominale** : ne tient pas compte de l'inflation ni du coût d'opportunité (un ETF peut surperformer même si `bilanCash ≥ 0`).
 
 ### Cash-on-cash return ✅
 
@@ -423,6 +426,7 @@ Analogue au MOIC sim : `(valeur_terminale + Σ_flows_opérationnels) / apport_in
 | Patrimoine total réel à horizon | `cap[hz] / (1+inflation/100)^{hz}`                    |
 | Patrimoine total à 30 ans       | `etfPurGlobal[29].cap`                                |
 | Patrimoine total réel à 30 ans  | `cap[30] / (1+inflation/100)^{30}`                    |
+| Break-even revente              | `—` (métrique immobilière sans équivalent ETF direct) |
 | Crossover                       | `—`                                                   |
 
 ### Crossover ✅
@@ -512,6 +516,14 @@ be = première année yr telle que cfC[yr] ≥ 0
 ```
 
 Indique quand les flux opérationnels cumulés repassent en positif (hors valeur du bien). Retourne `null` si jamais atteint en 30 ans.
+
+### Break-even revente ✅
+
+```
+beRevente = première année yr telle que bilanCash[yr] ≥ 0
+```
+
+Durée de détention minimale pour que la revente ne soit pas perdante (en nominal, base TRI/VAN incluant le loyer perso/économisé — cf. `bilanCash`). Intègre frais d'achat et de vente. Affiché dans **KpisTab** (section Patrimoine) et en annotation du 2ᵉ graphe de **ReventeTab**. Retourne `null` si jamais atteint en 30 ans. Diffère de `be` (qui n'inclut ni la revente ni le loyer perso).
 
 ---
 
