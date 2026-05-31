@@ -7,7 +7,7 @@ import {
   useEffect,
   useRef,
 } from 'react';
-import { DEFAULT_G, DEFAULT_SIMS, KEYS, resolveAutoFields } from './definitions.js';
+import { DEFAULT_G, DEFAULT_SIMS, KEYS, resolveAutoFields, simCopyPayload } from './definitions.js';
 import { compute, computeEtfPur, crossoverYear } from '../engine/compute.js';
 
 const STORAGE_KEY = 'immorenta_state';
@@ -45,6 +45,9 @@ export function AppProvider({ children }) {
   const [openGrp, setOpenGrp] = useState(
     () => saved?.openGrp ?? { A: 'Acquisition', B: 'Acquisition', C: 'Acquisition' }
   );
+  // Copy/paste clipboard for simulations. In-memory only (not persisted) — paste
+  // becomes available once a copy is made and resets on reload (Ctrl+C-like).
+  const [clipboard, setClipboard] = useState(null);
 
   const etfPurGlobal = useMemo(() => computeEtfPur(G), [G]);
 
@@ -86,6 +89,18 @@ export function AppProvider({ children }) {
     setSims(prev => ({ ...prev, [key]: { ...prev[key], ...updates } }));
   }, []);
 
+  /** Copy a simulation's financial inputs into the clipboard (excludes identity). */
+  const copySim = useCallback(key => setClipboard(simCopyPayload(sims[key])), [sims]);
+
+  /** Paste the clipboard onto a target sim, keeping its label/enabled/collapsed. */
+  const pasteSim = useCallback(
+    targetKey => {
+      if (!clipboard) return;
+      updateSimBulk(targetKey, clipboard);
+    },
+    [clipboard, updateSimBulk]
+  );
+
   const toggleOpenGrp = useCallback((key, grp) => {
     setOpenGrp(prev => ({ ...prev, [key]: prev[key] === grp ? null : grp }));
   }, []);
@@ -121,6 +136,9 @@ export function AppProvider({ children }) {
         resolvedSims,
         updateSim,
         updateSimBulk,
+        copySim,
+        pasteSim,
+        clipboard,
         toggleAutoField,
         curTab,
         setCurTab,

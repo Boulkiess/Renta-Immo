@@ -128,6 +128,19 @@ export function mkDef(mode) {
   };
 }
 
+/**
+ * Build the clipboard payload for a "copy simulation" action.
+ * Carries the financial inputs (mode + all params) and a *cloned* autoFields
+ * array, but drops identity/view state — label, enabled, collapsed — so a
+ * subsequent paste keeps the target panel's name and visibility (see D1).
+ * autoFields is cloned to avoid sharing the array reference between source and
+ * target after a paste.
+ */
+export const simCopyPayload = p => {
+  const { label, enabled, collapsed, ...rest } = p;
+  return { ...rest, autoFields: [...(rest.autoFields ?? [])] };
+};
+
 export const DEFAULT_SIMS = {
   A: {
     ...mkDef('loc'),

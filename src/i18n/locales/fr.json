@@ -55,7 +55,10 @@
   "sim": {
     "loc": "Locatif",
     "rp": "RP",
-    "enable": "Activer/désactiver cette simulation",
+    "menu": "Actions sur cette simulation",
+    "disable": "Désactiver",
+    "copy": "Copier",
+    "paste": "Coller",
     "hide": "masquer",
     "show": "afficher",
     "disabled": "Désactivé"

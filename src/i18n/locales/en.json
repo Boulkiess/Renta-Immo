@@ -55,7 +55,10 @@
   "sim": {
     "loc": "Rental",
     "rp": "Primary",
-    "enable": "Enable/disable this simulation",
+    "menu": "Actions on this simulation",
+    "disable": "Disable",
+    "copy": "Copy",
+    "paste": "Paste",
     "hide": "hide",
     "show": "show",
     "disabled": "Disabled"

@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
 import { COL, getGroups } from '../../state/definitions.js';
-import Toggle from '../common/Toggle.jsx';
+import { Menu, MenuItem } from '../common/Menu.jsx';
 import FieldGroup from './FieldGroup.jsx';
 import HeaderKpis from './HeaderKpis.jsx';
-import { CollapseIcon } from './icons.jsx';
+import { CollapseIcon, KebabIcon } from './icons.jsx';
 import {
   Panel,
   Header,
@@ -20,7 +20,18 @@ import {
 /** Full expanded simulation panel: header (label, mode, KPI chips) + field groups. */
 export default function FullPanel({ simKey }) {
   const { t } = useTranslation();
-  const { G, sims, updateSim, updateSimBulk, openGrp, toggleOpenGrp, RES } = useApp();
+  const {
+    G,
+    sims,
+    updateSim,
+    updateSimBulk,
+    copySim,
+    pasteSim,
+    clipboard,
+    openGrp,
+    toggleOpenGrp,
+    RES,
+  } = useApp();
   const p = sims[simKey];
   const r = RES[simKey];
   const col = COL[simKey];
@@ -37,11 +48,15 @@ export default function FullPanel({ simKey }) {
           >
             <CollapseIcon expanded />
           </IconBtn>
-          <Toggle
-            checked={p.enabled}
-            onChange={v => updateSim(simKey, 'enabled', v)}
-            title={t('sim.enable')}
-          />
+          <Menu trigger={<KebabIcon />} title={t('sim.menu')}>
+            <MenuItem onClick={() => updateSim(simKey, 'enabled', false)}>
+              {t('sim.disable')}
+            </MenuItem>
+            <MenuItem onClick={() => copySim(simKey)}>{t('sim.copy')}</MenuItem>
+            <MenuItem onClick={() => pasteSim(simKey)} disabled={!clipboard}>
+              {t('sim.paste')}
+            </MenuItem>
+          </Menu>
         </TopRow>
 
         <ModeRow>
