@@ -45,14 +45,17 @@ npm workspaces — app at root, pure financial engine extracted to packages/engi
 
 packages/
   engine/                @immo-renta/engine — pure financial engine, zero runtime deps
-    package.json         name "@immo-renta/engine", type module, main src/index.js
+    package.json         name "@immo-renta/engine", type module, main src/index.js, types dist/index.d.ts
+    tsconfig.json        checkJs + emitDeclarationOnly → generates dist/*.d.ts from JSDoc (npm run build:types)
     src/
       index.js          Public API barrel — the only import surface (re-exports compute.js)
       compute.js        Financial engine: compute(p,g), computeEtfPur(g), computeEtfKpis(g), crossoverYear()
                         + helpers exportés (testables): irr(), abattementIR/PS(), impLoc(), surplusAt(),
                           revalorise(), buildAmortization(), computeResale(), calcTRI(), calcVAN(), calcMoic()
+                        JSDoc @typedef Globals (g) + SimParams (p) → typed public API in the emitted .d.ts
     __tests__/          Vitest: compute (vérité-terrain), golden-master + self-contained fixtures.js
                         (NO dependency on src/state — engine is standalone)
+    dist/                Generated .d.ts (gitignored; built on demand / on prepack). NOT committed.
 
 index.html              HTML shell — loads src/main.jsx via Vite
 src/                     The web app. Imports the engine via `@immo-renta/engine` (workspace symlink).

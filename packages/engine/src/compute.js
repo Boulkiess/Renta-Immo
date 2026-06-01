@@ -1,5 +1,59 @@
 // Pure financial engine — all functions receive global settings (g) as parameter
 
+/**
+ * Global settings shared across the 3 simulations. Mirrors state's DEFAULT_G.
+ * @typedef {object} Globals
+ * @property {'lmnp'|'microbic'|'nu'} regime   Locative tax regime (global).
+ * @property {number} horizon          Calculation horizon in years (1–30).
+ * @property {number} tauxActu         Discount rate for NPV (%).
+ * @property {number} rendAlt          Alternative (ETF) annual return (%).
+ * @property {number} loyerPerso       Personal monthly rent (€/month).
+ * @property {number} revalLoyerPerso  Annual revaluation of personal rent (%).
+ * @property {number} budgetMensuel    Available monthly budget (€/month).
+ * @property {number} revalBudget      Annual budget revaluation (%).
+ * @property {number} [revalCharges]   Annual fixed-charges revaluation (%, default 2).
+ * @property {boolean} investirSurplus Reinvest the monthly surplus into the ETF pocket.
+ * @property {number} apportETF        Hypothetical capital invested in the ETF reference.
+ * @property {number} inflation        Inflation (%), used by real-terms KPIs.
+ */
+
+/**
+ * One simulation's financial parameters. Mirrors state's mkDef(). Both the
+ * locative ('loc') and résidence-principale ('rp') field sets are always present;
+ * compute() reads the subset matching `mode`.
+ * @typedef {object} SimParams
+ * @property {'loc'|'rp'} mode
+ * @property {number} prixAchat
+ * @property {number} fraisNotaire
+ * @property {number} travaux
+ * @property {number} fraisAgence
+ * @property {number} [fraisDossier]
+ * @property {number} apport
+ * @property {number} taux
+ * @property {number} duree
+ * @property {number} assurance
+ * @property {number} revalBien
+ * @property {number} fraisVente
+ * @property {number} loyer
+ * @property {number} vacance
+ * @property {number} taxeFonciere
+ * @property {number} chargesCopro
+ * @property {number} assurPNO
+ * @property {number} fraisGestion
+ * @property {number} provision
+ * @property {number} revalLoyer
+ * @property {number} tmi
+ * @property {number} ps
+ * @property {number} amortBien
+ * @property {number} amortTravaux
+ * @property {number} impotPV
+ * @property {number} psPV
+ * @property {number} taxeFonciereRP
+ * @property {number} chargesCoproRP
+ * @property {number} assurHab
+ * @property {number} provisionRP
+ */
+
 // ── Constantes fiscales ───────────────────────────────────────
 const PFU_RATE = 0.3; // flat tax (PFU) sur la plus-value ETF (CTO)
 const MICROBIC_ABATTEMENT = 0.5; // abattement forfaitaire Micro-BIC (meublé non classé)
@@ -13,11 +67,23 @@ const ABAT_FULL = 100; // exonération totale
 // Revalorisation composée : base × (1 + taux%)^périodes
 // Exporté pour la doc interactive (DocPanel) — single source of truth partagée
 // avec le moteur. Ne pas dupliquer cette formule ailleurs.
+/**
+ * Compound revaluation: base × (1 + ratePct%)^periods.
+ * @param {number} base
+ * @param {number} ratePct
+ * @param {number} periods
+ * @returns {number}
+ */
 export const revalorise = (base, ratePct, periods) => base * Math.pow(1 + ratePct / 100, periods);
 
 // Surplus annuel du scénario de RÉFÉRENCE ETF : budget revalorisé − loyer perso revalorisé.
 // ⚠️ Ne PAS confondre avec le surplus in-loop de compute() (budget − sorties réelles du bien) :
 // ce sont deux grandeurs distinctes. surplusAt() unifie uniquement computeEtfPur + computeEtfKpis.
+/**
+ * @param {Globals} g
+ * @param {number} yr
+ * @returns {number}
+ */
 export const surplusAt = (g, yr) =>
   Math.max(
     0,
@@ -25,6 +91,14 @@ export const surplusAt = (g, yr) =>
       revalorise(g.loyerPerso * 12, g.revalLoyerPerso, yr - 1)
   );
 
+/**
+ * Internal rate of return via Newton-Raphson. Returns null on non-convergence.
+ * @param {number[]} flows
+ * @param {number} [guess]
+ * @param {number} [maxIter]
+ * @param {number} [tol]
+ * @returns {number|null}
+ */
 export function irr(flows, guess = 0.1, maxIter = 100, tol = 1e-7) {
   let r = guess;
   for (let i = 0; i < maxIter; i++) {
@@ -44,12 +118,14 @@ export function irr(flows, guess = 0.1, maxIter = 100, tol = 1e-7) {
   return null;
 }
 
+/** @param {number} yr @returns {number} Abattement IR (%) — art. 150 VC CGI. */
 export function abattementIR(yr) {
   if (yr <= 5) return 0;
   if (yr <= 21) return (yr - 5) * ABAT_IR_PER_YEAR; // 6 %/an de la 6e à la 21e → 96 %
   return ABAT_FULL; // 4 % à la 22e = exonération totale
 }
 
+/** @param {number} yr @returns {number} Abattement PS (%) — art. 150 VC CGI. */
 export function abattementPS(yr) {
   if (yr <= 5) return 0;
   if (yr <= 21) return (yr - 5) * ABAT_PS_PER_YEAR; // 1,65 %/an de la 6e à la 21e
@@ -58,6 +134,18 @@ export function abattementPS(yr) {
   return ABAT_FULL;
 }
 
+/**
+ * Locative income tax for one year.
+ * @param {number} le  Effective rent (after vacancy).
+ * @param {number} chg Annual charges.
+ * @param {number} ab  Building amortization (LMNP).
+ * @param {number} at  Works amortization (LMNP).
+ * @param {number} tmi Marginal income tax rate (%).
+ * @param {number} ps  Social levies (%).
+ * @param {'lmnp'|'microbic'|'nu'} regime
+ * @param {number} [intAnnuel] Deductible loan interest for the year.
+ * @returns {number}
+ */
 export function impLoc(le, chg, ab, at, tmi, ps, regime, intAnnuel = 0) {
   let ri;
   if (regime === 'lmnp') ri = Math.max(0, le - chg - ab - at - intAnnuel);
@@ -66,6 +154,7 @@ export function impLoc(le, chg, ab, at, tmi, ps, regime, intAnnuel = 0) {
   return ri * ((tmi + ps) / 100);
 }
 
+/** @param {Globals} g @returns {{yr:number, cap:number, capNet:number}[]} */
 export function computeEtfPur(g) {
   const result = [];
   let cap = g.apportETF;
@@ -88,6 +177,10 @@ export function computeEtfPur(g) {
 //   TRI_real_ETF = (1 + rendAlt) / (1 + inflation) − 1
 //   VAN_ETF      = −apportETF + Σ (−surplusAt) / (1+tauxActu)^t + cap[hz] / (1+tauxActu)^hz
 //   MOIC_ETF     = (cap[hz] − Σ surplusAt) / apportETF   (null si apportETF = 0)
+/**
+ * @param {Globals} g
+ * @returns {{tri:number, triReal:number, van:number, moic:number|null, surplusTotal:number}}
+ */
 export function computeEtfKpis(g) {
   const hz = g.horizon;
   const capHz = computeEtfPur(g)[hz - 1]?.cap ?? 0;
@@ -109,6 +202,15 @@ export function computeEtfKpis(g) {
 
 // Tableau d'amortissement mensuel (annuité constante). amort[m-1] = mois m.
 // Boucle ≥ 12 mois pour garantir au moins une année même sur prêt très court.
+/**
+ * Monthly amortization schedule (constant annuity). amort[m-1] = month m.
+ * @param {number} emp  Borrowed principal.
+ * @param {number} tM   Monthly rate.
+ * @param {number} nM   Number of monthly payments.
+ * @param {number} mens Monthly payment.
+ * @param {number} assM Monthly insurance.
+ * @returns {{inter:number, cap:number, assur:number, rest:number}[]}
+ */
 export function buildAmortization(emp, tM, nM, mens, assM) {
   const amort = [];
   let cap = emp;
@@ -123,6 +225,12 @@ export function buildAmortization(emp, tM, nM, mens, assM) {
 
 // Revente à l'année yr : prix de revente (travaux inclus), frais, plus-value
 // imposée puis produit net. iPV avec abattements progressifs en mode 'loc' ; RP exonérée.
+/**
+ * @param {SimParams} p
+ * @param {number} rest Outstanding loan capital at year yr.
+ * @param {number} yr
+ * @returns {{pr:number, fa:number, reventeNet:number}}
+ */
 export function computeResale(p, rest, yr) {
   const pr = revalorise(p.prixAchat + p.travaux, p.revalBien, yr);
   const fa = pr * (p.fraisVente / 100);
@@ -137,6 +245,12 @@ export function computeResale(p, rest, yr) {
 }
 
 // TRI / VAN / MOIC à un horizon. Purs. flux 0-based ; irrFlows[0] = −apport.
+/**
+ * @param {{reventeNet:number}[]} flux
+ * @param {number[]} irrFlows  0-based; irrFlows[0] = −apport.
+ * @param {number} horizon
+ * @returns {number|null}
+ */
 export function calcTRI(flux, irrFlows, horizon) {
   if (horizon > 30 || horizon < 1) return null;
   const flows = [...irrFlows.slice(0, horizon + 1)];
@@ -144,6 +258,13 @@ export function calcTRI(flux, irrFlows, horizon) {
   return irr(flows);
 }
 
+/**
+ * @param {{reventeNet:number}[]} flux
+ * @param {number[]} irrFlows
+ * @param {Globals} g
+ * @param {number} horizon
+ * @returns {number|null}
+ */
 export function calcVAN(flux, irrFlows, g, horizon) {
   if (horizon > 30 || horizon < 1) return null;
   const r = g.tauxActu / 100;
@@ -156,12 +277,25 @@ export function calcVAN(flux, irrFlows, g, horizon) {
   return van;
 }
 
+/**
+ * @param {{reventeNet:number}[]} flux
+ * @param {number[]} irrFlows
+ * @param {number} horizon
+ * @param {number} apport
+ * @returns {number}
+ */
 export function calcMoic(flux, irrFlows, horizon, apport) {
   const last = flux[horizon - 1];
   if (!last) return 0;
   return (last.reventeNet + irrFlows.slice(1, horizon + 1).reduce((a, b) => a + b, 0)) / apport;
 }
 
+/**
+ * Core financial engine. Pure: given a simulation's params and globals, returns
+ * monthly payments, the 30-year flux array, IRR at 10/15/20y, NPV, MOIC, resale.
+ * @param {SimParams} p
+ * @param {Globals} g
+ */
 export function compute(p, g) {
   const ct = p.prixAchat + p.fraisNotaire + p.travaux + p.fraisAgence + (p.fraisDossier ?? 0);
   const emp = Math.max(0, ct - p.apport);
@@ -316,6 +450,13 @@ export function compute(p, g) {
   };
 }
 
+/**
+ * First year where immo patTotal ≥ ETF reference cap. Null if surplus not invested.
+ * @param {{flux:{patTotal:number}[]}} res  A compute() result.
+ * @param {{cap:number}[]} etfPurGlobal      A computeEtfPur() result.
+ * @param {Globals} g
+ * @returns {number|null}
+ */
 export function crossoverYear(res, etfPurGlobal, g) {
   if (!etfPurGlobal.length || !g.investirSurplus) return null;
   for (let i = 0; i < 30; i++) {

@@ -18,6 +18,6 @@
     "esModuleInterop": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/engine/**/*", "src/state/**/*", "packages/engine/**/*", "vite.config.js"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/engine/**/*", "src/state/**/*", "vite.config.js"],
+  "exclude": ["node_modules", "dist", "**/__tests__/**"]
 }

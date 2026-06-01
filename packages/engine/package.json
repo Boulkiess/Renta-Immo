@@ -5,17 +5,23 @@
   "type": "module",
   "main": "./src/index.js",
   "module": "./src/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./src/index.js"
     }
   },
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
   "sideEffects": false,
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build:types": "tsc -p tsconfig.json",
+    "prepack": "npm run build:types"
   },
   "license": "MIT",
   "dependencies": {},
