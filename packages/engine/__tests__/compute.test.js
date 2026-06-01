@@ -8,7 +8,7 @@ import {
   abattementIR,
   abattementPS,
   impLoc,
-} from '../index.js';
+} from '../src/index.js';
 import { makeG, mkParams } from './fixtures.js';
 
 const makeLoc = (over = {}) => mkParams('loc', over);

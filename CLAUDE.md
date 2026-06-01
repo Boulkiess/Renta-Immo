@@ -41,22 +41,31 @@ Deployment: pushing to `main` triggers GitHub Actions → `quality` job (format:
 ## Architecture
 
 ```
+npm workspaces — app at root, pure financial engine extracted to packages/engine
+
+packages/
+  engine/                @immo-renta/engine — pure financial engine, zero runtime deps
+    package.json         name "@immo-renta/engine", type module, main src/index.js
+    src/
+      index.js          Public API barrel — the only import surface (re-exports compute.js)
+      compute.js        Financial engine: compute(p,g), computeEtfPur(g), computeEtfKpis(g), crossoverYear()
+                        + helpers exportés (testables): irr(), abattementIR/PS(), impLoc(), surplusAt(),
+                          revalorise(), buildAmortization(), computeResale(), calcTRI(), calcVAN(), calcMoic()
+    __tests__/          Vitest: compute (vérité-terrain), golden-master + self-contained fixtures.js
+                        (NO dependency on src/state — engine is standalone)
+
 index.html              HTML shell — loads src/main.jsx via Vite
-src/
+src/                     The web app. Imports the engine via `@immo-renta/engine` (workspace symlink).
   main.jsx              React entry point (ReactDOM.createRoot)
   App.jsx               Root component — theme provider, layout, tab routing
   state/
     AppContext.jsx       React context: sims, G (globals), dispatch actions
     definitions.js      mkDef(), GRP_COMMON/LOC/RP, field metadata, I (info registry)
-  engine/
-    index.js            Public API barrel — engine package boundary; app imports from here, not compute.js directly (re-exports compute.js only)
-    compute.js          Financial engine: compute(p,g), computeEtfPur(g), computeEtfKpis(g), crossoverYear()
-                        + helpers exportés (testables): irr(), abattementIR/PS(), impLoc(), surplusAt(),
-                          buildAmortization(), computeResale(), calcTRI(), calcVAN(), calcMoic()
+  engine/                App-side engine helpers (NOT the pure compute package above)
     charts.js           Canvas renderers: drawLine(), drawBars(), attachHover()
     utils.js            Formatters: fmtE(), fmtK(), fmtP(), fmtTRI()
-    io.js               Export/import handlers (CSV, JSON, YAML)
-    __tests__/          Vitest: compute (vérité-terrain), golden-master, io round-trip
+    io.js               Export/import handlers (CSV, JSON, YAML) — coupled to state/definitions.js
+    __tests__/          Vitest: io round-trip (imports compute from @immo-renta/engine)
   components/
     SimPanel/           Left-column simulation panel (sliders, KPI chips, mode switch)
     ChartArea/          Canvas chart wrappers (Charts, KPIs, Revente, Amort tabs)
@@ -93,8 +102,8 @@ no LLM, no API key, no backend).
 ### Core data flow
 
 1. **`AppContext`** (`state/AppContext.jsx`) — holds state for 3 concurrent simulations (A, B, C) via `useReducer`. Each sim has a `mode` (`'loc'` / `'rp'`) and ~25 financial parameters from `mkDef()`, plus global settings `G`.
-2. **`compute(p, g)`** (`engine/compute.js`) — pure function: takes a simulation's parameters and globals, returns derived financials: monthly payments, 30-year cashflows, IRR at multiple horizons, NPV, patrimoine net. This is the financial engine — touch it carefully.
-3. **`computeEtfPur(g)`** (`engine/compute.js`) — pure function returning the 30-year ETF reference scenario array.
+2. **`compute(p, g)`** (`packages/engine/src/compute.js`) — pure function: takes a simulation's parameters and globals, returns derived financials: monthly payments, 30-year cashflows, IRR at multiple horizons, NPV, patrimoine net. This is the financial engine — touch it carefully.
+3. **`computeEtfPur(g)`** (`packages/engine/src/compute.js`) — pure function returning the 30-year ETF reference scenario array.
 4. Charts and KPI tables call `compute()` and `computeEtfPur()` on each render cycle.
 
 ### Key data shapes
@@ -185,7 +194,7 @@ no LLM, no API key, no backend).
 
 ## Métriques calculées et formules exactes
 
-Toutes les formules ci-dessous sont implémentées dans `engine/compute.js`. ✅ = vérifié correct, ⚠️ = simplification documentée.
+Toutes les formules ci-dessous sont implémentées dans `packages/engine/src/compute.js`. ✅ = vérifié correct, ⚠️ = simplification documentée.
 
 ### Coût et emprunt
 
@@ -405,7 +414,7 @@ La fonction retourne deux valeurs par année :
 
 ### Colonne ETF pur — KpisTab ✅
 
-Le tableau de l'onglet Comparaison affiche une colonne **ETF pur** à droite des colonnes simulation. Les KPIs financiers ETF (TRI/VAN/MOIC) sont calculés **dans `engine/compute.js` via `computeEtfKpis(g)`** (déplacés du composant vers le moteur pour passer sous le golden-master). `KpisTab/index.jsx` appelle `computeEtfKpis(G)` et passe le résultat à `buildSections()`. Les lignes simples (rendement, CF) restent dérivées de `G` dans `kpiSections.js`.
+Le tableau de l'onglet Comparaison affiche une colonne **ETF pur** à droite des colonnes simulation. Les KPIs financiers ETF (TRI/VAN/MOIC) sont calculés **dans `packages/engine/src/compute.js` via `computeEtfKpis(g)`** (déplacés du composant vers le moteur pour passer sous le golden-master). `KpisTab/index.jsx` appelle `computeEtfKpis(G)` et passe le résultat à `buildSections()`. Les lignes simples (rendement, CF) restent dérivées de `G` dans `kpiSections.js`.
 
 #### Rendements & Cashflow
 

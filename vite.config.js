@@ -10,7 +10,7 @@ export default defineConfig({
     // per-file via `// @vitest-environment jsdom` docblock — avoids the
     // deprecated environmentMatchGlobs and keeps the engine suite DOM-free.
     environment: 'node',
-    include: ['src/**/*.test.{js,jsx}'],
+    include: ['src/**/*.test.{js,jsx}', 'packages/*/__tests__/**/*.test.js'],
     setupFiles: ['./src/test-utils/setup.js'],
   },
 });

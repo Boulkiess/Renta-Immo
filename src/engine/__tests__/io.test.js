@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { buildExportData } from '../io.js';
-import { compute, computeEtfPur } from '../compute.js';
+import { compute, computeEtfPur } from '@immo-renta/engine';
 import { mkDef, KEYS } from '../../state/definitions.js';
 
 const G = {

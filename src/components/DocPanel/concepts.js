@@ -4,7 +4,7 @@
 // them, so adding/altering a concept is a data edit here, never new UI.
 //
 // SINGLE SOURCE OF TRUTH: every `compute()` adapter calls the exported, pure,
-// golden-master-tested engine helpers from engine/compute.js. The doc therefore
+// golden-master-tested engine helpers from @immo-renta/engine. The doc therefore
 // computes exactly like the app and cannot drift. Adapters are pure (no React,
 // no DOM) so they are unit-tested directly in concepts.test.js.
 //
@@ -36,7 +36,7 @@ import {
   computeResale,
   computeEtfPur,
   revalorise,
-} from '../../engine/index.js';
+} from '@immo-renta/engine';
 
 export const GROUPS = [
   'credit',

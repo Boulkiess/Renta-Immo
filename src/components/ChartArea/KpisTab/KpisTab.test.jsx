@@ -4,7 +4,7 @@ import { screen } from '@testing-library/react';
 import { renderWithProviders } from '../../../test-utils/renderWithProviders.jsx';
 import { normalizeMoney } from '../../../test-utils/kpiNormalize.js';
 import KpisTab from './index.jsx';
-import { compute, computeEtfKpis } from '../../../engine/index.js';
+import { compute, computeEtfKpis } from '@immo-renta/engine';
 import { DEFAULT_G, DEFAULT_SIMS, resolveAutoFields } from '../../../state/definitions.js';
 
 // Reproduce the provider's pipeline (merge defaults → resolve auto → compute)

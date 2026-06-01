@@ -1,0 +1,23 @@
+{
+  "name": "@immo-renta/engine",
+  "version": "0.1.0",
+  "description": "Pure financial engine for French real-estate investment analysis (LMNP, foncier nu, micro-BIC, plus-value art. 150 VC CGI, ETF reference scenario). Zero runtime dependencies.",
+  "type": "module",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "test": "vitest run"
+  },
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

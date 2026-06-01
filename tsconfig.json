@@ -3,6 +3,10 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@immo-renta/engine": ["./packages/engine/src/index.js"]
+    },
     "jsx": "react-jsx",
     "allowJs": true,
     "checkJs": true,
@@ -14,6 +18,6 @@
     "esModuleInterop": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/engine/**/*", "src/state/**/*", "vite.config.js"],
+  "include": ["src/engine/**/*", "src/state/**/*", "packages/engine/**/*", "vite.config.js"],
   "exclude": ["node_modules", "dist"]
 }

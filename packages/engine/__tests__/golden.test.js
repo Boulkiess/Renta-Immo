@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { compute, computeEtfPur, computeEtfKpis } from '../index.js';
+import { compute, computeEtfPur, computeEtfKpis } from '../src/index.js';
 import { makeG, mkParams } from './fixtures.js';
 
 // Golden-master : fige le comportement complet du moteur. Toute dérive lors d'un
