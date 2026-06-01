@@ -11,7 +11,9 @@ const ABAT_PS_LATE_PER_YEAR = 9; // %/an, années 23→30
 const ABAT_FULL = 100; // exonération totale
 
 // Revalorisation composée : base × (1 + taux%)^périodes
-const revalorise = (base, ratePct, periods) => base * Math.pow(1 + ratePct / 100, periods);
+// Exporté pour la doc interactive (DocPanel) — single source of truth partagée
+// avec le moteur. Ne pas dupliquer cette formule ailleurs.
+export const revalorise = (base, ratePct, periods) => base * Math.pow(1 + ratePct / 100, periods);
 
 // Surplus annuel du scénario de RÉFÉRENCE ETF : budget revalorisé − loyer perso revalorisé.
 // ⚠️ Ne PAS confondre avec le surplus in-loop de compute() (budget − sorties réelles du bien) :

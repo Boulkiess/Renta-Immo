@@ -506,5 +506,119 @@
     "zeroGuard": "Valeur calculée à 0 — vérifier le prix d'achat",
     "hint": "Les champs marqués A sont calculés automatiquement. Cliquer sur A pour passer en manuel.",
     "hintDismiss": "OK"
+  },
+  "doc": {
+    "open": "Documentation interactive",
+    "title": "Formules — documentation interactive",
+    "close": "Fermer",
+    "resetToSim": "Charger les valeurs de :",
+    "units": { "perMonth": " /mois", "years": "ans" },
+    "groups": {
+      "credit": "Crédit",
+      "rendement": "Rendement",
+      "capitalisation": "Capitalisation",
+      "fiscalite": "Fiscalité",
+      "plusvalue": "Plus-value",
+      "rentabilite": "Rentabilité (TRI/VAN/MOIC)"
+    },
+    "inputs": {
+      "emp": "Montant emprunté",
+      "ct": "Coût total d'acquisition",
+      "charges": "Charges annuelles",
+      "base": "Valeur initiale",
+      "le": "Loyer effectif (après vacance)",
+      "chg": "Charges déductibles",
+      "ab": "Amortissement du bien",
+      "at": "Amortissement des travaux",
+      "intAnnuel": "Intérêts annuels du crédit",
+      "rest": "Capital restant dû",
+      "flows": "Flux de trésorerie (année 0 → 6)",
+      "tauxActu": "Taux d'actualisation",
+      "apportETF": "Apport ETF",
+      "rendAlt": "Rendement ETF",
+      "budgetMensuel": "Budget mensuel",
+      "loyerPerso": "Loyer personnel",
+      "revalBudget": "Revalorisation budget",
+      "revalLoyerPerso": "Revalorisation loyer",
+      "regime": "Régime fiscal"
+    },
+    "notes": {
+      "totalInterest": "Intérêts totaux",
+      "interest": "Intérêts",
+      "insurance": "Assurance",
+      "at30": "À 30 ans",
+      "tri": "TRI",
+      "van": "VAN",
+      "moic": "MOIC",
+      "value": "Valeur",
+      "capGross": "Capital brut",
+      "capNet": "Capital net (après PFU)",
+      "reventeNet": "Produit net de revente",
+      "npvCurve": "VAN(taux)",
+      "abatIR": "Abattement IR",
+      "abatPS": "Abattement PS"
+    },
+    "concepts": {
+      "mensualite": {
+        "title": "Mensualité du crédit",
+        "body": "Annuité constante : une mensualité fixe qui rembourse le prêt sur toute sa durée. Un taux ou un montant plus élevé l'augmente ; une durée plus longue la baisse (mais coûte plus cher au total).",
+        "code": "mensualité = emprunt × (r/12) / (1 − (1 + r/12)^−n)"
+      },
+      "amortissement": {
+        "title": "Décomposition de l'amortissement",
+        "body": "Chaque mensualité se partage entre les intérêts (sur le capital restant) et le capital. Au début c'est surtout des intérêts ; la part de capital croît année après année.",
+        "code": "intérêts[m] = restant × r/12   ·   capital[m] = mensualité − intérêts[m]"
+      },
+      "assurance": {
+        "title": "Assurance emprunteur",
+        "body": "Assurance de prêt, calculée sur le capital initial (pratique des assurances groupe), donc constante sur toute la durée du crédit.",
+        "code": "assurance mensuelle = emprunt × taux / 12"
+      },
+      "coutCredit": {
+        "title": "Coût total du crédit",
+        "body": "Tout ce que le prêt coûte au-delà du capital emprunté : la somme des intérêts plus toutes les primes d'assurance sur la durée.",
+        "code": "coût = Σ intérêts + assurance × n"
+      },
+      "rendBrut": {
+        "title": "Rendement brut",
+        "body": "Loyer annuel divisé par le coût total d'acquisition, avant toute charge ou impôt. Un premier filtre rapide, calculé à l'année 0.",
+        "code": "rendement brut = loyer × 12 / coût total"
+      },
+      "rendNet": {
+        "title": "Rendement net",
+        "body": "Loyer effectif (après vacance) moins les charges annuelles, sur le coût total. Hors service de la dette et impôt.",
+        "code": "rendement net = (loyer × (1 − vacance) × 12 − charges) / coût total"
+      },
+      "revalorisation": {
+        "title": "Revalorisation composée",
+        "body": "Comment une valeur croît lorsqu'elle se capitalise à un taux annuel fixe. Le même helper du moteur pilote la revalorisation du bien, l'indexation des loyers et la croissance du budget.",
+        "code": "valeur[n] = base × (1 + taux)^n"
+      },
+      "etfPur": {
+        "title": "Scénario ETF pur",
+        "body": "L'alternative de référence : investir l'apport au départ, puis ajouter chaque année le surplus mensuel (budget − loyer perso), le tout capitalisé au rendement ETF. Le capital net applique le PFU de 30 % sur la plus-value.",
+        "code": "cap[n] = cap[n−1] × (1 + r) + surplus"
+      },
+      "impotLoc": {
+        "title": "Impôt sur les revenus locatifs",
+        "body": "L'impôt locatif dépend du régime. LMNP Réel déduit intérêts et amortissements ; Micro-BIC applique un abattement forfaitaire de 50 % ; Foncier nu déduit les charges réelles et les intérêts. Changez de régime pour comparer.",
+        "code": "impôt = revenu imposable × (TMI + prélèvements sociaux)"
+      },
+      "abattements": {
+        "title": "Abattements sur la plus-value",
+        "body": "Les abattements pour durée de détention réduisent la plus-value imposable au fil du temps. Exonération totale d'IR après 22 ans, de prélèvements sociaux après 30 ans. Locatif uniquement — la résidence principale est toujours exonérée.",
+        "code": "exonéré IR ≥ 22 ans · exonéré PS ≥ 30 ans"
+      },
+      "revente": {
+        "title": "Produit net de revente par année",
+        "body": "Ce que vous encaissez réellement en vendant l'année N : prix de revente (travaux inclus) moins capital restant, frais de vente et impôt sur la plus-value. Les abattements ci-dessus aplatissent l'impôt au fil des années.",
+        "code": "net = prix − capital restant − frais − impôt PV"
+      },
+      "triVanMoic": {
+        "title": "TRI · VAN · MOIC",
+        "body": "Éditez les flux de trésorerie (l'année 0 est votre mise initiale). La courbe est la VAN à chaque taux d'actualisation — là où elle croise zéro se trouve le TRI. La VAN lit la courbe à votre taux ; le MOIC est le multiple simple de l'argent récupéré sur l'argent investi.",
+        "code": "VAN(TRI) = 0   ·   MOIC = Σ entrées / sortie"
+      }
+    }
   }
 }

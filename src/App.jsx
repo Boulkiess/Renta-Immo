@@ -8,6 +8,7 @@ import NavBar from './components/NavBar/NavBar.jsx';
 import GlobalStrip from './components/GlobalStrip/GlobalStrip.jsx';
 import SimPanel from './components/SimPanel/SimPanel.jsx';
 import ChartArea from './components/ChartArea/ChartArea.jsx';
+import DocPanel from './components/DocPanel/DocPanel.jsx';
 
 const AppWrap = styled.div`
   display: flex;
@@ -50,6 +51,7 @@ export default function App() {
   const [theme, setTheme] = useState(() =>
     localStorage.getItem('immorenta_theme') === 'light' ? lightTheme : darkTheme
   );
+  const [docOpen, setDocOpen] = useState(false);
 
   function toggleTheme() {
     setTheme(t => {
@@ -64,7 +66,11 @@ export default function App() {
       <GlobalStyles />
       <AppProvider>
         <AppWrap>
-          <NavBar currentThemeName={theme.name} onToggleTheme={toggleTheme} />
+          <NavBar
+            currentThemeName={theme.name}
+            onToggleTheme={toggleTheme}
+            onOpenDoc={() => setDocOpen(true)}
+          />
           <GlobalStrip />
           <Main>
             <SimsPane>
@@ -75,6 +81,7 @@ export default function App() {
             <ChartArea />
           </Main>
         </AppWrap>
+        {docOpen && <DocPanel onClose={() => setDocOpen(false)} />}
         <PopoverHost />
       </AppProvider>
     </ThemeProvider>

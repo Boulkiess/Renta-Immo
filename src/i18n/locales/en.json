@@ -509,5 +509,119 @@
     "zeroGuard": "Computed value is 0 — check the purchase price",
     "hint": "Fields marked A are auto-calculated. Click A to switch to manual.",
     "hintDismiss": "OK"
+  },
+  "doc": {
+    "open": "Interactive documentation",
+    "title": "Formulas — interactive documentation",
+    "close": "Close",
+    "resetToSim": "Load values from:",
+    "units": { "perMonth": " /mo", "years": "yrs" },
+    "groups": {
+      "credit": "Credit",
+      "rendement": "Yield",
+      "capitalisation": "Compounding",
+      "fiscalite": "Taxation",
+      "plusvalue": "Capital gains",
+      "rentabilite": "Profitability (IRR/NPV/MOIC)"
+    },
+    "inputs": {
+      "emp": "Loan amount",
+      "ct": "Total acquisition cost",
+      "charges": "Annual expenses",
+      "base": "Initial value",
+      "le": "Effective rent (after vacancy)",
+      "chg": "Deductible expenses",
+      "ab": "Property depreciation",
+      "at": "Works depreciation",
+      "intAnnuel": "Annual loan interest",
+      "rest": "Outstanding capital",
+      "flows": "Cash flows (year 0 → 6)",
+      "tauxActu": "Discount rate",
+      "apportETF": "ETF contribution",
+      "rendAlt": "ETF return",
+      "budgetMensuel": "Monthly budget",
+      "loyerPerso": "Personal rent",
+      "revalBudget": "Budget growth",
+      "revalLoyerPerso": "Rent revaluation",
+      "regime": "Tax regime"
+    },
+    "notes": {
+      "totalInterest": "Total interest",
+      "interest": "Interest",
+      "insurance": "Insurance",
+      "at30": "At 30 yrs",
+      "tri": "IRR",
+      "van": "NPV",
+      "moic": "MOIC",
+      "value": "Value",
+      "capGross": "Gross capital",
+      "capNet": "Net capital (after PFU)",
+      "reventeNet": "Net sale proceeds",
+      "npvCurve": "NPV(rate)",
+      "abatIR": "Income-tax allowance",
+      "abatPS": "Social-contrib. allowance"
+    },
+    "concepts": {
+      "mensualite": {
+        "title": "Monthly loan payment",
+        "body": "Constant annuity: a fixed monthly payment that repays the loan over its term. A higher rate or amount raises it; a longer term lowers it (but costs more overall).",
+        "code": "payment = loan × (r/12) / (1 − (1 + r/12)^−n)"
+      },
+      "amortissement": {
+        "title": "Amortization breakdown",
+        "body": "Each payment splits between interest (on the outstanding balance) and capital. Early on most of it is interest; the capital share grows year after year.",
+        "code": "interest[m] = balance × r/12   ·   capital[m] = payment − interest[m]"
+      },
+      "assurance": {
+        "title": "Mortgage insurance",
+        "body": "Borrower insurance, charged on the initial capital (group-insurance practice), so it stays flat for the whole loan.",
+        "code": "monthly insurance = loan × rate / 12"
+      },
+      "coutCredit": {
+        "title": "Total cost of credit",
+        "body": "Everything the loan costs beyond the borrowed capital: all interest plus all insurance premiums over the term.",
+        "code": "cost = Σ interest + insurance × n"
+      },
+      "rendBrut": {
+        "title": "Gross yield",
+        "body": "Annual rent divided by the total acquisition cost, before any expense or tax. A quick first screen, computed at year 0.",
+        "code": "gross yield = rent × 12 / total cost"
+      },
+      "rendNet": {
+        "title": "Net yield",
+        "body": "Effective rent (after vacancy) minus annual operating expenses, over the total cost. Excludes debt service and tax.",
+        "code": "net yield = (rent × (1 − vacancy) × 12 − expenses) / total cost"
+      },
+      "revalorisation": {
+        "title": "Compound revaluation",
+        "body": "How a value grows when it compounds at a fixed annual rate. The same engine helper powers property appreciation, rent indexation and budget growth.",
+        "code": "value[n] = base × (1 + rate)^n"
+      },
+      "etfPur": {
+        "title": "Pure ETF scenario",
+        "body": "The reference alternative: invest the contribution upfront, then add the monthly surplus (budget − personal rent) every year, all compounding at the ETF return. Net capital applies a 30% flat tax (PFU) on the gain.",
+        "code": "cap[n] = cap[n−1] × (1 + r) + surplus"
+      },
+      "impotLoc": {
+        "title": "Rental income tax",
+        "body": "Tax on rental income depends on the regime. LMNP Real deducts interest and depreciation; Micro-BIC applies a 50% flat allowance; Bare rental deducts actual expenses and interest. Switch the regime to compare.",
+        "code": "tax = taxable income × (income bracket + social contributions)"
+      },
+      "abattements": {
+        "title": "Capital-gains allowances",
+        "body": "Holding allowances reduce the taxable gain over time. Income tax is fully exempt after 22 years; social contributions after 30 years. Rental only — the primary residence is always exempt.",
+        "code": "exempt IR ≥ 22 yrs · exempt PS ≥ 30 yrs"
+      },
+      "revente": {
+        "title": "Net sale proceeds by year",
+        "body": "What you actually pocket if you sell in year N: resale price (works included) minus outstanding capital, selling fees and capital-gains tax. The allowances above flatten the tax as the years pass.",
+        "code": "net = price − balance − fees − gains tax"
+      },
+      "triVanMoic": {
+        "title": "IRR · NPV · MOIC",
+        "body": "Edit the cash flows (year 0 is your initial outlay). The curve is the NPV at each discount rate — where it crosses zero is the IRR. NPV reads the curve at your discount rate; MOIC is the simple multiple of money out over money in.",
+        "code": "NPV(IRR) = 0   ·   MOIC = Σ inflows / outflow"
+      }
+    }
   }
 }

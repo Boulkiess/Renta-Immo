@@ -207,7 +207,7 @@ const UploadIcon = () => (
   </svg>
 );
 
-export default function NavBar({ currentThemeName, onToggleTheme }) {
+export default function NavBar({ currentThemeName, onToggleTheme, onOpenDoc }) {
   const { t, i18n } = useTranslation();
   const { G, sims, RES, etfPurGlobal, updateG, updateSimBulk } = useApp();
   const [expOpen, setExpOpen] = useState(false);
@@ -256,6 +256,10 @@ export default function NavBar({ currentThemeName, onToggleTheme }) {
           title={currentThemeName === 'dark' ? 'Mode clair' : 'Mode sombre'}
         >
           {currentThemeName === 'dark' ? '☀' : '☾'}
+        </ThemeBtn>
+
+        <ThemeBtn onClick={onOpenDoc} title={t('doc.open')} aria-label={t('doc.open')}>
+          ?
         </ThemeBtn>
 
         <ExpWrap>

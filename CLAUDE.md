@@ -60,12 +60,34 @@ src/
     SimPanel/           Left-column simulation panel (sliders, KPI chips, mode switch)
     ChartArea/          Canvas chart wrappers (Charts, KPIs, Revente, Amort tabs)
     GlobalStrip/        Global settings bar (loyerPerso, budget, regime, horizon…)
-    NavBar/             Tab navigation
+    NavBar/             Tab navigation (+ "?" trigger opening the DocPanel)
     Legend/             Simulation legend
-    common/             Shared UI atoms (+ useDraggableValue hook)
+    DocPanel/           Interactive documentation overlay (concept registry + generic card)
+    common/             Shared UI atoms (+ useDraggableValue hook, CanvasChart)
   i18n/                 Translations (fr/en)
   theme/                Styled-components theme tokens
 ```
+
+### Interactive documentation (DocPanel)
+
+A "?" button in the NavBar opens a full-screen overlay documenting the engine's
+formulas interactively. It is 100% client-side (the app stays strictly static —
+no LLM, no API key, no backend).
+
+- **`components/DocPanel/concepts.js`** — data registry. Each concept descriptor
+  has `{ id, group, i18nKey, render: 'number'|'line'|'bars', inputs[], compute(vals, ctx) }`.
+  **Every `compute` adapter calls the exported, pure engine helpers** (annuity,
+  `buildAmortization`, `impLoc`, `abattementIR/PS`, `computeResale`,
+  `computeEtfPur`, `irr`, `revalorise`) — the doc cannot drift from the app.
+  Adapters are pure (no React/DOM) and unit-tested in `__tests__/concepts.test.js`.
+- **`components/DocPanel/ConceptCard.jsx`** — one generic card renders every
+  descriptor (sliders / regime select / editable flow vector → number or
+  `CanvasChart`). Charts mount lazily (IntersectionObserver). Inputs seed from the
+  live sim A via `ctx`; "reset to my simulation" re-seeds.
+- **`components/DocPanel/DocPanel.jsx`** — overlay shell (sommaire + scrollable
+  cards, Esc / backdrop close, responsive).
+- i18n lives under the `doc.*` namespace (`doc.concepts.<id>.{title,body,code}`,
+  `doc.groups.*`, `doc.inputs.*`, `doc.notes.*`, `doc.units.*`).
 
 ### Core data flow
 
