@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../../state/AppContext.jsx';
 import { KEYS } from '../../../state/definitions.js';
-import { computeEtfKpis } from '../../../engine/compute.js';
+import { computeEtfKpis } from '../../../engine/index.js';
 import { buildSections } from './kpiSections.js';
 import KpiTable from './KpiTable.jsx';
 import SummaryCards from './SummaryCards.jsx';

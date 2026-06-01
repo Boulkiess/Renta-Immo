@@ -49,6 +49,7 @@ src/
     AppContext.jsx       React context: sims, G (globals), dispatch actions
     definitions.js      mkDef(), GRP_COMMON/LOC/RP, field metadata, I (info registry)
   engine/
+    index.js            Public API barrel — engine package boundary; app imports from here, not compute.js directly (re-exports compute.js only)
     compute.js          Financial engine: compute(p,g), computeEtfPur(g), computeEtfKpis(g), crossoverYear()
                         + helpers exportés (testables): irr(), abattementIR/PS(), impLoc(), surplusAt(),
                           buildAmortization(), computeResale(), calcTRI(), calcVAN(), calcMoic()

@@ -36,7 +36,7 @@ import {
   computeResale,
   computeEtfPur,
   revalorise,
-} from '../../engine/compute.js';
+} from '../../engine/index.js';
 
 export const GROUPS = [
   'credit',

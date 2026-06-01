@@ -8,7 +8,7 @@ import {
   useRef,
 } from 'react';
 import { DEFAULT_G, DEFAULT_SIMS, KEYS, resolveAutoFields, simCopyPayload } from './definitions.js';
-import { compute, computeEtfPur, crossoverYear } from '../engine/compute.js';
+import { compute, computeEtfPur, crossoverYear } from '../engine/index.js';
 
 const STORAGE_KEY = 'immorenta_state';
 
