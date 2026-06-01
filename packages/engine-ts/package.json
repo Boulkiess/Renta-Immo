@@ -1,0 +1,27 @@
+{
+  "name": "@immo-renta/engine-ts",
+  "version": "0.1.0",
+  "description": "TypeScript variant of the pure financial engine — same logic as @immo-renta/engine, authored in TS (real interfaces, strict mode, compiled to dist/ on build). Proof-of-concept alongside the JS package.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepack": "npm run build"
+  },
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -56,6 +56,11 @@ packages/
     __tests__/          Vitest: compute (vérité-terrain), golden-master + self-contained fixtures.js
                         (NO dependency on src/state — engine is standalone)
     dist/                Generated .d.ts (gitignored; built on demand / on prepack). NOT committed.
+  engine-ts/             @immo-renta/engine-ts — TypeScript variant (POC, parallel to engine; app does NOT use it)
+    src/{types,compute,index}.ts   1:1 port in native TS (interfaces, strict mode)
+    tsconfig.json        compiles src → dist (.js + .d.ts + sourcemaps) via `npm run build -w @immo-renta/engine-ts`
+    __tests__/parity.test.ts       imports BOTH engines, asserts TS output === JS output (matrix)
+    dist/                Compiled output (gitignored). Required for this package's `main` (TS must build; JS ships src).
 
 index.html              HTML shell — loads src/main.jsx via Vite
 src/                     The web app. Imports the engine via `@immo-renta/engine` (workspace symlink).

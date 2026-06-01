@@ -6,7 +6,9 @@ import globals from 'globals';
 import prettier from 'eslint-config-prettier';
 
 export default [
-  { ignores: ['dist/**', 'node_modules/**'] },
+  // *.ts is validated by tsc (per-package tsconfig), not ESLint — no
+  // typescript-eslint parser is installed, so skip TS files here.
+  { ignores: ['dist/**', 'node_modules/**', '**/*.ts'] },
   js.configs.recommended,
   {
     files: ['**/*.{js,jsx}'],
