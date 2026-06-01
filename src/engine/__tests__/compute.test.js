@@ -8,28 +8,11 @@ import {
   abattementIR,
   abattementPS,
   impLoc,
-} from '../compute.js';
-import { mkDef } from '../../state/definitions.js';
+} from '../index.js';
+import { makeG, mkParams } from './fixtures.js';
 
-// Globals par défaut (cf. CLAUDE.md) — surchargés au besoin dans chaque test.
-const makeG = (over = {}) => ({
-  regime: 'lmnp',
-  horizon: 20,
-  tauxActu: 3,
-  rendAlt: 6,
-  loyerPerso: 900,
-  revalLoyerPerso: 2,
-  budgetMensuel: 2500,
-  revalBudget: 0,
-  revalCharges: 2,
-  investirSurplus: true,
-  apportETF: 60000,
-  inflation: 2,
-  ...over,
-});
-
-const makeLoc = (over = {}) => ({ ...mkDef('loc'), label: 'Loc', ...over });
-const makeRp = (over = {}) => ({ ...mkDef('rp'), label: 'RP', ...over });
+const makeLoc = (over = {}) => mkParams('loc', over);
+const makeRp = (over = {}) => mkParams('rp', over);
 
 describe('irr() — Newton-Raphson', () => {
   it('résout un flux à TRI connu de 10 %', () => {
