@@ -1,19 +1,20 @@
-# TODO — refactoring reporté
+# TODO — deferred refactoring
 
-Items identifiés lors de l'audit clean-code (cf. plan de refactoring) mais hors scope du lot
-« tests + DRY ciblé ». À traiter dans des PR dédiés, une fois le filet de tests en place.
+Items identified during the clean-code audit (cf. refactoring plan) but out of scope
+for the "tests + targeted DRY" batch. To be handled in dedicated PRs, once the test
+net is in place.
 
-## Découpe des god-functions / god-components
+## Splitting the god-functions / god-components
 
-- [x] **`compute()`** → îlots purs exportés (`buildAmortization`, `computeResale`, `calcTRI/VAN/calcMoic`) + boucle 30 ans orchestratrice ; `surplusAt`/`computeEtfKpis` extraits.
-- [x] **`KpisTab.jsx`** → dossier `KpisTab/` (sous-composants + `kpiSections.js`) ; math ETF (TRI/VAN/MOIC) déplacée vers `engine/compute.js` (`computeEtfKpis`).
-- [x] **`SimPanel.jsx` / `GlobalStrip.jsx` / `FieldGroup.jsx`** → styled-components externalisés (`*.styles.js`) + SimPanel scindé en branches (Disabled/Collapsed/Full + HeaderKpis).
+- [x] **`compute()`** → pure islands exported (`buildAmortization`, `computeResale`, `calcTRI/VAN/calcMoic`) + a thin 30-year orchestrating loop; `annualSurplus`/`computeEtfKpis` extracted.
+- [x] **`KpisTab.jsx`** → `KpisTab/` folder (sub-components + `kpiSections.js`); ETF math (IRR/NPV/MOIC) moved to `engine/compute.js` (`computeEtfKpis`).
+- [x] **`SimPanel.jsx` / `GlobalStrip.jsx` / `FieldGroup.jsx`** → styled-components externalized (`*.styles.js`) + SimPanel split into branches (Disabled/Collapsed/Full + HeaderKpis).
 
-## Rendu & I/O
+## Rendering & I/O
 
-- [ ] **`charts.js`** → extraire setup canvas / couleurs thème / grille / x-labels (dupliqués 3×).
-- [ ] **`io.js`** → durcir le parser YAML fait-maison, remplacer `alert()` par un état UI (toast/bandeau).
+- [ ] **`charts.js`** → extract canvas setup / theme colors / grid / x-labels (duplicated 3×).
+- [ ] **`io.js`** → harden the home-grown YAML parser, replace `alert()` with a UI state (toast/banner).
 
 ## Tests
 
-- [x] **Tests composants (jsdom)** : harness `renderWithProviders` + tests `KpisTab`/`SimPanel`/`GlobalStrip`/`FieldGroup` (toggle auto-field, slider, flèches shift×10) ; math drag (clamp/shift×10) testée via `nextDragValue`. _Reste à faire : round-trip import→state._
+- [x] **Component tests (jsdom)**: `renderWithProviders` harness + `KpisTab`/`SimPanel`/`GlobalStrip`/`FieldGroup` tests (auto-field toggle, slider, shift×10 arrows); drag math (clamp/shift×10) tested via `nextDragValue`. _Still to do: import→state round-trip._

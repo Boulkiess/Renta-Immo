@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-**ImmoRenta** is a French real estate investment analysis tool built with React + Vite, running entirely in the browser.
+**ImmoRenta** is a French real estate investment analysis tool built with React + Vite, running entirely in the browser. All code, comments and documentation are in English; only the French UI locale (`src/i18n/locales/fr.json` values) is in French.
 
 ## Commands
 
@@ -16,19 +16,19 @@ npm run build    # Production build → dist/
 npm run preview  # Preview the production build
 ```
 
-### Pipeline de vérification (clean code)
+### Verification pipeline (clean code)
 
-| Commande               | Rôle                                                               | Quand                   |
-| ---------------------- | ------------------------------------------------------------------ | ----------------------- |
-| `npm run format`       | Reformate tous les fichiers avec Prettier                          | Nettoyage ponctuel      |
-| `npm run format:check` | Vérifie le formatage sans modifier (exit 1 si diff)                | CI                      |
-| `npm run lint`         | Rapport ESLint — erreurs bloquent la CI, warnings sont informatifs | CI / manuelle           |
-| `npm run lint:fix`     | Corrige automatiquement les problèmes ESLint corrigibles           | Après ajout de fichiers |
-| `npm run typecheck`    | TypeScript checkJs sur `src/engine/` + `src/state/`                | CI / manuelle           |
-| `npm run test`         | Vitest : tests moteur (`src/engine/__tests__/`)                    | CI / manuelle           |
-| `npm run check`        | Pipeline complète : format:check + lint + typecheck + test         | **Avant chaque PR**     |
+| Command                | Role                                                            | When                |
+| ---------------------- | --------------------------------------------------------------- | ------------------- |
+| `npm run format`       | Reformats all files with Prettier                               | Ad-hoc cleanup      |
+| `npm run format:check` | Checks formatting without modifying (exit 1 on diff)            | CI                  |
+| `npm run lint`         | ESLint report — errors block CI, warnings are informational     | CI / manual         |
+| `npm run lint:fix`     | Auto-fixes the fixable ESLint problems                          | After adding files  |
+| `npm run typecheck`    | `tsc --noEmit` (app: src/engine + src/state) then both packages | CI / manual         |
+| `npm run test`         | Vitest: engine + package + component tests                      | CI / manual         |
+| `npm run check`        | Full pipeline: format:check + lint + typecheck + test           | **Before every PR** |
 
-Le hook pre-commit (Husky + lint-staged) reformate et lint automatiquement les fichiers stagés à chaque `git commit`.
+The pre-commit hook (Husky) runs `npm run check` on every `git commit`.
 
 Deployment: pushing to `main` triggers GitHub Actions → `quality` job (format:check + lint + typecheck) → `build` job → GitHub Pages.
 
@@ -49,11 +49,11 @@ packages/
     tsconfig.json        checkJs + emitDeclarationOnly → generates dist/*.d.ts from JSDoc (npm run build:types)
     src/
       index.js          Public API barrel — the only import surface (re-exports compute.js)
-      compute.js        Financial engine: compute(p,g), computeEtfPur(g), computeEtfKpis(g), crossoverYear()
-                        + helpers exportés (testables): irr(), abattementIR/PS(), impLoc(), surplusAt(),
-                          revalorise(), buildAmortization(), computeResale(), calcTRI(), calcVAN(), calcMoic()
+      compute.js        Financial engine: compute(p,g), computeEtfScenario(g), computeEtfKpis(g), crossoverYear()
+                        + exported helpers (testable): irr(), allowanceIncomeTax/SocialTax(), rentalTax(), annualSurplus(),
+                          compound(), buildAmortization(), computeResale(), calcTRI(), calcVAN(), calcMoic()
                         JSDoc @typedef Globals (g) + SimParams (p) → typed public API in the emitted .d.ts
-    __tests__/          Vitest: compute (vérité-terrain), golden-master + self-contained fixtures.js
+    __tests__/          Vitest: compute (ground-truth), golden-master + self-contained fixtures.js
                         (NO dependency on src/state — engine is standalone)
     dist/                Generated .d.ts (gitignored; built on demand / on prepack). NOT committed.
   engine-ts/             @immo-renta/engine-ts — TypeScript variant (POC, parallel to engine; app does NOT use it)
@@ -68,7 +68,7 @@ src/                     The web app. Imports the engine via `@immo-renta/engine
   App.jsx               Root component — theme provider, layout, tab routing
   state/
     AppContext.jsx       React context: sims, G (globals), dispatch actions
-    definitions.js      mkDef(), GRP_COMMON/LOC/RP, field metadata, I (info registry)
+    definitions.js      mkDef(), GRP_COMMON/RENTAL/PRIMARY, field metadata
   engine/                App-side engine helpers (NOT the pure compute package above)
     charts.js           Canvas renderers: drawLine(), drawBars(), attachHover()
     utils.js            Formatters: fmtE(), fmtK(), fmtP(), fmtTRI()
@@ -76,13 +76,13 @@ src/                     The web app. Imports the engine via `@immo-renta/engine
     __tests__/          Vitest: io round-trip (imports compute from @immo-renta/engine)
   components/
     SimPanel/           Left-column simulation panel (sliders, KPI chips, mode switch)
-    ChartArea/          Canvas chart wrappers (Charts, KPIs, Revente, Amort tabs)
-    GlobalStrip/        Global settings bar (loyerPerso, budget, regime, horizon…)
+    ChartArea/          Canvas chart wrappers (Charts, KPIs, Sale, Amortization tabs)
+    GlobalStrip/        Global settings bar (personalRent, budget, regime, horizon…)
     NavBar/             Tab navigation (+ "?" trigger opening the DocPanel)
     Legend/             Simulation legend
     DocPanel/           Interactive documentation overlay (concept registry + generic card)
     common/             Shared UI atoms (+ useDraggableValue hook, CanvasChart)
-  i18n/                 Translations (fr/en)
+  i18n/                 Translations (fr/en) — keys are English; fr values stay French
   theme/                Styled-components theme tokens
 ```
 
@@ -95,498 +95,498 @@ no LLM, no API key, no backend).
 - **`components/DocPanel/concepts.js`** — data registry. Each concept descriptor
   has `{ id, group, i18nKey, render: 'number'|'line'|'bars', inputs[], compute(vals, ctx) }`.
   **Every `compute` adapter calls the exported, pure engine helpers** (annuity,
-  `buildAmortization`, `impLoc`, `abattementIR/PS`, `computeResale`,
-  `computeEtfPur`, `irr`, `revalorise`) — the doc cannot drift from the app.
+  `buildAmortization`, `rentalTax`, `allowanceIncomeTax/SocialTax`, `computeResale`,
+  `computeEtfScenario`, `irr`, `compound`) — the doc cannot drift from the app.
   Adapters are pure (no React/DOM) and unit-tested in `__tests__/concepts.test.js`.
 - **`components/DocPanel/ConceptCard.jsx`** — one generic card renders every
   descriptor (sliders / regime select / editable flow vector → number or
   `CanvasChart`). Charts mount lazily (IntersectionObserver). Inputs seed from the
   live sim A via `ctx`; "reset to my simulation" re-seeds.
-- **`components/DocPanel/DocPanel.jsx`** — overlay shell (sommaire + scrollable
+- **`components/DocPanel/DocPanel.jsx`** — overlay shell (table of contents + scrollable
   cards, Esc / backdrop close, responsive).
 - i18n lives under the `doc.*` namespace (`doc.concepts.<id>.{title,body,code}`,
   `doc.groups.*`, `doc.inputs.*`, `doc.notes.*`, `doc.units.*`).
 
 ### Core data flow
 
-1. **`AppContext`** (`state/AppContext.jsx`) — holds state for 3 concurrent simulations (A, B, C) via `useReducer`. Each sim has a `mode` (`'loc'` / `'rp'`) and ~25 financial parameters from `mkDef()`, plus global settings `G`.
-2. **`compute(p, g)`** (`packages/engine/src/compute.js`) — pure function: takes a simulation's parameters and globals, returns derived financials: monthly payments, 30-year cashflows, IRR at multiple horizons, NPV, patrimoine net. This is the financial engine — touch it carefully.
-3. **`computeEtfPur(g)`** (`packages/engine/src/compute.js`) — pure function returning the 30-year ETF reference scenario array.
-4. Charts and KPI tables call `compute()` and `computeEtfPur()` on each render cycle.
+1. **`AppContext`** (`state/AppContext.jsx`) — holds state for 3 concurrent simulations (A, B, C). Each sim has a `mode` (`'rental'` / `'primary'`) and ~25 financial parameters from `mkDef()`, plus global settings `G`.
+2. **`compute(p, g)`** (`packages/engine/src/compute.js`) — pure function: takes a simulation's parameters and globals, returns derived financials: monthly payments, 30-year cashflows, IRR at multiple horizons, NPV, net worth. This is the financial engine — touch it carefully.
+3. **`computeEtfScenario(g)`** (`packages/engine/src/compute.js`) — pure function returning the 30-year ETF reference scenario array.
+4. Charts and KPI tables call `compute()` and `computeEtfScenario()` on each render cycle.
 
 ### Key data shapes
 
-- `p` (simulation params) — `{ mode, prixAchat, fraisNotaire, travaux, apport, taux, duree, loyer, … }` — see `mkDef()` in `definitions.js`
-- `g` (globals) — `{ loyerPerso, revalLoyerPerso, budgetMensuel, revalBudget, revalCharges, investirSurplus, apportETF, rendAlt, tauxActu, horizon, regime, inflation }`
-- `compute()` return — `{ flux[30], cfM, mens, assM, tri10/15/20, van, moic, revente[], … }`
-- `flux[yr]` — `{ cfN, cfC, coc, le, chg, ann, imp, vb, rest, patNet, patTotal, etfPoche, reventeNet, bilanRevente, bilanTotal }`
+- `p` (simulation params) — `{ mode, purchasePrice, notaryFees, renovationCosts, downPayment, interestRate, loanTerm, rent, … }` — see `mkDef()` in `definitions.js`
+- `g` (globals) — `{ personalRent, personalRentGrowth, monthlyBudget, budgetGrowth, chargesGrowth, investSurplus, etfDownPayment, altReturn, discountRate, horizon, regime, inflation }`
+- `compute()` return — `{ flows[30], monthlyCashFlow, monthlyPayment, monthlyInsurance, tri10/15/20, van, moic, resaleByYear[], … }`
+- `flows[yr]` — `{ netCashFlow, cumulativeCashFlow, coc, effectiveRent, charges, annuity, tax, propertyValue, remainingCapital, netWorth, totalWorth, etfPocket, netResaleProceeds, resaleBalance, totalBalance, cashBalance, resalePrice }`
 
 ## Financial formulas
 
-- **Loan payment**: standard annuity — `mens = emp × (τ/12) / (1 − (1+τ/12)^−n)`
-- **IRR**: Newton-Raphson on cashflows `[-apport, CF1, ..., CFn + reventeNet]`
-- **ETF pur reference**: apport invested upfront + annual surplus (budget − real outflows) compounding at `g.rendAlt`
-- **Tax** (`impLoc()` + inline LMNP): LMNP (intérêts + amortissements déductibles, déficit reporté), Micro-BIC (50% abattement), Foncier nu (`'nu'`, intérêts déductibles)
-- **Capital gains**: LOC uniquement avec abattements progressifs (IR exo après 22 ans, PS exo après 30 ans) ; RP totalement exonérée
-- **Patrimoine total**: equity immobilière (valeur bien − capital restant) + ETF poche accumulée avec le surplus mensuel
-- **RP cash flow**: `cfN = -(charges + annuité + assurance)` — sorties réelles uniquement, jamais positif. Le loyer non dépensé n'est PAS un cash flow.
+- **Loan payment**: standard annuity — `monthlyPayment = loanAmount × (r/12) / (1 − (1+r/12)^−n)`
+- **IRR**: Newton-Raphson on cashflows `[-downPayment, CF1, ..., CFn + netResaleProceeds]`
+- **ETF reference**: down payment invested upfront + annual surplus (budget − real outflows) compounding at `g.altReturn`
+- **Tax** (`rentalTax()` + inline LMNP): LMNP (deductible interest + depreciation, loss carried over), Micro-BIC (50% flat allowance), bare ownership (`'nu'`, deductible interest)
+- **Capital gains**: rental only, with progressive allowances (income tax exempt after 22 years, social tax exempt after 30 years); primary residence fully exempt
+- **Total worth**: property equity (property value − remaining capital) + ETF pocket accumulated from the monthly surplus
+- **Primary-residence cash flow**: `netCashFlow = -(charges + annuity + insurance)` — real outflows only, never positive. The rent not spent is NOT a cash flow.
 
 ---
 
-## Paramètres d'entrée complets
+## Full input parameters
 
-### Globaux (`g` / `G` dans le state)
+### Globals (`g` / `G` in the state)
 
-| Clé               | Type                           | Défaut   | Description                                                                                                                                                                                                                                                                                    |
-| ----------------- | ------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `regime`          | `'lmnp' \| 'microbic' \| 'nu'` | `'lmnp'` | Régime fiscal locatif (global, s'applique aux 3 sims). `'nu'` = Foncier nu.                                                                                                                                                                                                                    |
-| `horizon`         | années (1–30)                  | `20`     | Horizon de calcul pour VAN et MOIC                                                                                                                                                                                                                                                             |
-| `tauxActu`        | %                              | `3`      | Taux d'actualisation pour la VAN                                                                                                                                                                                                                                                               |
-| `rendAlt`         | %                              | `6`      | Rendement de l'investissement alternatif (ETF)                                                                                                                                                                                                                                                 |
-| `loyerPerso`      | €/mois                         | `900`    | Loyer personnel payé chaque mois                                                                                                                                                                                                                                                               |
-| `revalLoyerPerso` | %                              | `2`      | Revalorisation annuelle du loyer personnel                                                                                                                                                                                                                                                     |
-| `budgetMensuel`   | €/mois                         | `2500`   | Budget mensuel disponible (sert à calculer le surplus vers ETF)                                                                                                                                                                                                                                |
-| `revalBudget`     | %                              | `0`      | Revalorisation annuelle du budget (hausses de salaire)                                                                                                                                                                                                                                         |
-| `revalCharges`    | %                              | `2`      | Revalorisation annuelle des charges fixes (taxe foncière, copro, assurances, provisions)                                                                                                                                                                                                       |
-| `investirSurplus` | booléen                        | `true`   | Réinvestir le surplus mensuel en ETF                                                                                                                                                                                                                                                           |
-| `apportETF`       | €                              | `60 000` | Apport hypothétique investi en ETF dans le scénario de référence                                                                                                                                                                                                                               |
-| `inflation`       | %                              | `2`      | Inflation. Sert aux indicateurs réels (TRI réel, patrimoine réel) et à la déflation des courbes via `displayReal`. Non utilisée dans le moteur nominal (`compute()`).                                                                                                                          |
-| `displayReal`     | booléen                        | `false`  | Affichage Nominal / Réel. Si `true` : déflate les courbes de ChartsTab et ReventeTab en euros constants (`valeur / (1+inflation/100)^année`) et inverse l'emphase nominal↔réel dans les tableaux KPI / SummaryCards. N'affecte ni `compute()` (toujours nominal) ni le tableau détail Revente. |
+| Key                  | Type                           | Default  | Description                                                                                                                                                                                                                                                                        |
+| -------------------- | ------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `regime`             | `'lmnp' \| 'microbic' \| 'nu'` | `'lmnp'` | Rental tax regime (global, applies to the 3 sims). `'nu'` = bare ownership.                                                                                                                                                                                                        |
+| `horizon`            | years (1–30)                   | `20`     | Calculation horizon for NPV and MOIC                                                                                                                                                                                                                                               |
+| `discountRate`       | %                              | `3`      | Discount rate for NPV                                                                                                                                                                                                                                                              |
+| `altReturn`          | %                              | `6`      | Return of the alternative (ETF) investment                                                                                                                                                                                                                                         |
+| `personalRent`       | €/month                        | `900`    | Personal rent paid every month                                                                                                                                                                                                                                                     |
+| `personalRentGrowth` | %                              | `2`      | Annual revaluation of the personal rent                                                                                                                                                                                                                                            |
+| `monthlyBudget`      | €/month                        | `2500`   | Available monthly budget (used to compute the ETF surplus)                                                                                                                                                                                                                         |
+| `budgetGrowth`       | %                              | `0`      | Annual budget revaluation (salary raises)                                                                                                                                                                                                                                          |
+| `chargesGrowth`      | %                              | `2`      | Annual revaluation of fixed charges (property tax, condo, insurance, reserves)                                                                                                                                                                                                     |
+| `investSurplus`      | boolean                        | `true`   | Reinvest the monthly surplus into the ETF                                                                                                                                                                                                                                          |
+| `etfDownPayment`     | €                              | `60 000` | Hypothetical capital invested in the ETF reference scenario                                                                                                                                                                                                                        |
+| `inflation`          | %                              | `2`      | Inflation. Drives the real indicators (real IRR, real wealth) and the curve deflation via `displayReal`. Not used by the nominal engine (`compute()`).                                                                                                                             |
+| `displayReal`        | boolean                        | `false`  | Nominal / Real display. If `true`: deflates the ChartsTab and ReventeTab curves to constant euros (`value / (1+inflation/100)^year`) and flips the nominal↔real emphasis in the KPI / SummaryCards tables. Affects neither `compute()` (always nominal) nor the Sale detail table. |
 
-### Par simulation (`p`) — Commun à `loc` et `rp`
+### Per simulation (`p`) — Common to `rental` and `primary`
 
-| Clé            | Type            | Défaut    | Description                                                  |
-| -------------- | --------------- | --------- | ------------------------------------------------------------ |
-| `mode`         | `'loc' \| 'rp'` | —         | Mode de la simulation                                        |
-| `prixAchat`    | €               | `250 000` | Prix d'achat du bien                                         |
-| `fraisNotaire` | €               | `20 000`  | Frais de notaire                                             |
-| `travaux`      | €               | `15 000`  | Montant des travaux                                          |
-| `fraisAgence`  | €               | `0`       | Frais d'agence à l'achat                                     |
-| `fraisDossier` | €               | `0`       | Frais de dossier et courtage crédit (intégrés dans `ct`)     |
-| `apport`       | €               | `50 000`  | Apport personnel                                             |
-| `taux`         | %               | `3,85`    | Taux d'intérêt annuel du crédit                              |
-| `duree`        | années (5–30)   | `20`      | Durée du crédit                                              |
-| `assurance`    | %               | `0,25`    | Taux annuel d'assurance emprunteur (sur capital emprunté)    |
-| `revalBien`    | %               | `2,0`     | Revalorisation annuelle du bien                              |
-| `fraisVente`   | %               | `4`       | Frais de vente (agence, diagnostics…) sur le prix de revente |
+| Key               | Type                    | Default   | Description                                            |
+| ----------------- | ----------------------- | --------- | ------------------------------------------------------ |
+| `mode`            | `'rental' \| 'primary'` | —         | Simulation mode                                        |
+| `purchasePrice`   | €                       | `250 000` | Property purchase price                                |
+| `notaryFees`      | €                       | `20 000`  | Notary fees                                            |
+| `renovationCosts` | €                       | `15 000`  | Renovation works amount                                |
+| `agencyFees`      | €                       | `0`       | Buyer's agent fees                                     |
+| `loanFees`        | €                       | `0`       | File & broker fees (included in `totalCost`)           |
+| `downPayment`     | €                       | `50 000`  | Personal down payment                                  |
+| `interestRate`    | %                       | `3.85`    | Annual loan interest rate                              |
+| `loanTerm`        | years (5–30)            | `20`      | Loan duration                                          |
+| `insuranceRate`   | %                       | `0.25`    | Annual borrower insurance rate (on borrowed capital)   |
+| `propertyGrowth`  | %                       | `2.0`     | Annual property appreciation                           |
+| `sellingFees`     | %                       | `4`       | Selling fees (agent, diagnostics…) on the resale price |
 
-### Par simulation (`p`) — Mode `loc` uniquement
+### Per simulation (`p`) — `rental` mode only
 
-| Clé            | Type   | Défaut  | Description                                                   |
-| -------------- | ------ | ------- | ------------------------------------------------------------- |
-| `loyer`        | €/mois | `1 000` | Loyer mensuel brut                                            |
-| `vacance`      | %      | `5`     | Taux de vacance locative                                      |
-| `taxeFonciere` | €/an   | `1 200` | Taxe foncière                                                 |
-| `chargesCopro` | €/an   | `800`   | Charges de copropriété                                        |
-| `assurPNO`     | €/an   | `200`   | Assurance propriétaire non-occupant                           |
-| `fraisGestion` | %      | `7`     | Frais de gestion locative (% du loyer brut annuel)            |
-| `provision`    | €/an   | `500`   | Provision pour travaux / vacance imprévue                     |
-| `revalLoyer`   | %      | `1,5`   | Revalorisation annuelle du loyer                              |
-| `tmi`          | %      | `30`    | Taux marginal d'imposition (IR)                               |
-| `ps`           | %      | `17,2`  | Prélèvements sociaux sur revenus locatifs                     |
-| `amortBien`    | %      | `2,5`   | Taux d'amortissement comptable annuel du bien (LMNP réel)     |
-| `amortTravaux` | %      | `10`    | Taux d'amortissement comptable annuel des travaux (LMNP réel) |
-| `impotPV`      | %      | `19`    | Taux d'imposition de la plus-value immobilière                |
-| `psPV`         | %      | `17,2`  | Prélèvements sociaux sur la plus-value                        |
+| Key                         | Type    | Default | Description                                                |
+| --------------------------- | ------- | ------- | ---------------------------------------------------------- |
+| `rent`                      | €/month | `1 000` | Gross monthly rent                                         |
+| `vacancyRate`               | %       | `5`     | Rental vacancy rate                                        |
+| `propertyTax`               | €/yr    | `1 200` | Property tax                                               |
+| `condoFees`                 | €/yr    | `800`   | Co-ownership (HOA) charges                                 |
+| `landlordInsurance`         | €/yr    | `200`   | Non-occupying-owner insurance                              |
+| `managementFees`            | %       | `7`     | Property management fees (% of gross annual rent)          |
+| `maintenanceReserve`        | €/yr    | `500`   | Reserve for works / unexpected vacancy                     |
+| `rentGrowth`                | %       | `1.5`   | Annual rent revaluation                                    |
+| `marginalTaxRate`           | %       | `30`    | Marginal income tax rate                                   |
+| `socialCharges`             | %       | `17.2`  | Social contributions on rental income                      |
+| `propertyDepreciation`      | %       | `2.5`   | Annual accounting depreciation of the property (LMNP real) |
+| `renovationDepreciation`    | %       | `10`    | Annual accounting depreciation of the works (LMNP real)    |
+| `capitalGainsTax`           | %       | `19`    | Capital-gains income-tax rate                              |
+| `capitalGainsSocialCharges` | %       | `17.2`  | Social contributions on the capital gain                   |
 
-### Par simulation (`p`) — Mode `rp` uniquement
+### Per simulation (`p`) — `primary` mode only
 
-| Clé              | Type | Défaut  | Description               |
-| ---------------- | ---- | ------- | ------------------------- |
-| `taxeFonciereRP` | €/an | `1 200` | Taxe foncière RP          |
-| `chargesCoproRP` | €/an | `1 200` | Charges de copropriété RP |
-| `assurHab`       | €/an | `300`   | Assurance habitation      |
-| `provisionRP`    | €/an | `500`   | Provision pour travaux RP |
+| Key                         | Type | Default | Description                    |
+| --------------------------- | ---- | ------- | ------------------------------ |
+| `propertyTaxPrimary`        | €/yr | `1 200` | Property tax (primary)         |
+| `condoFeesPrimary`          | €/yr | `1 200` | Co-ownership charges (primary) |
+| `homeInsurance`             | €/yr | `300`   | Home insurance                 |
+| `maintenanceReservePrimary` | €/yr | `500`   | Reserve for works (primary)    |
 
 ---
 
-## Métriques calculées et formules exactes
+## Computed metrics and exact formulas
 
-Toutes les formules ci-dessous sont implémentées dans `packages/engine/src/compute.js`. ✅ = vérifié correct, ⚠️ = simplification documentée.
+All formulas below are implemented in `packages/engine/src/compute.js`. ✅ = verified correct, ⚠️ = documented simplification.
 
-### Coût et emprunt
-
-```
-ct            = prixAchat + fraisNotaire + travaux + fraisAgence + fraisDossier   ✅ coût total d'acquisition
-emp           = max(0, ct − apport)                                              ✅ montant emprunté
-apportInvesti = min(apport, ct)                                                   ✅ capital immobilisé dans le bien
-etfSeed       = investirSurplus ? max(0, apport − ct) : 0                          ✅ reliquat investi en ETF
-apportTotal   = apportInvesti + etfSeed                                           ✅ mise de départ totale
-```
-
-**`apportInvesti` (capital plafonné)** : un apport qui dépasse `ct` (achat comptant sur-financé) laisse un reliquat de cash. Au-delà de `ct`, le crédit est déjà nul ; ce reliquat ne fait pas partie du rendement du bien. Les métriques **opérationnelles** — `patNet`, `bilanRevente`, `bilanCash`, dénominateur de `coc`/`MOIC`, flux initial du TRI/VAN — utilisent **`apportInvesti`**, jamais `p.apport`.
-
-**`etfSeed` (reliquat → ETF)** : si le toggle `investirSurplus` est actif, le reliquat `max(0, apport − ct)` est investi dans la poche ETF dès l'année 0 (`etfCap` démarre à `etfSeed` au lieu de 0) et compose au `rendAlt` comme `apportETF`. Sinon il reste du cash hors modèle (`etfSeed = 0`). Les métriques **patrimoniales totales** qui incluent la poche ETF — `patTotal` (brut) et `bilanTotal` (`reventeNet + etfCap − apportTotal`) — reflètent donc ce reliquat composé, avec `apportTotal` comme mise de départ. Conséquence : au-delà de `ct`, les métriques opérationnelles sont figées ; seules `patTotal`/`bilanTotal` évoluent, et uniquement si le reliquat est effectivement investi.
-
-### Mensualité crédit (annuité constante) ✅
+### Cost and loan
 
 ```
-τM   = taux / 100 / 12          (taux mensuel)
-nM   = duree × 12               (nombre de mensualités)
-mens = emp × τM / (1 − (1+τM)^−nM)   si emp>0 et τM>0
-     = emp / nM                       si τM = 0 (prêt sans intérêt)
+totalCost          = purchasePrice + notaryFees + renovationCosts + agencyFees + loanFees   ✅ total acquisition cost
+loanAmount         = max(0, totalCost − downPayment)                                         ✅ borrowed amount
+investedDownPayment = min(downPayment, totalCost)                                            ✅ capital tied up in the property
+etfSeed            = investSurplus ? max(0, downPayment − totalCost) : 0                      ✅ remainder invested in ETF
+totalDownPayment   = investedDownPayment + etfSeed                                           ✅ total starting stake
 ```
 
-### Assurance emprunteur ✅
+**`investedDownPayment` (capped capital)**: a down payment that exceeds `totalCost` (over-funded cash purchase) leaves a cash remainder. Beyond `totalCost` the loan is already zero; that remainder is not part of the property return. The **operational** metrics — `netWorth`, `resaleBalance`, `cashBalance`, the `coc`/`MOIC` denominator, the initial IRR/NPV flow — use **`investedDownPayment`**, never `p.downPayment`.
+
+**`etfSeed` (remainder → ETF)**: if the `investSurplus` toggle is on, the remainder `max(0, downPayment − totalCost)` is invested in the ETF pocket from year 0 (`etfCapital` starts at `etfSeed` instead of 0) and compounds at `altReturn` like `etfDownPayment`. Otherwise it stays as cash outside the model (`etfSeed = 0`). The **total wealth** metrics that include the ETF pocket — `totalWorth` (gross) and `totalBalance` (`netResaleProceeds + etfCapital − totalDownPayment`) — therefore reflect this compounded remainder, with `totalDownPayment` as the starting stake. Consequence: beyond `totalCost` the operational metrics are frozen; only `totalWorth`/`totalBalance` move, and only if the remainder is actually invested.
+
+### Monthly loan payment (constant annuity) ✅
 
 ```
-assM = emp × (assurance/100) / 12     (fixe, sur capital initial)
+rM             = interestRate / 100 / 12   (monthly rate)
+nM             = loanTerm × 12             (number of payments)
+monthlyPayment = loanAmount × rM / (1 − (1+rM)^−nM)   if loanAmount>0 and rM>0
+               = loanAmount / nM                       if rM = 0 (interest-free loan)
 ```
 
-Attention : l'assurance est calculée sur le capital initial (non sur le capital restant dû), ce qui correspond à la pratique des assurances groupe.
-
-### Tableau d'amortissement (mensuel) ✅
-
-Pour chaque mois m = 1..nM :
+### Borrower insurance ✅
 
 ```
-intérêts[m]   = capitalRestant[m-1] × τM
-amortCapital[m] = max(0, mens − intérêts[m])
-capitalRestant[m] = max(0, capitalRestant[m-1] − amortCapital[m])
+monthlyInsurance = loanAmount × (insuranceRate/100) / 12     (fixed, on initial capital)
 ```
 
-KPIs dérivés :
+Note: insurance is computed on the initial capital (not the outstanding balance), matching group-insurance practice.
+
+### Amortization schedule (monthly) ✅
+
+For each month m = 1..nM:
 
 ```
-totInt = Σ intérêts[m]           (coût total des intérêts)
-totAss = Σ assM                  (coût total assurance = assM × nM)
+interest[m]   = balance[m-1] × rM
+principal[m]  = max(0, monthlyPayment − interest[m])
+balance[m]    = max(0, balance[m-1] − principal[m])
 ```
 
-### Loyers annuels (mode `loc`) ✅
+Derived KPIs:
 
 ```
-lb = loyer × 12 × (1 + revalLoyer/100)^(yr−1)     (loyer brut annuel, année yr)
-le = lb × (1 − vacance/100)                         (loyer effectif après vacance)
+totalInterest  = Σ interest[m]              (total interest cost)
+totalInsurance = Σ monthlyInsurance         (total insurance cost = monthlyInsurance × nM)
 ```
 
-### Charges annuelles (mode `loc`) ✅
+### Annual rents (`rental` mode) ✅
 
 ```
-fC  = (1 + revalCharges/100)^(yr−1)                  (facteur de revalorisation annuel)
-chg = (taxeFonciere + chargesCopro + assurPNO + provision) × fC + lb × (fraisGestion/100)
+grossRent     = rent × 12 × (1 + rentGrowth/100)^(yr−1)   (gross annual rent, year yr)
+effectiveRent = grossRent × (1 − vacancyRate/100)          (effective rent after vacancy)
 ```
 
-Note : les frais de gestion sont calculés sur le loyer **brut** (lb), pas sur le loyer effectif. C'est la pratique courante des agences. Les charges fixes (taxe foncière, copro, assurances, provision) croissent avec `revalCharges` ; les frais de gestion croissent mécaniquement avec le loyer brut.
-
-### Charges annuelles (mode `rp`) ✅
+### Annual charges (`rental` mode) ✅
 
 ```
-fC  = (1 + revalCharges/100)^(yr−1)
-chg = (taxeFonciereRP + chargesCoproRP + assurHab + provisionRP) × fC
+chargesFactor = (1 + chargesGrowth/100)^(yr−1)             (annual revaluation factor)
+charges = (propertyTax + condoFees + landlordInsurance + maintenanceReserve) × chargesFactor + grossRent × (managementFees/100)
 ```
 
-### Fiscalité locative — `impLoc()` ✅
+Note: management fees are computed on the **gross** rent (grossRent), not the effective rent — standard agency practice. The fixed charges grow with `chargesGrowth`; the management fees grow mechanically with the gross rent.
 
-Régime 'lmnp' (LMNP réel) — calcul inline dans la boucle annuelle avec report de déficit :
-
-```
-intAnnuel[yr] = Σ amort[m].inter  pour m ∈ [(yr−1)×12, yr×12)   (intérêts annuels déductibles)
-ab = prixAchat × (amortBien/100),  at = travaux × (amortTravaux/100)
-
-riRaw = le − chg − ab − at − intAnnuel − amortReport   (amortReport = report des années passées)
-RI    = max(0, riRaw)
-amortReport_new = riRaw < 0 ? −riRaw : 0               (excédent reporté à l'année suivante)
-impôt = RI × (tmi + ps) / 100
-```
-
-Régimes 'microbic' et 'nu' — via `impLoc()` :
+### Annual charges (`primary` mode) ✅
 
 ```
-Micro-BIC  : RI = max(0, le × 0,50)              (abattement 50%, meublé non-classé)
-Foncier nu : RI = max(0, le − chg − intAnnuel)   (intérêts déductibles)
-
-impôt = RI × (tmi + ps) / 100
+chargesFactor = (1 + chargesGrowth/100)^(yr−1)
+charges = (propertyTaxPrimary + condoFeesPrimary + homeInsurance + maintenanceReservePrimary) × chargesFactor
 ```
 
-**Simplification restante (ne pas modifier sans décision explicite) :**
+### Rental income tax — `rentalTax()` ✅
 
-- Le Micro-BIC est codé à 50% d'abattement : c'est le taux du meublé **non-classé**. Le meublé **classé tourisme** bénéficie de 71%. Non implémenté.
-- En Foncier nu, le déficit foncier imputable sur le revenu global (jusqu'à €10 700/an) n'est pas modélisé (nécessite les revenus globaux de l'utilisateur, hors périmètre).
-
-### Cash flow annuel ✅
-
-**Mode `loc` :**
+Regime 'lmnp' (LMNP real) — inline calculation in the annual loop with loss carry-over:
 
 ```
-loyerPersoAnn = loyerPerso × 12 × (1 + revalLoyerPerso/100)^(yr−1)
-cfN = le − chg − (mens×12) − (assM×12) − loyerPersoAnn − impôt
-cfC = Σ cfN[1..yr]     (cash flow cumulé)
+annualInterest[yr] = Σ amortization[m].interest  for m ∈ [(yr−1)×12, yr×12)   (deductible annual interest)
+buildingDepreciation = purchasePrice × (propertyDepreciation/100),  worksDepreciation = renovationCosts × (renovationDepreciation/100)
+
+taxableRaw = effectiveRent − charges − buildingDepreciation − worksDepreciation − annualInterest − depreciationCarry
+taxable    = max(0, taxableRaw)
+depreciationCarry_new = taxableRaw < 0 ? −taxableRaw : 0       (surplus carried to the next year)
+tax = taxable × (marginalTaxRate + socialCharges) / 100
 ```
 
-**Mode `rp` :**
+Regimes 'microbic' and 'nu' — via `rentalTax()`:
 
 ```
-cfN = −(chg + mens×12 + assM×12)     (toujours négatif)
-cfC = Σ cfN[1..yr]
-le  = loyerPersoAnn                   (loyer économisé, affiché mais non compté dans cfN)
+Micro-BIC      : taxable = max(0, effectiveRent × 0.50)                   (50% allowance, non-classified furnished)
+Bare ownership : taxable = max(0, effectiveRent − charges − annualInterest)   (deductible interest)
+
+tax = taxable × (marginalTaxRate + socialCharges) / 100
 ```
 
-`ann` dans `flux[]` = `mens×12 + assM×12` (annuités + assurances totales).
+**Remaining simplification (do not change without an explicit decision):**
 
-### Surplus et poche ETF ✅
+- Micro-BIC is coded at 50% allowance: the rate of **non-classified** furnished. **Classified-tourism** furnished gets 71%. Not implemented.
+- For bare ownership, the property loss deductible against global income (up to €10,700/yr) is not modeled (needs the user's global income, out of scope).
 
-```
-realOutAnn  = −cfN                                              (mode loc : sorties nettes réelles)
-            = chg + mens×12 + assM×12                          (mode rp)
-budgetAnn   = budgetMensuel×12 × (1 + revalBudget/100)^(yr−1)  (budget revalorisé chaque année)
-surplusAnn  = max(0, budgetAnn − realOutAnn)
-etfCap[yr]  = etfCap[yr-1] × (1 + rendAlt/100) + (investirSurplus ? surplusAnn : 0)
-```
+### Annual cash flow ✅
 
-`etfCap` démarre à `etfSeed` dans `compute()` — soit 0 (cas normal : l'apport est investi dans le bien), soit le reliquat d'apport au-delà de `ct` quand `investirSurplus` est actif (cf. § « Coût et emprunt »).
-
-### Valeur du bien et revente ⚠️
+**`rental` mode:**
 
 ```
-vb = prixAchat × (1 + revalBien/100)^yr                   (valeur affichée dans les graphiques patrimoine)
-pr = (prixAchat + travaux) × (1 + revalBien/100)^yr        (prix de revente effectif)
+personalRentAnnual = personalRent × 12 × (1 + personalRentGrowth/100)^(yr−1)
+netCashFlow = effectiveRent − charges − (monthlyPayment×12) − (monthlyInsurance×12) − personalRentAnnual − tax
+cumulativeCashFlow = Σ netCashFlow[1..yr]
 ```
 
-**Asymétrie documentée** : `vb` exclut les travaux, `pr` les inclut. L'équité affichée dans les graphiques (`vb − rest`) est donc inférieure de `travaux × (1+r)^yr` par rapport au produit de cession réel. Ce n'est pas un bug : `vb` est la valeur de l'actif nu, `pr` est le prix négocié tenant compte des améliorations. Toujours utiliser `reventeNet` (calculé depuis `pr`) pour tout calcul financier de cession.
+**`primary` mode:**
 
 ```
-fa         = pr × (fraisVente/100)                         (frais de vente)
-pvB        = max(0, pr − prixAchat − travaux)              (plus-value brute)
-
-Abattements progressifs (art. 150 VC CGI) — mode 'loc' uniquement :
-  abIR(yr) = 0          si yr ≤ 5
-           = (yr−5) × 6  si 6 ≤ yr ≤ 21          (6 %/an → 96 % à la 21e)
-           = 100          si yr ≥ 22               (exonération totale IR)
-
-  abPS(yr) = 0                             si yr ≤ 5
-           = (yr−5) × 1,65                 si 6 ≤ yr ≤ 21   (1,65 %/an)
-           = 26,4 + 1,6 = 28,0             si yr = 22
-           = 28,0 + (yr−22) × 9            si 23 ≤ yr ≤ 30   (9 %/an)
-           = 100                            si yr > 30        (exonération totale PS)
-
-iPV = pvB × (impotPV × (1 − abIR/100) + psPV × (1 − abPS/100)) / 100   si mode='loc'
-    = 0                                                                    si mode='rp'
-reventeNet = pr − capitalRestant − fa − iPV                ✅
+netCashFlow = −(charges + monthlyPayment×12 + monthlyInsurance×12)     (always negative)
+cumulativeCashFlow = Σ netCashFlow[1..yr]
+effectiveRent = personalRentAnnual    (saved rent, displayed but not counted in netCashFlow)
 ```
 
-**Note :** Pour une détention de 22 ans ou plus, l'impôt IR sur la PV est nul. Après 30 ans, PS également nul → iPV = 0.
+`annuity` in `flows[]` = `monthlyPayment×12 + monthlyInsurance×12` (total annuities + insurance).
 
-### Bilans à la revente ✅
+### Surplus and ETF pocket ✅
 
 ```
-bilanRevente = reventeNet + cfC    − apportInvesti   (gain net opérationnel : vente + flux cumulés bruts − mise dans le bien)
-bilanTotal   = reventeNet + etfCap  − apportTotal     (gain net global : vente + ETF accumulé − mise de départ totale)
-bilanCash    = reventeNet + irrCfC  − apportInvesti   (gain net cash, base TRI/VAN : irrCfC = Σ(cfN + loyerPersoAnn))
+realOutflow   = −netCashFlow                                         (rental: real net outflows)
+              = charges + monthlyPayment×12 + monthlyInsurance×12    (primary)
+annualBudget  = monthlyBudget×12 × (1 + budgetGrowth/100)^(yr−1)     (budget revalued each year)
+budgetSurplus = max(0, annualBudget − realOutflow)
+etfCapital[yr] = etfCapital[yr-1] × (1 + altReturn/100) + (investSurplus ? budgetSurplus : 0)
 ```
 
-Note : ces bilans soustraient `apportInvesti` (capital dans le bien), sauf `bilanTotal` qui soustrait `apportTotal` (capital bien + reliquat ETF) car son `etfCap` inclut le reliquat investi — cf. § « Coût et emprunt ». Dans le cas normal `apport ≤ ct`, `apportInvesti = apportTotal = apport` : ces formules se réduisent à `− apport`.
+`etfCapital` starts at `etfSeed` in `compute()` — either 0 (normal case: the down payment is invested in the property) or the down-payment remainder beyond `totalCost` when `investSurplus` is on (cf. § "Cost and loan").
 
-`bilanRevente` suppose que les flux positifs restent en cash (flux **bruts** `cfC`, loyer perso inclus comme coût). `bilanTotal` suppose qu'ils sont réinvestis en ETF (via le mécanisme surplus). Ces deux métriques sont affichées dans **KpisTab** (section Patrimoine) à l'horizon choisi.
+### Property value and resale ⚠️
 
-`bilanCash` utilise les **mêmes flux ajustés que TRI/VAN/MOIC** (`irrCfC = Σ(cfN + loyerPersoAnn)` — le loyer perso est réintégré : coût subi neutralisé en LOC, loyer économisé crédité en RP). Contrairement à `bilanRevente`, son passage à zéro est interprétable comme « durée de détention minimale pour ne pas perdre d'argent (nominal, hors coût d'opportunité) ». Tracé dans le 2ᵉ graphe de **ReventeTab** avec une annotation verticale par sim à l'année de break-even. ⚠️ Métrique **nominale** : ne tient pas compte de l'inflation ni du coût d'opportunité (un ETF peut surperformer même si `bilanCash ≥ 0`).
+```
+propertyValue = purchasePrice × (1 + propertyGrowth/100)^yr                   (value shown in the wealth charts)
+resalePrice   = (purchasePrice + renovationCosts) × (1 + propertyGrowth/100)^yr   (effective resale price)
+```
+
+**Documented asymmetry**: `propertyValue` excludes works, `resalePrice` includes them. The equity shown in the charts (`propertyValue − remaining`) is therefore lower by `renovationCosts × (1+r)^yr` than the real sale proceeds. This is not a bug: `propertyValue` is the value of the bare asset, `resalePrice` is the negotiated price accounting for improvements. Always use `netResaleProceeds` (computed from `resalePrice`) for any financial sale calculation.
+
+```
+sellingFee = resalePrice × (sellingFees/100)                       (selling fee)
+grossGain  = max(0, resalePrice − purchasePrice − renovationCosts) (gross capital gain)
+
+Progressive allowances (art. 150 VC CGI) — 'rental' mode only:
+  allowanceIR(yr) = 0          if yr ≤ 5
+                  = (yr−5) × 6  if 6 ≤ yr ≤ 21          (6 %/yr → 96 % at year 21)
+                  = 100         if yr ≥ 22               (full income-tax exemption)
+
+  allowancePS(yr) = 0                       if yr ≤ 5
+                  = (yr−5) × 1.65           if 6 ≤ yr ≤ 21   (1.65 %/yr)
+                  = 26.4 + 1.6 = 28.0       if yr = 22
+                  = 28.0 + (yr−22) × 9      if 23 ≤ yr ≤ 30   (9 %/yr)
+                  = 100                      if yr > 30        (full social-tax exemption)
+
+capitalGainsTax_amount = grossGain × (capitalGainsTax × (1 − allowanceIR/100) + capitalGainsSocialCharges × (1 − allowancePS/100)) / 100   if mode='rental'
+                       = 0                                                                                                                   if mode='primary'
+netResaleProceeds = resalePrice − remainingCapital − sellingFee − capitalGainsTax_amount                ✅
+```
+
+**Note:** For a holding of 22 years or more, income tax on the gain is zero. After 30 years, social tax is also zero → capitalGainsTax_amount = 0.
+
+### Resale balances ✅
+
+```
+resaleBalance = netResaleProceeds + cumulativeCashFlow − investedDownPayment   (net operational gain: sale + gross cumulative flows − stake in the property)
+totalBalance  = netResaleProceeds + etfCapital − totalDownPayment              (net global gain: sale + accumulated ETF − total starting stake)
+cashBalance   = netResaleProceeds + irrCumulative − investedDownPayment        (net cash gain, IRR/NPV basis: irrCumulative = Σ(netCashFlow + personalRentAnnual))
+```
+
+Note: these balances subtract `investedDownPayment` (capital in the property), except `totalBalance` which subtracts `totalDownPayment` (property capital + ETF remainder) because its `etfCapital` includes the invested remainder — cf. § "Cost and loan". In the normal case `downPayment ≤ totalCost`, `investedDownPayment = totalDownPayment = downPayment`: these formulas reduce to `− downPayment`.
+
+`resaleBalance` assumes the positive flows stay as cash (**gross** flows `cumulativeCashFlow`, personal rent included as a cost). `totalBalance` assumes they are reinvested in the ETF (via the surplus mechanism). Both metrics are shown in **KpisTab** (Wealth section) at the chosen horizon.
+
+`cashBalance` uses the **same adjusted flows as IRR/NPV/MOIC** (`irrCumulative = Σ(netCashFlow + personalRentAnnual)` — the personal rent is reintegrated: a sunk cost neutralized in rental, a saved rent credited in primary). Unlike `resaleBalance`, its zero-crossing is interpretable as "minimum holding period to not lose money (nominal, excluding opportunity cost)". Drawn in the 2nd chart of **ReventeTab** with a vertical annotation per sim at the break-even year. ⚠️ **Nominal** metric: ignores inflation and opportunity cost (an ETF can outperform even when `cashBalance ≥ 0`).
 
 ### Cash-on-cash return ✅
 
 ```
-coc[yr] = cfN[yr] / apport × 100   (% annuel, null si apport = 0)
+coc[yr] = netCashFlow[yr] / downPayment × 100   (% annual, null if downPayment = 0)
 ```
 
-Rendement brut annuel du flux net sur le capital investi. Disponible dans `flux[yr].coc`. Contrairement au TRI, il ne tient pas compte du temps ni de la valeur de revente — c'est le rendement opérationnel pur de l'année.
+Gross annual return of the net flow on the invested capital. Available in `flows[yr].coc`. Unlike IRR, it ignores time and resale value — it is the pure operational return of the year.
 
-### Patrimoine ✅
-
-```
-patNet   = vb − capitalRestant + cfC − apport    (richesse nette : equity immobilière + flux cumulés − apport)
-patTotal = (vb − capitalRestant) + etfCap        (patrimoine brut : equity + poche ETF, sans déduire l'apport)
-```
-
-`patTotal` ne déduit pas l'apport car il sert à comparer avec `etfPurGlobal.cap` qui inclut lui aussi l'apport initial. Note : `apportETF` est un paramètre global unique alors que chaque simulation a son propre `p.apport` — si les deux diffèrent, la comparaison n'est pas à iso-capital.
-
-### Scénario ETF pur — `computeEtfPur(g)` ⚠️
+### Wealth ✅
 
 ```
-cap[0]      = apportETF
-lpa[yr]     = loyerPerso × 12 × (1 + revalLoyerPerso/100)^(yr−1)
-budgetAnn   = budgetMensuel × 12 × (1 + revalBudget/100)^(yr−1)
-surplus     = max(0, budgetAnn − lpa[yr])
-cap[yr]     = cap[yr−1] × (1 + rendAlt/100) + surplus
+netWorth   = propertyValue − remainingCapital + cumulativeCashFlow − downPayment    (net wealth: property equity + cumulative flows − down payment)
+totalWorth = (propertyValue − remainingCapital) + etfCapital                        (gross wealth: equity + ETF pocket, without subtracting the down payment)
 ```
 
-Représente l'alternative : investir l'apport en ETF et placer le surplus mensuel après paiement du loyer.
+`totalWorth` does not subtract the down payment because it is compared with `etfScenarioGlobal.cap` which also includes the initial contribution. Note: `etfDownPayment` is a single global parameter whereas each simulation has its own `p.downPayment` — if they differ, the comparison is not at iso-capital.
 
-La fonction retourne deux valeurs par année :
-
-- `cap` : valeur brute (composition sans taxe) — utilisée dans ChartsTab (patrimoine), KpisTab, crossover, export
-- `capNet` : valeur nette après **PFU 30% sur la plus-value** (`capNet = cap − max(0, cap − totalContribs) × 0,30`) — utilisée uniquement dans **ReventeTab** (chart + table hover)
-
-**Simplifications restantes :**
-
-- Taux fixé à 30% flat (PFU CTO) — pas de distinction PEA 17,2% / CTO 30%
-- Pas de taxe annuelle (correct pour un ETF capitalisant : l'imposition n'a lieu qu'à la cession)
-- Le crossover compare `patTotal` immo (brut, avant impôt de cession) avec `cap` ETF (brut) — cohérence intentionnelle ; seule la ReventeTab utilise `capNet`
-
-### Colonne ETF pur — KpisTab ✅
-
-Le tableau de l'onglet Comparaison affiche une colonne **ETF pur** à droite des colonnes simulation. Les KPIs financiers ETF (TRI/VAN/MOIC) sont calculés **dans `packages/engine/src/compute.js` via `computeEtfKpis(g)`** (déplacés du composant vers le moteur pour passer sous le golden-master). `KpisTab/index.jsx` appelle `computeEtfKpis(G)` et passe le résultat à `buildSections()`. Les lignes simples (rendement, CF) restent dérivées de `G` dans `kpiSections.js`.
-
-#### Rendements & Cashflow
-
-| Ligne          | Valeur ETF    | Formule                                                                       |
-| -------------- | ------------- | ----------------------------------------------------------------------------- |
-| Rendement brut | `rendAlt`     | Rendement supposé de l'ETF, brut = net (pas de charges)                       |
-| Rendement net  | `rendAlt`     | Idem — affiché en `%` via `fmtP`                                              |
-| CF réel/mois   | `−loyerPerso` | Seule sortie mensuelle du scénario ETF : le loyer payé                        |
-| Effort mensuel | `0`           | L'ETF pur est la situation de référence locataire — effort nul par définition |
-
-#### TRI / VAN / MOIC
-
-**TRI ETF (tous horizons) — valeur exacte, non approchée :**
+### Pure ETF scenario — `computeEtfScenario(g)` ⚠️
 
 ```
-TRI_ETF = rendAlt / 100
+cap[0]      = etfDownPayment
+pra[yr]     = personalRent × 12 × (1 + personalRentGrowth/100)^(yr−1)
+annualBudget = monthlyBudget × 12 × (1 + budgetGrowth/100)^(yr−1)
+surplus     = max(0, annualBudget − pra[yr])
+cap[yr]     = cap[yr−1] × (1 + altReturn/100) + surplus
 ```
 
-Preuve : les flux ETF sont `[−apportETF, −S₁, …, −S_{n−1}, cap[n]−Sₙ]` où `cap[n] = apportETF×(1+r)ⁿ + Σ Sₖ×(1+r)^{n−k}`. La VPN de ces flux au taux `r = rendAlt` s'annule algébriquement pour tout surplus `Sₖ`. Donc TRI₁₀ = TRI₁₅ = TRI₂₀ = `rendAlt` quel que soit le surplus.
+Represents the alternative: invest the down payment in ETF and place the monthly surplus after paying the rent.
+
+The function returns two values per year:
+
+- `cap`: gross value (tax-free compounding) — used in ChartsTab (wealth), KpisTab, crossover, export
+- `capNet`: net value after **30% PFU on the capital gain** (`capNet = cap − max(0, cap − totalContribs) × 0.30`) — used only in **ReventeTab** (chart + table hover)
+
+**Remaining simplifications:**
+
+- Rate fixed at 30% flat (PFU CTO) — no PEA 17.2% / CTO 30% distinction
+- No annual tax (correct for a capitalizing ETF: taxation only on sale)
+- The crossover compares immo `totalWorth` (gross, before sale tax) with ETF `cap` (gross) — intentional consistency; only ReventeTab uses `capNet`
+
+### Pure ETF column — KpisTab ✅
+
+The Comparison tab table shows a **Pure ETF** column to the right of the simulation columns. The financial ETF KPIs (IRR/NPV/MOIC) are computed **in `packages/engine/src/compute.js` via `computeEtfKpis(g)`** (moved from the component into the engine to sit under the golden-master). `KpisTab/index.jsx` calls `computeEtfKpis(G)` and passes the result to `buildSections()`. The simple rows (yield, CF) stay derived from `G` in `kpiSections.js`.
+
+#### Yields & Cash-flow
+
+| Row            | ETF value       | Formula                                                                    |
+| -------------- | --------------- | -------------------------------------------------------------------------- |
+| Gross yield    | `altReturn`     | Assumed ETF return, gross = net (no charges)                               |
+| Net yield      | `altReturn`     | Same — shown as `%` via `fmtP`                                             |
+| Real CF/mo     | `−personalRent` | Only monthly outflow of the ETF scenario: the rent paid                    |
+| Monthly effort | `0`             | The pure ETF is the renter reference situation — zero effort by definition |
+
+#### IRR / NPV / MOIC
+
+**ETF IRR (all horizons) — exact value, not approximated:**
 
 ```
-TRI_real_ETF = (1 + rendAlt/100) / (1 + inflation/100) − 1
+IRR_ETF = altReturn / 100
 ```
 
-**VAN ETF :**
+Proof: the ETF flows are `[−etfDownPayment, −S₁, …, −S_{n−1}, cap[n]−Sₙ]` where `cap[n] = etfDownPayment×(1+r)ⁿ + Σ Sₖ×(1+r)^{n−k}`. The NPV of these flows at rate `r = altReturn` cancels algebraically for any surplus `Sₖ`. So IRR₁₀ = IRR₁₅ = IRR₂₀ = `altReturn` regardless of the surplus.
 
 ```
-surplusAnn[t] = max(0, budgetMensuel×12×(1+revalBudget/100)^{t−1} − loyerPerso×12×(1+revalLoyerPerso/100)^{t−1})
-
-VAN_ETF = −apportETF
-        + Σ_{t=1}^{horizon} (−surplusAnn[t]) / (1+tauxActu/100)^t
-        + cap[horizon] / (1+tauxActu/100)^{horizon}
+IRR_real_ETF = (1 + altReturn/100) / (1 + inflation/100) − 1
 ```
 
-Si `tauxActu = rendAlt`, VAN = 0. Si `tauxActu < rendAlt`, VAN > 0 (ETF surperforme le taux d'actualisation).
-
-**MOIC ETF :**
+**ETF NPV:**
 
 ```
-MOIC_ETF = (cap[horizon] − Σ_{t=1}^{horizon} surplusAnn[t]) / apportETF
+budgetSurplus[t] = max(0, monthlyBudget×12×(1+budgetGrowth/100)^{t−1} − personalRent×12×(1+personalRentGrowth/100)^{t−1})
+
+NPV_ETF = −etfDownPayment
+        + Σ_{t=1}^{horizon} (−budgetSurplus[t]) / (1+discountRate/100)^t
+        + cap[horizon] / (1+discountRate/100)^{horizon}
 ```
 
-Analogue au MOIC sim : `(valeur_terminale + Σ_flows_opérationnels) / apport_initial`. Ici les flows opérationnels sont `−surplusAnn[t]` (contributions annuelles). Si surplus = 0 : MOIC = `(1 + rendAlt/100)^{horizon}`.
+If `discountRate = altReturn`, NPV = 0. If `discountRate < altReturn`, NPV > 0 (ETF outperforms the discount rate).
 
-#### Patrimoine
+**ETF MOIC:**
 
-| Ligne                           | Valeur ETF                                            |
-| ------------------------------- | ----------------------------------------------------- |
-| Patrimoine net à horizon        | `—` (métrique immobilière sans équivalent ETF direct) |
-| Patrimoine total à horizon      | `etfPurGlobal[hz−1].cap`                              |
-| Patrimoine total réel à horizon | `cap[hz] / (1+inflation/100)^{hz}`                    |
-| Patrimoine total à 30 ans       | `etfPurGlobal[29].cap`                                |
-| Patrimoine total réel à 30 ans  | `cap[30] / (1+inflation/100)^{30}`                    |
-| Break-even revente              | `—` (métrique immobilière sans équivalent ETF direct) |
-| Crossover                       | `—`                                                   |
+```
+MOIC_ETF = (cap[horizon] − Σ_{t=1}^{horizon} budgetSurplus[t]) / etfDownPayment
+```
+
+Analogous to the sim MOIC: `(terminal_value + Σ_operational_flows) / initial_down_payment`. Here the operational flows are `−budgetSurplus[t]` (annual contributions). If surplus = 0: MOIC = `(1 + altReturn/100)^{horizon}`.
+
+#### Wealth
+
+| Row                           | ETF value                                              |
+| ----------------------------- | ------------------------------------------------------ |
+| Net wealth at horizon         | `—` (real-estate metric with no direct ETF equivalent) |
+| Total wealth at horizon       | `etfScenarioGlobal[hz−1].cap`                          |
+| Real total wealth at horizon  | `cap[hz] / (1+inflation/100)^{hz}`                     |
+| Total wealth at 30 years      | `etfScenarioGlobal[29].cap`                            |
+| Real total wealth at 30 years | `cap[30] / (1+inflation/100)^{30}`                     |
+| Resale break-even             | `—` (real-estate metric with no direct ETF equivalent) |
+| Crossover                     | `—`                                                    |
 
 ### Crossover ✅
 
 ```
-crossover = première année yr telle que patTotal[yr] ≥ etfPurGlobal[yr].cap
+crossover = first year yr such that totalWorth[yr] ≥ etfScenarioGlobal[yr].cap
 ```
 
-Si `investirSurplus = false`, retourne `null` (comparaison sans sens car les surplus ne sont pas capitalisés).
+If `investSurplus = false`, returns `null` (the comparison is meaningless since the surpluses are not capitalized).
 
-### TRI (IRR) — Newton-Raphson ✅
+### IRR — Newton-Raphson ✅
 
-**Flux (LOC et RP) :** `[−apport, cfN[1]+loyerPersoAnn[1], …, cfN[horizon]+loyerPersoAnn[horizon] + reventeNet[horizon]]`
+**Flows (rental and primary):** `[−downPayment, netCashFlow[1]+personalRentAnnual[1], …, netCashFlow[horizon]+personalRentAnnual[horizon] + netResaleProceeds[horizon]]`
 
-- **Mode LOC** : `loyerPersoAnn` est réintégré dans les flux — le loyer personnel est un coût subi indépendamment de l'investissement, pas un coût de l'investissement lui-même.
-- **Mode RP** : `loyerPersoAnn` est ajouté comme bénéfice — c'est le loyer économisé grâce à l'achat de la résidence principale.
+- **rental mode**: `personalRentAnnual` is reintegrated into the flows — the personal rent is a sunk cost incurred regardless of the investment, not a cost of the investment itself.
+- **primary mode**: `personalRentAnnual` is added as a benefit — it is the rent saved by buying the primary residence.
 
-Les deux modes utilisent donc la même formule de flux, ce qui rend TRI et VAN comparables entre LOC et RP.
+Both modes therefore use the same flow formula, which makes IRR and NPV comparable between rental and primary.
 
 ```
-NPV(r)  = Σ_{t=0}^{n} flux[t] / (1+r)^t = 0
-NPV'(r) = Σ_{t=1}^{n} (−t × flux[t]) / (1+r)^{t+1}
+NPV(r)  = Σ_{t=0}^{n} flows[t] / (1+r)^t = 0
+NPV'(r) = Σ_{t=1}^{n} (−t × flows[t]) / (1+r)^{t+1}
 r_{k+1} = r_k − NPV(r_k) / NPV'(r_k)     (Newton-Raphson)
 ```
 
-Retourne `null` si non-convergence en 100 itérations, si `|NPV'| < 1e-15`, ou si `r < −1`. Point de départ : `r₀ = 0,10` (10 %).
+Returns `null` on non-convergence in 100 iterations, if `|NPV'| < 1e-15`, or if `r < −1`. Starting point: `r₀ = 0.10` (10 %).
 
-Calculé pour horizons 10, 15 et 20 ans : `tri10`, `tri15`, `tri20`.
+Computed for horizons 10, 15 and 20 years: `tri10`, `tri15`, `tri20`.
 
-### VAN (NPV) ✅
+### NPV ✅
 
 ```
-VAN = −apport + Σ_{t=1}^{horizon} f[t]/(1+tauxActu/100)^t + reventeNet[horizon]/(1+tauxActu/100)^{horizon}
+NPV = −downPayment + Σ_{t=1}^{horizon} f[t]/(1+discountRate/100)^t + netResaleProceeds[horizon]/(1+discountRate/100)^{horizon}
 
-où f[t] = cfN[t] + loyerPersoAnn[t]   (même flows que TRI — cf. section TRI ci-dessus)
+where f[t] = netCashFlow[t] + personalRentAnnual[t]   (same flows as IRR — cf. IRR section above)
 ```
 
-**Remarque** : les flows utilisés pour la VAN sont identiques à ceux du TRI. En mode LOC, `loyerPersoAnn` est réintégré (coût subi indépendamment de l'investissement). En mode RP, `loyerPersoAnn` est ajouté comme bénéfice (loyer économisé grâce à l'achat). Les deux modes mesurent ainsi le rendement pur de l'investissement sur une base comparable.
+**Remark**: the flows used for NPV are identical to those of the IRR. In rental mode, `personalRentAnnual` is reintegrated (sunk cost incurred regardless of the investment). In primary mode, `personalRentAnnual` is added as a benefit (rent saved by buying). Both modes thereby measure the pure return of the investment on a comparable basis.
 
 ### MOIC ✅
 
 ```
-irrCfC = Σ_{t=1}^{horizon} irrFlows[t]    (même flows ajustés que TRI/VAN)
-MOIC   = (reventeNet[horizon] + irrCfC) / apport
+irrCumulative = Σ_{t=1}^{horizon} irrFlows[t]    (same adjusted flows as IRR/NPV)
+MOIC          = (netResaleProceeds[horizon] + irrCumulative) / downPayment
 ```
 
-Multiple on Invested Capital — combien de fois l'apport a été multiplié. Utilise les flows ajustés (`loyerPersoAnn` exclu/ajouté selon le mode) pour être cohérent avec TRI et VAN.
+Multiple on Invested Capital — how many times the down payment has been multiplied. Uses the adjusted flows (`personalRentAnnual` excluded/added depending on mode) to be consistent with IRR and NPV.
 
-### Rendements (mode `loc`) ✅
-
-```
-rendBrut = (loyer × 12 / ct) × 100                                           (% sur coût total acquisition)
-rendNet  = (loyer × (1−vacance/100) × 12 − chgAn0) / ct × 100
-  où chgAn0 = taxeFonciere + chargesCopro + assurPNO + provision + loyer×12×(fraisGestion/100)
-```
-
-Calculés sur les valeurs de l'**année 0** (pas revalorisées). Indicateurs statiques.
-
-### Cash flow mensuel affiché — `cfM` ⚠️
+### Yields (`rental` mode) ✅
 
 ```
-Mode loc : cfM = loyer − mens − assM − loyerPerso     (hors charges opérationnelles !)
-Mode rp  : cfM = loyerPerso − mens − assM             (différentiel vs. rester locataire)
+grossYield = (rent × 12 / totalCost) × 100                                       (% of total acquisition cost)
+netYield   = (rent × (1−vacancyRate/100) × 12 − chargesYr0) / totalCost × 100
+  where chargesYr0 = propertyTax + condoFees + landlordInsurance + maintenanceReserve + rent×12×(managementFees/100)
 ```
 
-**Attention** : `cfM` est un indicateur simplifié **non affiché dans les KPI chips du SimPanel** (remplacé par `cfN[yr=1]/12`). Il est conservé dans `compute()` pour KpisTab et io.js. Il **n'inclut pas** taxeFonciere, chargesCopro, assurPNO, fraisGestion, provision, ni l'impôt. Ne pas utiliser `cfM` dans des calculs financiers.
+Computed on **year-0** values (not revalued). Static indicators.
 
-### KPI chips SimPanel (unified LOC/RP)
-
-Les 4 chips affichés dans le header de chaque SimPanel sont identiques pour les modes LOC et RP :
-
-| Chip          | Formule                              | Couleur                         |
-| ------------- | ------------------------------------ | ------------------------------- |
-| Mensualité    | `r.mens + r.assM`                    | couleur sim                     |
-| CF réel/mois  | `r.flux[0].cfN / 12`                 | rouge si < 0, couleur sim sinon |
-| Effort/mois   | `−r.flux[0].cfN / 12 − G.loyerPerso` | rouge si > 0, couleur sim sinon |
-| Patrimoine Xa | `r.flux[G.horizon−1].patTotal`       | couleur sim                     |
-
-**Effort/mois** = surcoût mensuel vs. situation actuelle (louer à `loyerPerso`). Positif = tu dépenses plus qu'aujourd'hui. Négatif = l'investissement est moins cher que ta situation actuelle. Formule unifiée valide pour LOC et RP. Redondant avec CF réel/mois uniquement si `loyerPerso = 0`.
-
-`rendBrut`, `rendNet`, `cfM`, `crossover` ne sont plus affichés dans le SimPanel — toujours calculés par `compute()` et disponibles dans KpisTab et io.js.
-
-### Point mort (break-even) ✅
+### Displayed monthly cash flow — `monthlyCashFlow` ⚠️
 
 ```
-be = première année yr telle que cfC[yr] ≥ 0
+rental mode  : monthlyCashFlow = rent − monthlyPayment − monthlyInsurance − personalRent   (excludes operational charges!)
+primary mode : monthlyCashFlow = personalRent − monthlyPayment − monthlyInsurance          (differential vs. staying a renter)
 ```
 
-Indique quand les flux opérationnels cumulés repassent en positif (hors valeur du bien). Retourne `null` si jamais atteint en 30 ans.
+**Warning**: `monthlyCashFlow` is a simplified indicator **not shown in the SimPanel KPI chips** (replaced by `netCashFlow[yr=1]/12`). It is kept in `compute()` for KpisTab and io.js. It does **not** include propertyTax, condoFees, landlordInsurance, managementFees, maintenanceReserve, nor tax. Do not use `monthlyCashFlow` in financial calculations.
 
-### Break-even revente ✅
+### SimPanel KPI chips (unified rental/primary)
+
+The 4 chips shown in each SimPanel header are identical for rental and primary modes:
+
+| Chip            | Formula                                         | Color                           |
+| --------------- | ----------------------------------------------- | ------------------------------- |
+| Monthly payment | `r.monthlyPayment + r.monthlyInsurance`         | sim color                       |
+| Real CF/mo      | `r.flows[0].netCashFlow / 12`                   | red if < 0, sim color otherwise |
+| Effort/mo       | `−r.flows[0].netCashFlow / 12 − G.personalRent` | red if > 0, sim color otherwise |
+| Wealth Xy       | `r.flows[G.horizon−1].totalWorth`               | sim color                       |
+
+**Effort/mo** = monthly extra cost vs. the current situation (renting at `personalRent`). Positive = you spend more than today. Negative = the investment is cheaper than your current situation. Unified formula valid for rental and primary. Redundant with Real CF/mo only when `personalRent = 0`.
+
+`grossYield`, `netYield`, `monthlyCashFlow`, `crossover` are no longer shown in the SimPanel — still computed by `compute()` and available in KpisTab and io.js.
+
+### Break-even ✅
 
 ```
-beRevente = première année yr telle que bilanCash[yr] ≥ 0
+breakEven = first year yr such that cumulativeCashFlow[yr] ≥ 0
 ```
 
-Durée de détention minimale pour que la revente ne soit pas perdante (en nominal, base TRI/VAN incluant le loyer perso/économisé — cf. `bilanCash`). Intègre frais d'achat et de vente. Affiché dans **KpisTab** (section Patrimoine) et en annotation du 2ᵉ graphe de **ReventeTab**. Retourne `null` si jamais atteint en 30 ans. Diffère de `be` (qui n'inclut ni la revente ni le loyer perso).
+Indicates when the cumulative operational flows turn positive (excluding the property value). Returns `null` if never reached in 30 years.
+
+### Resale break-even ✅
+
+```
+resaleBreakEven = first year yr such that cashBalance[yr] ≥ 0
+```
+
+Minimum holding period for the resale not to be a loss (nominal, IRR/NPV basis including the personal/saved rent — cf. `cashBalance`). Includes purchase and sale fees. Shown in **KpisTab** (Wealth section) and as an annotation of the 2nd chart of **ReventeTab**. Returns `null` if never reached in 30 years. Differs from `breakEven` (which includes neither the resale nor the personal rent).
 
 ---
 
-## Invariants et règles à respecter
+## Invariants and rules to respect
 
-- **`compute()` est une fonction pure** : ne jamais y introduire de side effects ni d'état.
-- **`flux[]` est indexé 0-based** : `flux[0]` = année 1, `flux[yr-1]` = année yr.
-- **`amort[]` est mensuel** : `amort[m-1]` = mois m. Pour l'année yr, le capital restant de fin d'année est `amort[yr×12 - 1].rest`.
-- **`etfCap` démarre à `etfSeed`** dans `compute()` (0 dans le cas normal, jamais `apportETF`). `etfSeed > 0` uniquement quand `apport > ct` ET `investirSurplus` actif — le reliquat d'apport est alors investi en ETF (cf. § « Coût et emprunt »).
-- **Apport sur-financé** : `apportInvesti = min(apport, ct)` pour les métriques opérationnelles ; `apportTotal = apportInvesti + etfSeed` pour `bilanTotal`. Ne jamais utiliser `p.apport` brut dans le moteur — toujours l'une de ces deux grandeurs plafonnées.
-- **`reventeNet` utilise `pr` (avec travaux)**, pas `vb` (sans travaux). Ne jamais substituer.
-- **RP : `cfN` est toujours ≤ 0**, le loyer économisé est stocké dans `le` pour affichage mais n'entre pas dans `cfN`.
-- La **valeur résiduelle du capital restant** après la durée du prêt est 0 : `amort[nM-1].rest ≈ 0`.
+- **`compute()` is a pure function**: never introduce side effects or state.
+- **`flows[]` is 0-based**: `flows[0]` = year 1, `flows[yr-1]` = year yr.
+- **`amortization[]` is monthly**: `amortization[m-1]` = month m. For year yr, the end-of-year outstanding capital is `amortization[yr×12 - 1].remaining`.
+- **`etfCapital` starts at `etfSeed`** in `compute()` (0 in the normal case, never `etfDownPayment`). `etfSeed > 0` only when `downPayment > totalCost` AND `investSurplus` is on — the down-payment remainder is then invested in ETF (cf. § "Cost and loan").
+- **Over-funded down payment**: `investedDownPayment = min(downPayment, totalCost)` for the operational metrics; `totalDownPayment = investedDownPayment + etfSeed` for `totalBalance`. Never use raw `p.downPayment` in the engine — always one of these two capped quantities.
+- **`netResaleProceeds` uses `resalePrice` (with works)**, not `propertyValue` (without works). Never substitute.
+- **primary: `netCashFlow` is always ≤ 0**, the saved rent is stored in `effectiveRent` for display but does not enter `netCashFlow`.
+- The **residual value of the outstanding capital** after the loan term is 0: `amortization[nM-1].remaining ≈ 0`.
 
 ## Skill routing
 
