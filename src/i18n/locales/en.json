@@ -61,6 +61,7 @@
   "sim": {
     "rental": "Rental",
     "primary": "Primary",
+    "viager": "Viager",
     "menu": "Actions on this simulation",
     "disable": "Disable",
     "copy": "Copy",
@@ -84,9 +85,20 @@
     "Income": "Rental income",
     "Charges": "Operating expenses",
     "Taxation": "Taxation",
-    "Primary residence": "Primary residence"
+    "Primary residence": "Primary residence",
+    "Viager property": "Viager property",
+    "Annuity": "Bouquet & annuity",
+    "Viager charges": "Owner charges"
   },
   "fields": {
+    "marketValue": { "label": "Market value (free)" },
+    "occupationDiscount": { "label": "Occupation discount %" },
+    "bouquet": { "label": "Bouquet (upfront)" },
+    "monthlyAnnuity": { "label": "Monthly annuity (rente)" },
+    "annuityGrowth": { "label": "Annuity indexation %/yr" },
+    "expectedDuration": { "label": "Expected duration (yrs)" },
+    "ownerCharges": { "label": "Owner charges (€/yr)" },
+    "ownerChargesGrowth": { "label": "Owner charges growth %/yr" },
     "purchasePrice": { "label": "Purchase price" },
     "notaryFees": { "label": "Notary fees" },
     "renovationCosts": { "label": "Renovation works" },
@@ -118,6 +130,41 @@
     "maintenanceReservePrimary": { "label": "Maintenance reserve (€/yr)" }
   },
   "tooltips": {
+    "marketValue": {
+      "title": "Market value (free)",
+      "body": "Vacant (free) market value of the property. Drives the resale price and the value-unlock at the seller's death.",
+      "code": "occupiedValue = marketValue × (1 − occupationDiscount/100)"
+    },
+    "occupationDiscount": {
+      "title": "Occupation discount (décote)",
+      "body": "Discount reflecting the seller's right to occupy until death. Reduces the market value to the occupied value actually paid. Capped below 100%."
+    },
+    "bouquet": {
+      "title": "Bouquet (upfront)",
+      "body": "Upfront lump paid at signing. Plays the purchase-price role: it is the financed amount. Set the down payment equal to bouquet + notary for an all-cash viager.",
+      "code": "loanAmount = max(0, bouquet + notaryFees − downPayment)"
+    },
+    "monthlyAnnuity": {
+      "title": "Monthly annuity (rente)",
+      "body": "Rente viagère paid to the seller every month until death. Added to the 'Monthly payment' KPI chip alongside the loan payment."
+    },
+    "annuityGrowth": {
+      "title": "Annuity indexation %/yr",
+      "body": "Annual revaluation (indexation) of the rente, usually tied to an index. 0% = fixed annuity.",
+      "code": "rente[yr] = monthlyAnnuity × 12 × (1 + annuityGrowth/100)^(yr−1)"
+    },
+    "expectedDuration": {
+      "title": "Expected duration (years)",
+      "body": "Seller's expected remaining lifespan. The rente stops at this year and the décote lifts (property value steps up to its full market value). The defining viager bet: die earlier → bargain, later → overpay. A ±5y sensitivity band is shown on the KPIs."
+    },
+    "ownerCharges": {
+      "title": "Owner charges (€/yr)",
+      "body": "Charges borne by the buyer (bare owner): taxe foncière and major works. Projected across all years."
+    },
+    "ownerChargesGrowth": {
+      "title": "Owner charges growth %/yr",
+      "body": "Annual revaluation of the owner charges. Typically 2–3%/yr in France."
+    },
     "inflation": {
       "title": "Inflation (CPI)",
       "body": "Annual inflation rate. Appreciation and alternative return rates are nominal (e.g. 2% appreciation + 2% inflation = 0% real gain). Used to display real-terms indicators: real IRR (Fisher) and constant-euro wealth in KPIs and charts."
@@ -480,7 +527,8 @@
   "resale": {
     "salePrice": "Sale price:",
     "etfPocket": "ETF pocket:",
-    "yr": "Yr {{n}}"
+    "yr": "Yr {{n}}",
+    "death": "Death ~Yr {{n}}"
   },
   "amortization": {
     "principal": "Capital",

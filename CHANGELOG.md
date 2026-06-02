@@ -8,6 +8,32 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Viager (life annuity) investment mode** — a third simulation mode (`'viager'`)
+  alongside `rental`/`primary`, modeling **viager occupé** (the seller occupies, so no
+  rental income; the property is bought for a **bouquet** + lifetime **rente**). New
+  per-sim fields: `marketValue`, `occupationDiscount` (décote), `bouquet`,
+  `monthlyAnnuity`, `annuityGrowth`, `expectedDuration`, `ownerCharges`,
+  `ownerChargesGrowth`. The bouquet is loan-financeable via the existing
+  `downPayment`/`interestRate`/`loanTerm` machinery (`downPayment = bouquet + notaryFees`
+  ⇒ all-cash). The rente stops at `expectedDuration`; the **décote amortizes linearly to
+  zero** by the expected-death year, so the resale value rises smoothly to the full market
+  value (no value cliff — an early resale is a real occupied sale). Resale gains are
+  taxed like a rental resale (cost basis `bouquet + Σrente + notaryFees`, nominal — a
+  documented simplification). Engine: 3-way mode dispatch with a `default: throw`,
+  `computeResale` parameterized into `computeViagerResale`, and `computeViagerBand` (a
+  ±5-year sensitivity readout that communicates the longevity bet while keeping the engine
+  deterministic). Mirrored in the engine-ts POC (exhaustive `switch`, parity test extended).
+  UI: viager mode button, the "Monthly payment" chip includes the rente, the
+  `GRP_VIAGER` field group, a death-year annotation on the ReventeTab charts, and en/fr
+  field labels + tooltips. Tests: viager ground-truth + golden-master scenarios, engine-ts parity rows,
+  io round-trip. Existing rental/primary golden snapshots stay numerically byte-identical
+  (only the additive `monthlyAnnuity` result field and the widened sim `inputs` changed).
+  Produced via `/autoplan` (CEO + Eng/Design review; decisions logged in `PLAN-viager.md`).
+- _Deferred (per review):_ mortality table / INSEE barème, full early/expected/late
+  scenario mode, viager libre, rente réversibilité, and the capitalised-rente cost basis.
+
 ### Changed
 
 - **Codebase translated to 100% English (identifiers included).** All French was

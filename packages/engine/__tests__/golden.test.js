@@ -24,6 +24,8 @@ const scenarios = [
   ['rental · microbic', mkParams('rental'), { regime: 'microbic' }],
   ['rental · nu', mkParams('rental'), { regime: 'nu' }],
   ['primary', mkParams('primary'), {}],
+  ['viager · financed bouquet', mkParams('viager'), {}],
+  ['viager · cash bouquet', mkParams('viager', { downPayment: 70000 }), {}],
 ];
 
 describe('golden-master — compute()', () => {

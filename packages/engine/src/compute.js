@@ -18,11 +18,11 @@
  */
 
 /**
- * One simulation's financial parameters. Mirrors state's mkDef(). Both the
- * rental ('rental') and primary-residence ('primary') field sets are always
- * present; compute() reads the subset matching `mode`.
+ * One simulation's financial parameters. Mirrors state's mkDef(). The rental
+ * ('rental'), primary-residence ('primary') and viager ('viager') field sets are
+ * always present; compute() reads the subset matching `mode`.
  * @typedef {object} SimParams
- * @property {'rental'|'primary'} mode
+ * @property {'rental'|'primary'|'viager'} mode
  * @property {number} purchasePrice
  * @property {number} notaryFees
  * @property {number} renovationCosts
@@ -52,6 +52,14 @@
  * @property {number} condoFeesPrimary
  * @property {number} homeInsurance
  * @property {number} maintenanceReservePrimary
+ * @property {number} [marketValue]        Viager: free (vacant) market value.
+ * @property {number} [occupationDiscount] Viager: décote d'occupation (%).
+ * @property {number} [bouquet]            Viager: upfront lump (plays purchasePrice role).
+ * @property {number} [monthlyAnnuity]     Viager: rente viagère (€/month).
+ * @property {number} [annuityGrowth]      Viager: annual rente indexation (%).
+ * @property {number} [expectedDuration]   Viager: seller's expected remaining lifespan (years).
+ * @property {number} [ownerCharges]       Viager: owner-borne charges (€/yr).
+ * @property {number} [ownerChargesGrowth] Viager: owner-charges revaluation (%).
  */
 
 // ── Tax constants ─────────────────────────────────────────────
@@ -247,6 +255,9 @@ export function buildAmortization(
 
 // Resale at year yr: resale price (renovation included), fees, taxed capital gain,
 // then net proceeds. Capital-gains tax with progressive allowances in 'rental' mode; primary is exempt.
+// Viager: the décote lifts at death (value steps occupiedValue → marketValue at
+// expectedDuration), the cost basis is bouquet + cumulative rente + notary, and the
+// gain is taxed like rental (a viager resale is not exempt). See computeViagerResale.
 /**
  * @param {SimParams} p
  * @param {number} remaining Outstanding loan capital at year yr.
@@ -254,6 +265,7 @@ export function buildAmortization(
  * @returns {{resalePrice:number, sellingFee:number, netResaleProceeds:number}}
  */
 export function computeResale(p, remaining, yr) {
+  if (p.mode === 'viager') return computeViagerResale(p, remaining, yr);
   const resalePrice = compound(p.purchasePrice + p.renovationCosts, p.propertyGrowth, yr);
   const sellingFee = resalePrice * (p.sellingFees / 100);
   const grossGain = Math.max(0, resalePrice - p.purchasePrice - p.renovationCosts);
@@ -267,6 +279,59 @@ export function computeResale(p, remaining, yr) {
           p.capitalGainsSocialCharges * (1 - allowancePS / 100))) /
       100;
   }
+  return {
+    resalePrice,
+    sellingFee,
+    netResaleProceeds: resalePrice - remaining - sellingFee - capitalGainsTax,
+  };
+}
+
+// Viager occupied value (before property growth) at year yr. The décote amortizes
+// linearly to zero by the expected-death year: the occupation discount reflects the
+// foregone use, which shrinks as the remaining occupation shortens. At yr = 0 the full
+// décote applies; at yr ≥ expectedDuration the discount is zero (full market value), so
+// the value rises smoothly across the death year instead of stepping.
+/** @param {SimParams} p @param {number} yr @returns {number} */
+function viagerOccupiedBase(p, yr) {
+  const ed = Math.max(1, p.expectedDuration);
+  const remainingFraction = Math.max(0, (ed - yr) / ed); // 1 at yr 0 → 0 at yr ≥ ed
+  const discount = Math.min(99, p.occupationDiscount) * remainingFraction;
+  return p.marketValue * (1 - discount / 100);
+}
+
+// Cumulative rente actually paid up to year yr (caps at expectedDuration).
+/** @param {SimParams} p @param {number} yr @returns {number} */
+function viagerRenteToDate(p, yr) {
+  let total = 0;
+  const lastYear = Math.min(yr, Math.max(1, p.expectedDuration));
+  for (let y = 1; y <= lastYear; y++)
+    total += compound(p.monthlyAnnuity * 12, p.annuityGrowth, y - 1);
+  return total;
+}
+
+// Viager resale at year yr. The resale price is the décote-amortized occupied value
+// (which reaches the full market value by the expected-death year) grown by property
+// appreciation. Cost basis = bouquet + cumulative rente paid + notary (nominal — a
+// documented simplification, cf. CLAUDE.md); the gain is taxed with the same
+// progressive allowances as a rental resale.
+/**
+ * @param {SimParams} p
+ * @param {number} remaining Outstanding loan capital at year yr.
+ * @param {number} yr
+ * @returns {{resalePrice:number, sellingFee:number, netResaleProceeds:number}}
+ */
+export function computeViagerResale(p, remaining, yr) {
+  const resalePrice = compound(viagerOccupiedBase(p, yr), p.propertyGrowth, yr);
+  const sellingFee = resalePrice * (p.sellingFees / 100);
+  const costBasis = p.bouquet + viagerRenteToDate(p, yr) + p.notaryFees;
+  const grossGain = Math.max(0, resalePrice - costBasis);
+  const allowanceIR = Math.min(100, allowanceIncomeTax(yr));
+  const allowancePS = Math.min(100, allowanceSocialTax(yr));
+  const capitalGainsTax =
+    (grossGain *
+      (p.capitalGainsTax * (1 - allowanceIR / 100) +
+        p.capitalGainsSocialCharges * (1 - allowancePS / 100))) /
+    100;
   return {
     resalePrice,
     sellingFee,
@@ -330,8 +395,13 @@ export function calcMoic(flows, irrFlows, horizon, downPayment) {
  * @param {Globals} g
  */
 export function compute(p, g) {
-  const totalCost =
-    p.purchasePrice + p.notaryFees + p.renovationCosts + p.agencyFees + (p.loanFees ?? 0);
+  const isViager = p.mode === 'viager';
+  // Viager: the bouquet is the t0 price component (it plays purchasePrice's role); the
+  // rente is the deferred price paid over time, NOT financed by the bank loan. The
+  // décote-amortized occupied value drives resale, not the loan. See CLAUDE.md.
+  const totalCost = isViager
+    ? p.bouquet + p.notaryFees
+    : p.purchasePrice + p.notaryFees + p.renovationCosts + p.agencyFees + (p.loanFees ?? 0);
   const loanAmount = Math.max(0, totalCost - p.downPayment);
   // Capital actually tied up in the property: capped at the total cost. A down
   // payment that exceeds `totalCost` (over-funded cash purchase) leaves a cash
@@ -362,8 +432,10 @@ export function compute(p, g) {
     monthlyInsurance
   );
 
-  const buildingDepreciation = p.purchasePrice * (p.propertyDepreciation / 100),
-    worksDepreciation = p.renovationCosts * (p.renovationDepreciation / 100);
+  // Depreciation only applies to the rental LMNP path; guard against the viager
+  // params (which have no purchasePrice/renovationCosts) producing NaN.
+  const buildingDepreciation = isViager ? 0 : p.purchasePrice * (p.propertyDepreciation / 100),
+    worksDepreciation = isViager ? 0 : p.renovationCosts * (p.renovationDepreciation / 100);
   const flows = [];
   let cumulativeCashFlow = 0;
   let irrCumulative = 0; // cumulative adjusted flows (netCashFlow + personalRentAnnual) — IRR/NPV/MOIC basis
@@ -377,7 +449,11 @@ export function compute(p, g) {
     const remaining = amortization[monthIdx]?.remaining ?? 0;
     const annuity = yr <= p.loanTerm ? monthlyPayment * 12 : 0;
     const annualInsurance = yr <= p.loanTerm ? monthlyInsurance * 12 : 0;
-    const propertyValue = compound(p.purchasePrice, p.propertyGrowth, yr);
+    // Viager: the décote-amortized occupied value (rising to full market value by the
+    // expected-death year) grown by appreciation. Rental/primary use purchasePrice growth.
+    const propertyValue = isViager
+      ? compound(viagerOccupiedBase(p, yr), p.propertyGrowth, yr)
+      : compound(p.purchasePrice, p.propertyGrowth, yr);
     const personalRentAnnual = compound(g.personalRent * 12, g.personalRentGrowth, yr - 1);
 
     let netCashFlow,
@@ -420,7 +496,7 @@ export function compute(p, g) {
         );
       }
       netCashFlow = effectiveRent - charges - annuity - annualInsurance - tax - personalRentAnnual;
-    } else {
+    } else if (p.mode === 'primary') {
       const chargesFactor = compound(1, g.chargesGrowth ?? 2, yr - 1);
       charges =
         (p.propertyTaxPrimary +
@@ -430,10 +506,26 @@ export function compute(p, g) {
         chargesFactor;
       netCashFlow = -(charges + annuity + annualInsurance);
       effectiveRent = personalRentAnnual;
+    } else if (p.mode === 'viager') {
+      // Viager occupied: no rental income (the seller occupies). The buyer pays the
+      // rente (stops at death), owner charges (all years), and the bouquet loan if
+      // financed. Personal rent is reintegrated like rental — the investor still rents
+      // their own home, so it is a sunk cost neutralized in the IRR/NPV flows.
+      const rente =
+        yr <= Math.max(1, p.expectedDuration)
+          ? compound(p.monthlyAnnuity * 12, p.annuityGrowth, yr - 1)
+          : 0;
+      const chargesFactor = compound(1, p.ownerChargesGrowth ?? g.chargesGrowth ?? 2, yr - 1);
+      charges = p.ownerCharges * chargesFactor + rente;
+      netCashFlow = -(charges + annuity + annualInsurance) - personalRentAnnual;
+    } else {
+      throw new Error(`compute(): unknown sim mode "${p.mode}"`);
     }
     cumulativeCashFlow += netCashFlow;
 
-    const realOutflow = p.mode === 'rental' ? -netCashFlow : charges + annuity + annualInsurance;
+    // Real money out of pocket (feeds the ETF surplus). For rental/viager the personal
+    // rent is part of it (the investor rents elsewhere); for primary it is not.
+    const realOutflow = p.mode === 'primary' ? charges + annuity + annualInsurance : -netCashFlow;
     const annualBudget = compound(g.monthlyBudget * 12, g.budgetGrowth, yr - 1);
     const budgetSurplus = Math.max(0, annualBudget - realOutflow);
     etfCapital = etfCapital * (1 + altRate) + (g.investSurplus ? budgetSurplus : 0);
@@ -492,7 +584,9 @@ export function compute(p, g) {
   const monthlyCashFlow =
     p.mode === 'rental'
       ? p.rent - monthlyPayment - monthlyInsurance - g.personalRent
-      : g.personalRent - monthlyPayment - monthlyInsurance;
+      : p.mode === 'viager'
+        ? -(monthlyPayment + monthlyInsurance + (p.monthlyAnnuity ?? 0))
+        : g.personalRent - monthlyPayment - monthlyInsurance;
   const breakEven = flows.findIndex(f => f.cumulativeCashFlow >= 0);
   const resaleBreakEven = flows.findIndex(f => f.cashBalance >= 0);
 
@@ -501,6 +595,9 @@ export function compute(p, g) {
     loanAmount,
     monthlyPayment,
     monthlyInsurance,
+    // Viager monthly rente (0 for rental/primary). The "Monthly payment" KPI chip adds
+    // it to the loan payment so a bouquet-only viager doesn't display €0.
+    monthlyAnnuity: isViager ? p.monthlyAnnuity : 0,
     totalInterest,
     totalInsurance,
     grossYield,
@@ -539,4 +636,42 @@ export function crossoverYear(res, etfScenarioGlobal, g) {
     if (property != null && etf != null && property >= etf) return i + 1;
   }
   return null;
+}
+
+/**
+ * Sensitivity band for a viager simulation: re-run the deterministic engine at
+ * expectedDuration ± delta and report the min/mid/max of the headline KPIs at the
+ * horizon. This communicates the longevity bet (die early → bargain, die late →
+ * overpay) without restructuring the engine into a multi-scenario model. Pure: it
+ * just calls compute() on cloned params; it is NEVER called by compute() itself
+ * (no recursion). Returns null for non-viager sims.
+ * @param {SimParams} p
+ * @param {Globals} g
+ * @param {number} [delta] Years either side of expectedDuration (default 5).
+ * @returns {null | {expectedDuration:number, delta:number,
+ *   totalWorth:{min:number, mid:number, max:number},
+ *   cashBalance:{min:number, mid:number, max:number}}}
+ */
+export function computeViagerBand(p, g, delta = 5) {
+  if (p.mode !== 'viager') return null;
+  const hz = g.horizon;
+  const at = duration => {
+    const f = compute({ ...p, expectedDuration: Math.max(1, duration) }, g).flows[hz - 1];
+    return { totalWorth: f?.totalWorth ?? 0, cashBalance: f?.cashBalance ?? 0 };
+  };
+  const ed = Math.max(1, p.expectedDuration);
+  const lo = at(ed - delta),
+    mid = at(ed),
+    hi = at(ed + delta);
+  const span = key => ({
+    min: Math.min(lo[key], mid[key], hi[key]),
+    mid: mid[key],
+    max: Math.max(lo[key], mid[key], hi[key]),
+  });
+  return {
+    expectedDuration: ed,
+    delta,
+    totalWorth: span('totalWorth'),
+    cashBalance: span('cashBalance'),
+  };
 }

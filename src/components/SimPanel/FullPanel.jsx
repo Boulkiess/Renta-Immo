@@ -74,6 +74,13 @@ export default function FullPanel({ simKey }) {
           >
             {t('sim.primary')}
           </ModeBtn>
+          <ModeBtn
+            $active={p.mode === 'viager'}
+            $col={col}
+            onClick={() => updateSimBulk(simKey, { mode: 'viager' })}
+          >
+            {t('sim.viager')}
+          </ModeBtn>
         </ModeRow>
 
         {p.enabled && (

@@ -3,7 +3,7 @@
 // the main authoring-ergonomics difference between the two variants.
 
 export type Regime = 'lmnp' | 'microbic' | 'nu';
-export type Mode = 'rental' | 'primary';
+export type Mode = 'rental' | 'primary' | 'viager';
 
 /** Global settings shared across the 3 simulations. Mirrors state's DEFAULT_G. */
 export interface Globals {
@@ -53,6 +53,15 @@ export interface SimParams {
   condoFeesPrimary: number;
   homeInsurance: number;
   maintenanceReservePrimary: number;
+  // Viager (life annuity, occupied) — present on every sim; read only when mode==='viager'.
+  marketValue?: number;
+  occupationDiscount?: number;
+  bouquet?: number;
+  monthlyAnnuity?: number;
+  annuityGrowth?: number;
+  expectedDuration?: number;
+  ownerCharges?: number;
+  ownerChargesGrowth?: number;
 }
 
 export interface AmortMonth {
@@ -115,6 +124,7 @@ export interface ComputeResult {
   loanAmount: number;
   monthlyPayment: number;
   monthlyInsurance: number;
+  monthlyAnnuity: number;
   totalInterest: number;
   totalInsurance: number;
   grossYield: number;

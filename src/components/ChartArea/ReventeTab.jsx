@@ -78,12 +78,24 @@ export default function ReventeTab() {
       }));
   }
 
+  // Viager: mark the expected death year — where the rente stops and the décote has
+  // fully amortized (the property reaches its full market value) — as a reference event.
+  function deathAnnotations() {
+    return activeKeys
+      .filter(k => sims[k].mode === 'viager')
+      .map(k => ({
+        x: sims[k].expectedDuration,
+        color: COL[k],
+        label: t('resale.death', { n: sims[k].expectedDuration }),
+      }));
+  }
+
   return (
     <Wrap>
       <Title dangerouslySetInnerHTML={{ __html: t('charts.resale.title') }} />
       <Desc dangerouslySetInnerHTML={{ __html: t('charts.resale.desc') }} />
       <CanvasChart
-        draw={c => drawLine(c, datasets(), X_LABELS)}
+        draw={c => drawLine(c, datasets(), X_LABELS, deathAnnotations())}
         deps={[sims, RES, etfScenarioGlobal, G, theme.name]}
         height={220}
       />
@@ -94,7 +106,9 @@ export default function ReventeTab() {
       />
       <Desc dangerouslySetInnerHTML={{ __html: t('charts.resaleCash.desc') }} />
       <CanvasChart
-        draw={c => drawLine(c, cashDatasets(), X_LABELS, cashAnnotations())}
+        draw={c =>
+          drawLine(c, cashDatasets(), X_LABELS, [...cashAnnotations(), ...deathAnnotations()])
+        }
         deps={[sims, RES, G, theme.name]}
         height={220}
       />

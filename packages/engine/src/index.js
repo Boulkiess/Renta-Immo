@@ -12,6 +12,7 @@ export {
   computeEtfScenario,
   computeEtfKpis,
   crossoverYear,
+  computeViagerBand,
   // Pure helpers (testable in isolation)
   irr,
   compound,
@@ -21,6 +22,7 @@ export {
   rentalTax,
   buildAmortization,
   computeResale,
+  computeViagerResale,
   calcTRI,
   calcVAN,
   calcMoic,

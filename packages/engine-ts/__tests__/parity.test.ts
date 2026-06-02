@@ -22,7 +22,10 @@ const makeG = (over: Partial<Globals> = {}): Globals => ({
   ...over,
 });
 
-const mkParams = (mode: 'rental' | 'primary', over: Partial<SimParams> = {}): SimParams => ({
+const mkParams = (
+  mode: 'rental' | 'primary' | 'viager',
+  over: Partial<SimParams> = {}
+): SimParams => ({
   mode,
   purchasePrice: 250000,
   notaryFees: 20000,
@@ -53,15 +56,26 @@ const mkParams = (mode: 'rental' | 'primary', over: Partial<SimParams> = {}): Si
   condoFeesPrimary: 1200,
   homeInsurance: 300,
   maintenanceReservePrimary: 500,
+  marketValue: 250000,
+  occupationDiscount: 35,
+  bouquet: 50000,
+  monthlyAnnuity: 800,
+  annuityGrowth: 2,
+  expectedDuration: 15,
+  ownerCharges: 1500,
+  ownerChargesGrowth: 2,
   ...over,
 });
 
-// Matrix: rental × 3 regimes, primary, an over-funded sim, and a few global tweaks.
+// Matrix: rental × 3 regimes, primary, viager, an over-funded sim, and a few global tweaks.
 const scenarios: [string, SimParams, Globals][] = [
   ['rental · lmnp', mkParams('rental'), makeG({ regime: 'lmnp' })],
   ['rental · microbic', mkParams('rental'), makeG({ regime: 'microbic' })],
   ['rental · nu', mkParams('rental'), makeG({ regime: 'nu' })],
   ['primary', mkParams('primary'), makeG()],
+  ['viager · financed bouquet', mkParams('viager'), makeG()],
+  ['viager · cash bouquet', mkParams('viager', { downPayment: 70000 }), makeG()],
+  ['viager · horizon 30', mkParams('viager'), makeG({ horizon: 30 })],
   ['rental · over-funded', mkParams('rental', { downPayment: 320000 }), makeG()],
   ['rental · surplus off', mkParams('rental'), makeG({ investSurplus: false })],
   ['primary · horizon 30', mkParams('primary'), makeG({ horizon: 30 })],
@@ -79,6 +93,14 @@ describe('parity — TS engine matches JS engine', () => {
   it.each([10, 20, 30])('computeEtfKpis() — horizon %i', hz => {
     const g = makeG({ horizon: hz });
     expect(ts.computeEtfKpis(g)).toEqual(js.computeEtfKpis(g));
+  });
+
+  it('computeViagerBand() agrees (viager sensitivity band)', () => {
+    const p = mkParams('viager');
+    expect(ts.computeViagerBand(p, makeG())).toEqual(js.computeViagerBand(p, makeG()));
+    expect(ts.computeViagerBand(mkParams('rental'), makeG())).toEqual(
+      js.computeViagerBand(mkParams('rental'), makeG())
+    );
   });
 
   it('pure helpers agree (irr, allowances, rentalTax)', () => {

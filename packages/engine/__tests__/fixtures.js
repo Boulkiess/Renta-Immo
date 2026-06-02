@@ -56,5 +56,15 @@ export const mkParams = (mode, over = {}) => ({
   condoFeesPrimary: 1200,
   homeInsurance: 300,
   maintenanceReservePrimary: 500,
+  // Viager (occupied) fields — present on every fixture; compute() reads them only
+  // when mode === 'viager'. Adding them does NOT change rental/primary output.
+  marketValue: 250000,
+  occupationDiscount: 35,
+  bouquet: 50000,
+  monthlyAnnuity: 800,
+  annuityGrowth: 2,
+  expectedDuration: 15,
+  ownerCharges: 1500,
+  ownerChargesGrowth: 2,
   ...over,
 });

@@ -61,6 +61,7 @@
   "sim": {
     "rental": "Locatif",
     "primary": "RP",
+    "viager": "Viager",
     "menu": "Actions sur cette simulation",
     "disable": "Désactiver",
     "copy": "Copier",
@@ -84,9 +85,20 @@
     "Income": "Revenus locatifs",
     "Charges": "Charges",
     "Taxation": "Fiscalité",
-    "Primary residence": "Résidence principale"
+    "Primary residence": "Résidence principale",
+    "Viager property": "Bien en viager",
+    "Annuity": "Bouquet & rente",
+    "Viager charges": "Charges propriétaire"
   },
   "fields": {
+    "marketValue": { "label": "Valeur vénale (libre)" },
+    "occupationDiscount": { "label": "Décote d'occupation %" },
+    "bouquet": { "label": "Bouquet (à la signature)" },
+    "monthlyAnnuity": { "label": "Rente mensuelle" },
+    "annuityGrowth": { "label": "Indexation rente %/an" },
+    "expectedDuration": { "label": "Durée estimée (ans)" },
+    "ownerCharges": { "label": "Charges propriétaire (€/an)" },
+    "ownerChargesGrowth": { "label": "Croissance charges %/an" },
     "purchasePrice": { "label": "Prix d'achat" },
     "notaryFees": { "label": "Frais de notaire" },
     "renovationCosts": { "label": "Travaux" },
@@ -118,6 +130,41 @@
     "maintenanceReservePrimary": { "label": "Provision travaux (€/an)" }
   },
   "tooltips": {
+    "marketValue": {
+      "title": "Valeur vénale (libre)",
+      "body": "Valeur du bien libre de toute occupation. Sert de base au prix de revente et à la levée de la décote au décès du vendeur.",
+      "code": "valeurOccupée = valeurVénale × (1 − décote/100)"
+    },
+    "occupationDiscount": {
+      "title": "Décote d'occupation",
+      "body": "Décote reflétant le droit du vendeur d'occuper le bien jusqu'à son décès. Réduit la valeur vénale à la valeur occupée réellement payée. Plafonnée sous 100 %."
+    },
+    "bouquet": {
+      "title": "Bouquet (à la signature)",
+      "body": "Somme versée à la signature. Joue le rôle du prix d'achat : c'est le montant financé. Mettez l'apport égal à bouquet + frais de notaire pour un viager 100 % comptant.",
+      "code": "loanAmount = max(0, bouquet + fraisNotaire − apport)"
+    },
+    "monthlyAnnuity": {
+      "title": "Rente mensuelle",
+      "body": "Rente viagère versée chaque mois au vendeur jusqu'à son décès. Ajoutée à la pastille KPI « Mensualité » avec la mensualité de prêt."
+    },
+    "annuityGrowth": {
+      "title": "Indexation rente %/an",
+      "body": "Revalorisation annuelle (indexation) de la rente, souvent liée à un indice. 0 % = rente fixe.",
+      "code": "rente[an] = renteMensuelle × 12 × (1 + indexation/100)^(an−1)"
+    },
+    "expectedDuration": {
+      "title": "Durée estimée (ans)",
+      "body": "Espérance de vie résiduelle du vendeur. La rente s'arrête cette année-là et la décote se lève (la valeur du bien remonte à sa valeur vénale). C'est le pari du viager : décès plus tôt → bonne affaire, plus tard → surcoût. Une fourchette de sensibilité ±5 ans est affichée sur les KPIs."
+    },
+    "ownerCharges": {
+      "title": "Charges propriétaire (€/an)",
+      "body": "Charges supportées par l'acquéreur (nu-propriétaire) : taxe foncière et gros travaux. Projetées sur toutes les années."
+    },
+    "ownerChargesGrowth": {
+      "title": "Croissance charges %/an",
+      "body": "Revalorisation annuelle des charges propriétaire. En général 2–3 %/an en France."
+    },
     "inflation": {
       "title": "Inflation (IPC)",
       "body": "Taux d'inflation annuel. Les taux de revalorisation et de rendement alternatif sont nominaux (ex : 2% revalo + 2% inflation = 0% de gain réel). L'inflation est utilisée pour afficher les indicateurs réels : TRI réel (Fisher) et patrimoine en euros constants dans les KPIs et graphiques."
@@ -480,7 +527,8 @@
   "resale": {
     "salePrice": "Revente :",
     "etfPocket": "ETF poche :",
-    "yr": "An {{n}}"
+    "yr": "An {{n}}",
+    "death": "Décès ~An {{n}}"
   },
   "amortization": {
     "principal": "Capital",

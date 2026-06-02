@@ -109,7 +109,7 @@ no LLM, no API key, no backend).
 
 ### Core data flow
 
-1. **`AppContext`** (`state/AppContext.jsx`) — holds state for 3 concurrent simulations (A, B, C). Each sim has a `mode` (`'rental'` / `'primary'`) and ~25 financial parameters from `mkDef()`, plus global settings `G`.
+1. **`AppContext`** (`state/AppContext.jsx`) — holds state for 3 concurrent simulations (A, B, C). Each sim has a `mode` (`'rental'` / `'primary'` / `'viager'`) and ~25 financial parameters from `mkDef()`, plus global settings `G`.
 2. **`compute(p, g)`** (`packages/engine/src/compute.js`) — pure function: takes a simulation's parameters and globals, returns derived financials: monthly payments, 30-year cashflows, IRR at multiple horizons, NPV, net worth. This is the financial engine — touch it carefully.
 3. **`computeEtfScenario(g)`** (`packages/engine/src/compute.js`) — pure function returning the 30-year ETF reference scenario array.
 4. Charts and KPI tables call `compute()` and `computeEtfScenario()` on each render cycle.
@@ -155,20 +155,20 @@ no LLM, no API key, no backend).
 
 ### Per simulation (`p`) — Common to `rental` and `primary`
 
-| Key               | Type                    | Default   | Description                                            |
-| ----------------- | ----------------------- | --------- | ------------------------------------------------------ |
-| `mode`            | `'rental' \| 'primary'` | —         | Simulation mode                                        |
-| `purchasePrice`   | €                       | `250 000` | Property purchase price                                |
-| `notaryFees`      | €                       | `20 000`  | Notary fees                                            |
-| `renovationCosts` | €                       | `15 000`  | Renovation works amount                                |
-| `agencyFees`      | €                       | `0`       | Buyer's agent fees                                     |
-| `loanFees`        | €                       | `0`       | File & broker fees (included in `totalCost`)           |
-| `downPayment`     | €                       | `50 000`  | Personal down payment                                  |
-| `interestRate`    | %                       | `3.85`    | Annual loan interest rate                              |
-| `loanTerm`        | years (5–30)            | `20`      | Loan duration                                          |
-| `insuranceRate`   | %                       | `0.25`    | Annual borrower insurance rate (on borrowed capital)   |
-| `propertyGrowth`  | %                       | `2.0`     | Annual property appreciation                           |
-| `sellingFees`     | %                       | `4`       | Selling fees (agent, diagnostics…) on the resale price |
+| Key               | Type                                | Default   | Description                                            |
+| ----------------- | ----------------------------------- | --------- | ------------------------------------------------------ |
+| `mode`            | `'rental' \| 'primary' \| 'viager'` | —         | Simulation mode                                        |
+| `purchasePrice`   | €                                   | `250 000` | Property purchase price                                |
+| `notaryFees`      | €                                   | `20 000`  | Notary fees                                            |
+| `renovationCosts` | €                                   | `15 000`  | Renovation works amount                                |
+| `agencyFees`      | €                                   | `0`       | Buyer's agent fees                                     |
+| `loanFees`        | €                                   | `0`       | File & broker fees (included in `totalCost`)           |
+| `downPayment`     | €                                   | `50 000`  | Personal down payment                                  |
+| `interestRate`    | %                                   | `3.85`    | Annual loan interest rate                              |
+| `loanTerm`        | years (5–30)                        | `20`      | Loan duration                                          |
+| `insuranceRate`   | %                                   | `0.25`    | Annual borrower insurance rate (on borrowed capital)   |
+| `propertyGrowth`  | %                                   | `2.0`     | Annual property appreciation                           |
+| `sellingFees`     | %                                   | `4`       | Selling fees (agent, diagnostics…) on the resale price |
 
 ### Per simulation (`p`) — `rental` mode only
 
@@ -197,6 +197,44 @@ no LLM, no API key, no backend).
 | `condoFeesPrimary`          | €/yr | `1 200` | Co-ownership charges (primary) |
 | `homeInsurance`             | €/yr | `300`   | Home insurance                 |
 | `maintenanceReservePrimary` | €/yr | `500`   | Reserve for works (primary)    |
+
+### Per simulation (`p`) — `viager` mode only (viager occupé)
+
+| Key                  | Type    | Default   | Description                                                                                   |
+| -------------------- | ------- | --------- | --------------------------------------------------------------------------------------------- |
+| `marketValue`        | €       | `250 000` | Free (vacant) market value — the resale value the décote amortizes toward                     |
+| `occupationDiscount` | %       | `35`      | Décote d'occupation at year 0. Amortizes linearly to 0 by `expectedDuration`. Capped `< 100`. |
+| `bouquet`            | €       | `50 000`  | Upfront lump at signing. Plays `purchasePrice`'s role (the financed price component).         |
+| `monthlyAnnuity`     | €/month | `800`     | Rente viagère paid to the seller until death                                                  |
+| `annuityGrowth`      | %       | `2`       | Annual revaluation (indexation) of the rente                                                  |
+| `expectedDuration`   | years   | `15`      | Seller's expected remaining lifespan = occupation + annuity-paying years. Clamped `≥ 1`.      |
+| `ownerCharges`       | €/yr    | `1 500`   | Owner-borne charges (taxe foncière, gros travaux) — all years                                 |
+| `ownerChargesGrowth` | %       | `2`       | Annual revaluation of the owner charges                                                       |
+
+**Viager occupé model (buyer = débirentier).** No rental income (the seller occupies). The
+bouquet is the t0 price paid (financed by the existing `downPayment`/loan machinery:
+`loanAmount = max(0, bouquet + notaryFees − downPayment)`; set `downPayment = bouquet + notaryFees`
+for an all-cash viager). The rente is the deferred price, paid as a parallel outflow that
+**stops at `expectedDuration`** (unlike a loan, which runs `loanTerm`). The **décote amortizes
+linearly to zero** by `expectedDuration` — `occupiedValue(yr) = marketValue × (1 − occupationDiscount × max(0,(ED−yr)/ED) / 100)`,
+so `propertyValue`/`resalePrice = occupiedValue(yr) × (1+propertyGrowth)^yr` rises **smoothly** to
+the full market value by the death year (no step). You own the bien from signing, so an early resale
+is a real (occupied) sale at this amortized value. `netCashFlow = −(ownerCharges + rente + loanAnnuity) − personalRent`
+(always ≤ 0; personal rent reintegrated in the IRR/NPV flows like rental — the investor still
+rents elsewhere). The rente is bundled into `flows[].charges` so `netCashFlow` reconciles with
+the charges + annuity columns. Resale: cost basis `= bouquet + Σrente-to-date + notaryFees`
+(nominal — ⚠️ documented simplification, the real CGI uses the capitalised rente value), and the
+gain is taxed with the same progressive allowances as a rental resale (a viager resale is **not**
+exempt). `computeViagerResale()` and `computeViagerBand()` (a ±5-year sensitivity readout on
+totalWorth/cashBalance, exposed for the UI) live in `compute.js`. The "Monthly payment" KPI chip
+adds `monthlyAnnuity` to the loan payment so a bouquet-only viager does not display €0.
+
+**Remaining viager simplifications (do not change without an explicit decision):**
+
+- Deterministic single `expectedDuration` (plus the ±5y band); no mortality table / barème, no
+  early/expected/late scenario mode, no viager libre, no rente réversibilité.
+- Cost basis is the nominal sum of rente paid, not the capitalised rente value (art. CGI).
+- The décote is a direct % input (not derived from a DUH/age valuation).
 
 ---
 

@@ -11,7 +11,10 @@ export default function HeaderKpis({ r, col, personalRent, monthlyBudget, horizo
     <KpiRow>
       <KpiChip>
         <KpiLabel>{t('kpi.monthlyPayment')}</KpiLabel>
-        <KpiVal $col={col}>{fmtE(r.monthlyPayment + r.monthlyInsurance)}</KpiVal>
+        {/* Viager: include the rente — a bouquet-only viager has no loan payment. */}
+        <KpiVal $col={col}>
+          {fmtE(r.monthlyPayment + r.monthlyInsurance + (r.monthlyAnnuity ?? 0))}
+        </KpiVal>
       </KpiChip>
       <KpiChip $danger={Math.round(-cfN0 / 12) > monthlyBudget}>
         <KpiLabel>{t('kpi.monthlyCashFlow')}</KpiLabel>

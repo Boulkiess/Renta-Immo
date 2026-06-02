@@ -3,6 +3,7 @@ import {
   compute,
   computeEtfScenario,
   computeEtfKpis,
+  computeViagerBand,
   annualSurplus,
   irr,
   allowanceIncomeTax,
@@ -13,6 +14,7 @@ import { makeG, mkParams } from './fixtures.js';
 
 const makeRental = (over = {}) => mkParams('rental', over);
 const makePrimary = (over = {}) => mkParams('primary', over);
+const makeViager = (over = {}) => mkParams('viager', over);
 
 describe('irr() — Newton-Raphson', () => {
   it('solves a flow with a known IRR of 10 %', () => {
@@ -235,6 +237,79 @@ describe('compute() — primary mode invariants', () => {
     const r = compute(makePrimary(), g);
     expect(r.flows[0].effectiveRent).toBeCloseTo(900 * 12, 6);
     expect(r.flows[4].effectiveRent).toBeCloseTo(900 * 12 * Math.pow(1.02, 4), 6);
+  });
+});
+
+describe('compute() — viager (occupied) mode', () => {
+  // occupiedValue = marketValue × (1 − discount) = 250000 × 0.65 = 162500
+  // totalCost = bouquet + notary = 50000 + 20000 = 70000
+  it('no rental income: effectiveRent is 0 and netCashFlow is always ≤ 0', () => {
+    const r = compute(makeViager(), makeG());
+    for (const f of r.flows) {
+      expect(f.effectiveRent).toBe(0);
+      expect(f.netCashFlow).toBeLessThanOrEqual(0);
+    }
+  });
+
+  it('cash bouquet (downPayment = bouquet + notary) → no loan; default → financed', () => {
+    expect(compute(makeViager({ downPayment: 70000 }), makeG()).loanAmount).toBe(0);
+    expect(compute(makeViager(), makeG()).loanAmount).toBe(20000); // 70000 − 50000
+  });
+
+  it('the rente stops at expectedDuration (charges drop sharply the year after death)', () => {
+    const r = compute(makeViager({ expectedDuration: 15 }), makeG());
+    // flows[14] = year 15 (rente present), flows[15] = year 16 (rente gone)
+    expect(r.flows[15].charges).toBeLessThan(r.flows[14].charges * 0.5);
+  });
+
+  it('décote amortizes smoothly to full market value by the expected-death year (no cliff)', () => {
+    const p = makeViager({ expectedDuration: 15, occupationDiscount: 35, propertyGrowth: 2 });
+    const r = compute(p, makeG());
+    // Property value rises monotonically across the death year, no step.
+    expect(r.flows[13].propertyValue).toBeLessThan(r.flows[14].propertyValue);
+    expect(r.flows[14].propertyValue).toBeLessThan(r.flows[15].propertyValue);
+    // No cliff: the year-over-year ratio around death stays small (was ~1.5 with the step).
+    expect(r.flows[15].propertyValue / r.flows[14].propertyValue).toBeLessThan(1.1);
+    // By the expected-death year the décote is fully gone → full market value × growth.
+    expect(r.flows[14].propertyValue).toBeCloseTo(250000 * Math.pow(1.02, 15), 2);
+  });
+
+  it('exposes the monthly rente for the KPI chip (0 for non-viager)', () => {
+    expect(compute(makeViager({ monthlyAnnuity: 800 }), makeG()).monthlyAnnuity).toBe(800);
+    expect(compute(makeRental(), makeG()).monthlyAnnuity).toBe(0);
+    expect(compute(makeViager(), makeG()).grossYield).toBe(0);
+    expect(compute(makeViager(), makeG()).netYield).toBe(0);
+  });
+
+  it('resale gains are taxed (not exempt) and fully exempt at 30 years', () => {
+    const p = makeViager({ propertyGrowth: 3, expectedDuration: 8 });
+    const r = compute(p, makeG({ horizon: 30 }));
+    const cgtAt = yr => {
+      const f = r.flows[yr - 1];
+      const sellingFee = f.resalePrice * (p.sellingFees / 100);
+      return f.resalePrice - f.remainingCapital - sellingFee - f.netResaleProceeds;
+    };
+    expect(cgtAt(10)).toBeGreaterThan(0); // partial allowances → positive tax
+    expect(cgtAt(30)).toBeCloseTo(0, 4); // 30 years → full exemption
+  });
+
+  it('clamps expectedDuration ≥ 1 (ED = 0 behaves like ED = 1)', () => {
+    const a = compute(makeViager({ expectedDuration: 0 }), makeG());
+    const b = compute(makeViager({ expectedDuration: 1 }), makeG());
+    expect(a.flows).toEqual(b.flows);
+  });
+
+  it('clamps occupationDiscount < 100 (no zero-value arbitrage at 100 %)', () => {
+    const r = compute(makeViager({ occupationDiscount: 100 }), makeG());
+    expect(r.flows[0].propertyValue).toBeGreaterThan(0);
+  });
+
+  it('computeViagerBand returns min ≤ mid ≤ max and null for non-viager', () => {
+    const band = computeViagerBand(makeViager(), makeG());
+    expect(band).not.toBeNull();
+    expect(band.totalWorth.min).toBeLessThanOrEqual(band.totalWorth.mid);
+    expect(band.totalWorth.mid).toBeLessThanOrEqual(band.totalWorth.max);
+    expect(computeViagerBand(makeRental(), makeG())).toBeNull();
   });
 });
 

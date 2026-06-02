@@ -6,6 +6,7 @@ export {
   computeEtfScenario,
   computeEtfKpis,
   crossoverYear,
+  computeViagerBand,
   irr,
   compound,
   annualSurplus,
@@ -14,10 +15,13 @@ export {
   rentalTax,
   buildAmortization,
   computeResale,
+  computeViagerResale,
   calcTRI,
   calcVAN,
   calcMoic,
 } from './compute.js';
+
+export type { ViagerBand } from './compute.js';
 
 export type {
   Regime,

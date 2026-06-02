@@ -48,4 +48,15 @@ describe('buildExportData()', () => {
     KEYS.forEach(k => expect(roundTrip.simulations[k].inputs).toEqual(sims[k]));
     expect(roundTrip.global).toEqual(G);
   });
+
+  it('round-trips a viager simulation (viager-specific inputs preserved)', () => {
+    const vSims = { ...sims, A: { ...mkDef('viager'), label: 'Viager A' } };
+    const vRes = Object.fromEntries(KEYS.map(k => [k, compute(vSims[k], G)]));
+    const d = buildExportData(G, vSims, vRes, etfScenarioGlobal);
+    const roundTrip = JSON.parse(JSON.stringify(d));
+    expect(roundTrip.simulations.A.inputs.mode).toBe('viager');
+    expect(roundTrip.simulations.A.inputs.bouquet).toBe(50000);
+    expect(roundTrip.simulations.A.inputs.expectedDuration).toBe(15);
+    expect(roundTrip.simulations.A.inputs).toEqual(vSims.A);
+  });
 });

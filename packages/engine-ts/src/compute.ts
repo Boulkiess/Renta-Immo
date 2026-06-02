@@ -153,8 +153,46 @@ export function buildAmortization(
   return amortization;
 }
 
+/** Viager occupied value (before growth) at year yr — décote amortizes linearly to 0 by expectedDuration. */
+function viagerOccupiedBase(p: SimParams, yr: number): number {
+  const ed = Math.max(1, p.expectedDuration ?? 1);
+  const remainingFraction = Math.max(0, (ed - yr) / ed); // 1 at yr 0 → 0 at yr ≥ ed
+  const discount = Math.min(99, p.occupationDiscount ?? 0) * remainingFraction;
+  return (p.marketValue ?? 0) * (1 - discount / 100);
+}
+
+/** Cumulative rente actually paid up to year yr (caps at expectedDuration). */
+function viagerRenteToDate(p: SimParams, yr: number): number {
+  let total = 0;
+  const lastYear = Math.min(yr, Math.max(1, p.expectedDuration ?? 1));
+  for (let y = 1; y <= lastYear; y++)
+    total += compound((p.monthlyAnnuity ?? 0) * 12, p.annuityGrowth ?? 0, y - 1);
+  return total;
+}
+
+/** Viager resale: décote lifts at death; basis = bouquet + cumulative rente + notary; gain taxed like rental. */
+export function computeViagerResale(p: SimParams, remaining: number, yr: number): ResaleResult {
+  const resalePrice = compound(viagerOccupiedBase(p, yr), p.propertyGrowth, yr);
+  const sellingFee = resalePrice * (p.sellingFees / 100);
+  const costBasis = (p.bouquet ?? 0) + viagerRenteToDate(p, yr) + p.notaryFees;
+  const grossGain = Math.max(0, resalePrice - costBasis);
+  const allowanceIR = Math.min(100, allowanceIncomeTax(yr));
+  const allowancePS = Math.min(100, allowanceSocialTax(yr));
+  const capitalGainsTax =
+    (grossGain *
+      (p.capitalGainsTax * (1 - allowanceIR / 100) +
+        p.capitalGainsSocialCharges * (1 - allowancePS / 100))) /
+    100;
+  return {
+    resalePrice,
+    sellingFee,
+    netResaleProceeds: resalePrice - remaining - sellingFee - capitalGainsTax,
+  };
+}
+
 /** Resale at year yr: resale price (renovation included), fees, taxed capital gain, net proceeds. */
 export function computeResale(p: SimParams, remaining: number, yr: number): ResaleResult {
+  if (p.mode === 'viager') return computeViagerResale(p, remaining, yr);
   const resalePrice = compound(p.purchasePrice + p.renovationCosts, p.propertyGrowth, yr);
   const sellingFee = resalePrice * (p.sellingFees / 100);
   const grossGain = Math.max(0, resalePrice - p.purchasePrice - p.renovationCosts);
@@ -223,8 +261,10 @@ export function calcMoic(
  * monthly payments, the 30-year flows array, IRR at 10/15/20y, NPV, MOIC, resale.
  */
 export function compute(p: SimParams, g: Globals): ComputeResult {
-  const totalCost =
-    p.purchasePrice + p.notaryFees + p.renovationCosts + p.agencyFees + (p.loanFees ?? 0);
+  const isViager = p.mode === 'viager';
+  const totalCost = isViager
+    ? (p.bouquet ?? 0) + p.notaryFees
+    : p.purchasePrice + p.notaryFees + p.renovationCosts + p.agencyFees + (p.loanFees ?? 0);
   const loanAmount = Math.max(0, totalCost - p.downPayment);
   const investedDownPayment = Math.min(p.downPayment, totalCost);
   const etfSeed = g.investSurplus ? Math.max(0, p.downPayment - totalCost) : 0;
@@ -247,8 +287,8 @@ export function compute(p: SimParams, g: Globals): ComputeResult {
     monthlyInsurance
   );
 
-  const buildingDepreciation = p.purchasePrice * (p.propertyDepreciation / 100),
-    worksDepreciation = p.renovationCosts * (p.renovationDepreciation / 100);
+  const buildingDepreciation = isViager ? 0 : p.purchasePrice * (p.propertyDepreciation / 100),
+    worksDepreciation = isViager ? 0 : p.renovationCosts * (p.renovationDepreciation / 100);
   const flows: FlowYear[] = [];
   let cumulativeCashFlow = 0;
   let irrCumulative = 0; // cumulative adjusted flows (netCashFlow + personalRentAnnual) — IRR/NPV/MOIC basis
@@ -262,7 +302,9 @@ export function compute(p: SimParams, g: Globals): ComputeResult {
     const remaining = amortization[monthIdx]?.remaining ?? 0;
     const annuity = yr <= p.loanTerm ? monthlyPayment * 12 : 0;
     const annualInsurance = yr <= p.loanTerm ? monthlyInsurance * 12 : 0;
-    const propertyValue = compound(p.purchasePrice, p.propertyGrowth, yr);
+    const propertyValue = isViager
+      ? compound(viagerOccupiedBase(p, yr), p.propertyGrowth, yr)
+      : compound(p.purchasePrice, p.propertyGrowth, yr);
     const personalRentAnnual = compound(g.personalRent * 12, g.personalRentGrowth, yr - 1);
 
     let netCashFlow: number,
@@ -305,7 +347,7 @@ export function compute(p: SimParams, g: Globals): ComputeResult {
         );
       }
       netCashFlow = effectiveRent - charges - annuity - annualInsurance - tax - personalRentAnnual;
-    } else {
+    } else if (p.mode === 'primary') {
       const chargesFactor = compound(1, g.chargesGrowth ?? 2, yr - 1);
       charges =
         (p.propertyTaxPrimary +
@@ -315,10 +357,20 @@ export function compute(p: SimParams, g: Globals): ComputeResult {
         chargesFactor;
       netCashFlow = -(charges + annuity + annualInsurance);
       effectiveRent = personalRentAnnual;
+    } else if (p.mode === 'viager') {
+      const rente =
+        yr <= Math.max(1, p.expectedDuration ?? 1)
+          ? compound((p.monthlyAnnuity ?? 0) * 12, p.annuityGrowth ?? 0, yr - 1)
+          : 0;
+      const chargesFactor = compound(1, p.ownerChargesGrowth ?? g.chargesGrowth ?? 2, yr - 1);
+      charges = (p.ownerCharges ?? 0) * chargesFactor + rente;
+      netCashFlow = -(charges + annuity + annualInsurance) - personalRentAnnual;
+    } else {
+      throw new Error(`compute(): unknown sim mode "${String(p.mode)}"`);
     }
     cumulativeCashFlow += netCashFlow;
 
-    const realOutflow = p.mode === 'rental' ? -netCashFlow : charges + annuity + annualInsurance;
+    const realOutflow = p.mode === 'primary' ? charges + annuity + annualInsurance : -netCashFlow;
     const annualBudget = compound(g.monthlyBudget * 12, g.budgetGrowth, yr - 1);
     const budgetSurplus = Math.max(0, annualBudget - realOutflow);
     etfCapital = etfCapital * (1 + altRate) + (g.investSurplus ? budgetSurplus : 0);
@@ -371,7 +423,9 @@ export function compute(p: SimParams, g: Globals): ComputeResult {
   const monthlyCashFlow =
     p.mode === 'rental'
       ? p.rent - monthlyPayment - monthlyInsurance - g.personalRent
-      : g.personalRent - monthlyPayment - monthlyInsurance;
+      : p.mode === 'viager'
+        ? -(monthlyPayment + monthlyInsurance + (p.monthlyAnnuity ?? 0))
+        : g.personalRent - monthlyPayment - monthlyInsurance;
   const breakEven = flows.findIndex(f => f.cumulativeCashFlow >= 0);
   const resaleBreakEven = flows.findIndex(f => f.cashBalance >= 0);
 
@@ -380,6 +434,7 @@ export function compute(p: SimParams, g: Globals): ComputeResult {
     loanAmount,
     monthlyPayment,
     monthlyInsurance,
+    monthlyAnnuity: isViager ? (p.monthlyAnnuity ?? 0) : 0,
     totalInterest,
     totalInsurance,
     grossYield,
@@ -416,4 +471,36 @@ export function crossoverYear(
     if (property != null && etf != null && property >= etf) return i + 1;
   }
   return null;
+}
+
+export interface ViagerBand {
+  expectedDuration: number;
+  delta: number;
+  totalWorth: { min: number; mid: number; max: number };
+  cashBalance: { min: number; mid: number; max: number };
+}
+
+/** Sensitivity band for a viager sim: re-run at expectedDuration ± delta, report min/mid/max KPIs. */
+export function computeViagerBand(p: SimParams, g: Globals, delta = 5): ViagerBand | null {
+  if (p.mode !== 'viager') return null;
+  const hz = g.horizon;
+  const at = (duration: number) => {
+    const f = compute({ ...p, expectedDuration: Math.max(1, duration) }, g).flows[hz - 1];
+    return { totalWorth: f?.totalWorth ?? 0, cashBalance: f?.cashBalance ?? 0 };
+  };
+  const ed = Math.max(1, p.expectedDuration ?? 1);
+  const lo = at(ed - delta),
+    mid = at(ed),
+    hi = at(ed + delta);
+  const span = (key: 'totalWorth' | 'cashBalance') => ({
+    min: Math.min(lo[key], mid[key], hi[key]),
+    mid: mid[key],
+    max: Math.max(lo[key], mid[key], hi[key]),
+  });
+  return {
+    expectedDuration: ed,
+    delta,
+    totalWorth: span('totalWorth'),
+    cashBalance: span('cashBalance'),
+  };
 }
