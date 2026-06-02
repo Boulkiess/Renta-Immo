@@ -36,7 +36,7 @@ const KEY_YEARS = [5, 10, 15, 20, 25, 30];
 
 export default function ReventeTab() {
   const { t } = useTranslation();
-  const { sims, RES, etfPurGlobal, G } = useApp();
+  const { sims, RES, etfScenarioGlobal, G } = useApp();
   const theme = useTheme();
   const activeKeys = KEYS.filter(k => sims[k].enabled);
 
@@ -48,13 +48,13 @@ export default function ReventeTab() {
     const ds = activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map((f, i) => dfl(f.bilanTotal, i)),
+      data: RES[k].flows.map((f, i) => dfl(f.totalBalance, i)),
     }));
     ds.push({
       color: '#94a3b8',
       dashed: true,
-      label: 'ETF pur (net)',
-      data: etfPurGlobal.map((e, i) => dfl(e.capNet, i)),
+      label: 'Pure ETF (net)',
+      data: etfScenarioGlobal.map((e, i) => dfl(e.capNet, i)),
     });
     return ds;
   }
@@ -63,43 +63,43 @@ export default function ReventeTab() {
     return activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map((f, i) => dfl(f.bilanCash, i)),
+      data: RES[k].flows.map((f, i) => dfl(f.cashBalance, i)),
     }));
   }
 
-  // Vertical markers at each sim's resale break-even year (bilanCash ≥ 0).
+  // Vertical markers at each sim's resale break-even year (cashBalance ≥ 0).
   function cashAnnotations() {
     return activeKeys
-      .filter(k => RES[k].beRevente != null)
+      .filter(k => RES[k].resaleBreakEven != null)
       .map(k => ({
-        x: RES[k].beRevente,
+        x: RES[k].resaleBreakEven,
         color: COL[k],
-        label: t('revente.yr', { n: RES[k].beRevente }),
+        label: t('resale.yr', { n: RES[k].resaleBreakEven }),
       }));
   }
 
   return (
     <Wrap>
-      <Title dangerouslySetInnerHTML={{ __html: t('charts.revente.title') }} />
-      <Desc dangerouslySetInnerHTML={{ __html: t('charts.revente.desc') }} />
+      <Title dangerouslySetInnerHTML={{ __html: t('charts.resale.title') }} />
+      <Desc dangerouslySetInnerHTML={{ __html: t('charts.resale.desc') }} />
       <CanvasChart
         draw={c => drawLine(c, datasets(), X_LABELS)}
-        deps={[sims, RES, etfPurGlobal, G, theme.name]}
+        deps={[sims, RES, etfScenarioGlobal, G, theme.name]}
         height={220}
       />
 
       <Title
         style={{ marginTop: 18 }}
-        dangerouslySetInnerHTML={{ __html: t('charts.reventeCash.title') }}
+        dangerouslySetInnerHTML={{ __html: t('charts.resaleCash.title') }}
       />
-      <Desc dangerouslySetInnerHTML={{ __html: t('charts.reventeCash.desc') }} />
+      <Desc dangerouslySetInnerHTML={{ __html: t('charts.resaleCash.desc') }} />
       <CanvasChart
         draw={c => drawLine(c, cashDatasets(), X_LABELS, cashAnnotations())}
         deps={[sims, RES, G, theme.name]}
         height={220}
       />
 
-      <SubTitle dangerouslySetInnerHTML={{ __html: t('charts.reventeDetail') }} />
+      <SubTitle dangerouslySetInnerHTML={{ __html: t('charts.resaleDetail') }} />
 
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
         <thead>
@@ -114,7 +114,7 @@ export default function ReventeTab() {
                 color: 'var(--muted)',
               }}
             >
-              Année
+              Year
             </th>
             {activeKeys.map(k => (
               <th
@@ -141,28 +141,28 @@ export default function ReventeTab() {
                 fontSize: 10,
               }}
             >
-              ETF pur
+              Pure ETF
             </th>
           </tr>
         </thead>
         <tbody>
           {KEY_YEARS.map((yr, ri) => {
-            const etf = etfPurGlobal[yr - 1];
+            const etf = etfScenarioGlobal[yr - 1];
             const bg = ri % 2 === 0 ? 'var(--s2)' : 'transparent';
             return (
               <tr key={yr}>
                 <td style={{ padding: '6px 8px', background: bg, fontWeight: 700 }}>
-                  {t('revente.yr', { n: yr })}
+                  {t('resale.yr', { n: yr })}
                 </td>
                 {activeKeys.map(k => {
-                  const f = RES[k].flux[yr - 1];
+                  const f = RES[k].flows[yr - 1];
                   return (
                     <td key={k} style={{ padding: '6px 8px', textAlign: 'right', background: bg }}>
-                      <div style={{ color: COL[k], fontWeight: 700 }}>{fmtE(f?.bilanTotal)}</div>
+                      <div style={{ color: COL[k], fontWeight: 700 }}>{fmtE(f?.totalBalance)}</div>
                       <div style={{ fontSize: 9, color: 'var(--muted)', marginTop: 2 }}>
-                        {t('revente.revente')} {fmtK(f?.reventeNet)}
+                        {t('resale.salePrice')} {fmtK(f?.netResaleProceeds)}
                         {' · '}
-                        {t('revente.etfPoche')} {fmtK(f?.etfPoche)}
+                        {t('resale.etfPocket')} {fmtK(f?.etfPocket)}
                       </div>
                     </td>
                   );

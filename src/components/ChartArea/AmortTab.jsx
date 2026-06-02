@@ -85,30 +85,30 @@ const LineSwatch = styled.span`
 `;
 
 const AMORT_COLORS = {
-  interets: '#e2cbcb',
-  assurance: '#a30eff',
-  restant: '#ff0000',
-  rembourse: '#ffff00',
+  interest: '#e2cbcb',
+  insurance: '#a30eff',
+  remaining: '#ff0000',
+  repaid: '#ffff00',
 };
 
-function aggregateByYear(amort, duree) {
-  const cap = [],
-    inter = [],
-    ass = [];
-  for (let yr = 1; yr <= duree; yr++) {
+function aggregateByYear(amortization, loanTerm) {
+  const principal = [],
+    interest = [],
+    insurance = [];
+  for (let yr = 1; yr <= loanTerm; yr++) {
     let c = 0,
       i = 0,
       a = 0;
-    for (let m = (yr - 1) * 12; m < yr * 12 && m < amort.length; m++) {
-      c += amort[m].cap;
-      i += amort[m].inter;
-      a += amort[m].assur;
+    for (let m = (yr - 1) * 12; m < yr * 12 && m < amortization.length; m++) {
+      c += amortization[m].principal;
+      i += amortization[m].interest;
+      a += amortization[m].insurance;
     }
-    cap.push(c);
-    inter.push(i);
-    ass.push(a);
+    principal.push(c);
+    interest.push(i);
+    insurance.push(a);
   }
-  return { cap, inter, ass };
+  return { principal, interest, insurance };
 }
 
 export default function AmortTab() {
@@ -122,30 +122,30 @@ export default function AmortTab() {
       {activeKeys.map(k => {
         const p = sims[k];
         const r = RES[k];
-        const { cap, inter, ass } = aggregateByYear(r.amort, p.duree);
-        const amortX = Array.from({ length: p.duree }, (_, i) => String(i + 1));
-        const restByYear = Array.from({ length: p.duree }, (_, i) => {
+        const { principal, interest, insurance } = aggregateByYear(r.amortization, p.loanTerm);
+        const amortX = Array.from({ length: p.loanTerm }, (_, i) => String(i + 1));
+        const remainingByYear = Array.from({ length: p.loanTerm }, (_, i) => {
           const idx = (i + 1) * 12 - 1;
-          return idx < r.amort.length ? r.amort[idx].rest : 0;
+          return idx < r.amortization.length ? r.amortization[idx].remaining : 0;
         });
-        let cumCap = 0;
-        const capRembourse = cap.map(v => (cumCap += v));
+        let cumPrincipal = 0;
+        const principalRepaid = principal.map(v => (cumPrincipal += v));
 
         const amortDs = [
-          { color: COL[k], label: t('amort.capital'), data: cap },
-          { color: AMORT_COLORS.interets, label: t('amort.interets'), data: inter },
-          { color: AMORT_COLORS.assurance, label: t('amort.assurance'), data: ass },
+          { color: COL[k], label: t('amortization.principal'), data: principal },
+          { color: AMORT_COLORS.interest, label: t('amortization.interest'), data: interest },
+          { color: AMORT_COLORS.insurance, label: t('amortization.insurance'), data: insurance },
         ];
         const restDs = {
-          color: AMORT_COLORS.restant,
-          label: t('charts.amortCap.title'),
-          data: restByYear,
+          color: AMORT_COLORS.remaining,
+          label: t('charts.amortizationBalance.title'),
+          data: remainingByYear,
           dashed: false,
         };
         const capRemDs = {
-          color: AMORT_COLORS.rembourse,
-          label: t('amort.capitalRembourse'),
-          data: capRembourse,
+          color: AMORT_COLORS.repaid,
+          label: t('amortization.principalRepaid'),
+          data: principalRepaid,
           dashed: false,
         };
 
@@ -154,39 +154,39 @@ export default function AmortTab() {
             <BlockHeader>
               <BlockTitle $col={COL[k]}>{p.label}</BlockTitle>
               <BlockDesc>
-                {t('amort.capital')} — {t('kpisTable.emprunte').toLowerCase()} —{' '}
-                {t('amort.assurance').toLowerCase()}
+                {t('amortization.principal')} — {t('kpisTable.loanAmount').toLowerCase()} —{' '}
+                {t('amortization.insurance').toLowerCase()}
               </BlockDesc>
             </BlockHeader>
 
             <ChartSection>
-              <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.amort.title') }} />
-              <ChartDesc dangerouslySetInnerHTML={{ __html: t('charts.amort.desc') }} />
+              <ChartTitle dangerouslySetInnerHTML={{ __html: t('charts.amortization.title') }} />
+              <ChartDesc dangerouslySetInnerHTML={{ __html: t('charts.amortization.desc') }} />
               <LegendRow>
                 <LegItem>
                   <Swatch $col={COL[k]} />
-                  {t('amort.capital')}
+                  {t('amortization.principal')}
                 </LegItem>
                 <LegItem>
-                  <Swatch $col={AMORT_COLORS.interets} />
-                  {t('amort.interets')}
+                  <Swatch $col={AMORT_COLORS.interest} />
+                  {t('amortization.interest')}
                 </LegItem>
                 <LegItem>
-                  <Swatch $col={AMORT_COLORS.assurance} />
-                  {t('amort.assurance')}
+                  <Swatch $col={AMORT_COLORS.insurance} />
+                  {t('amortization.insurance')}
                 </LegItem>
                 <LegItem>
-                  <LineSwatch $col={AMORT_COLORS.restant} />
-                  {t('charts.amortCap.title')}
+                  <LineSwatch $col={AMORT_COLORS.remaining} />
+                  {t('charts.amortizationBalance.title')}
                 </LegItem>
                 <LegItem>
-                  <LineSwatch $col={AMORT_COLORS.rembourse} />
-                  {t('amort.capitalRembourse')}
+                  <LineSwatch $col={AMORT_COLORS.repaid} />
+                  {t('amortization.principalRepaid')}
                 </LegItem>
               </LegendRow>
               <CanvasChart
                 draw={c => drawBarsWithLine(c, amortDs, [restDs, capRemDs], amortX)}
-                deps={[r, p.duree, theme.name]}
+                deps={[r, p.loanTerm, theme.name]}
                 height={220}
               />
             </ChartSection>

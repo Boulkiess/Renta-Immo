@@ -10,7 +10,7 @@
 //
 // ┌── Concept ─────────────────────────────────────────────────────────────┐
 // │ id        unique slug                                                    │
-// │ group     group id (see GROUPS) — drives the sommaire                    │
+// │ group     group id (see GROUPS) — drives the table of contents          │
 // │ i18nKey   dotted path to {title, body, code?} (tooltips.* reused where   │
 // │           a clean match exists, else doc.concepts.*)                     │
 // │ inputs    [{ key, type?, min, max, step, default, unit?, options?,       │
@@ -29,32 +29,32 @@
 
 import {
   irr,
-  abattementIR,
-  abattementPS,
-  impLoc,
+  allowanceIncomeTax,
+  allowanceSocialTax,
+  rentalTax,
   buildAmortization,
   computeResale,
-  computeEtfPur,
-  revalorise,
+  computeEtfScenario,
+  compound,
 } from '@immo-renta/engine';
 
 export const GROUPS = [
   'credit',
-  'rendement',
-  'capitalisation',
-  'fiscalite',
-  'plusvalue',
-  'rentabilite',
+  'yield',
+  'compounding',
+  'taxation',
+  'capitalGains',
+  'profitability',
 ];
 
 // ── Pure local helpers (doc-only; not part of the engine) ──────────────────
 
-/** Monthly annuity payment. Mirrors compute(): emp×τM/(1−(1+τM)^−nM). */
-export function mensualite(emp, tauxPct, dureeAns) {
-  const tM = tauxPct / 100 / 12;
-  const nM = dureeAns * 12;
-  if (emp <= 0) return 0;
-  return tM > 0 ? (emp * tM) / (1 - Math.pow(1 + tM, -nM)) : emp / nM;
+/** Monthly annuity payment. Mirrors compute(): loan×rM/(1−(1+rM)^−nM). */
+export function monthlyPayment(loanAmount, ratePct, termYears) {
+  const rM = ratePct / 100 / 12;
+  const nM = termYears * 12;
+  if (loanAmount <= 0) return 0;
+  return rM > 0 ? (loanAmount * rM) / (1 - Math.pow(1 + rM, -nM)) : loanAmount / nM;
 }
 
 /** Net present value of a 0-based flow vector at rate r (fraction). */
@@ -62,20 +62,20 @@ export function npv(flows, r) {
   return flows.reduce((s, f, t) => s + f / Math.pow(1 + r, t), 0);
 }
 
-/** Aggregate the monthly amortization schedule into per-year interest/capital. */
-export function yearlyAmort(emp, tauxPct, dureeAns) {
-  const tM = tauxPct / 100 / 12;
-  const nM = dureeAns * 12;
-  const mens = mensualite(emp, tauxPct, dureeAns);
-  const amort = buildAmortization(emp, tM, nM, mens, 0);
+/** Aggregate the monthly amortization schedule into per-year interest/principal. */
+export function yearlyAmortization(loanAmount, ratePct, termYears) {
+  const rM = ratePct / 100 / 12;
+  const nM = termYears * 12;
+  const payment = monthlyPayment(loanAmount, ratePct, termYears);
+  const amortization = buildAmortization(loanAmount, rM, nM, payment, 0);
   const interest = [];
-  const capital = [];
-  for (let y = 0; y < dureeAns; y++) {
-    const slice = amort.slice(y * 12, y * 12 + 12);
-    interest.push(slice.reduce((s, m) => s + m.inter, 0));
-    capital.push(slice.reduce((s, m) => s + m.cap, 0));
+  const principal = [];
+  for (let y = 0; y < termYears; y++) {
+    const slice = amortization.slice(y * 12, y * 12 + 12);
+    interest.push(slice.reduce((s, m) => s + m.interest, 0));
+    principal.push(slice.reduce((s, m) => s + m.principal, 0));
   }
-  return { interest, capital };
+  return { interest, principal };
 }
 
 const years1to30 = Array.from({ length: 30 }, (_, i) => i + 1);
@@ -84,92 +84,95 @@ const years1to30 = Array.from({ length: 30 }, (_, i) => i + 1);
 // fall back to the descriptor default. ctx = { sim, G, res } | undefined.
 const seedSim = (key, fallback) => ctx => ctx?.sim?.[key] ?? fallback;
 const seedG = (key, fallback) => ctx => ctx?.G?.[key] ?? fallback;
-const seedEmp = fallback => ctx => ctx?.res?.emp ?? fallback;
+const seedLoan = fallback => ctx => ctx?.res?.loanAmount ?? fallback;
 
 // ── The registry ───────────────────────────────────────────────────────────
 
 export const CONCEPTS = [
-  // ════ CRÉDIT ════
+  // ════ CREDIT ════
   {
-    id: 'mensualite',
+    id: 'monthlyPayment',
     group: 'credit',
-    i18nKey: 'doc.concepts.mensualite',
+    i18nKey: 'doc.concepts.monthlyPayment',
     render: 'number',
     inputs: [
       {
-        key: 'emp',
+        key: 'loanAmount',
         min: 10000,
         max: 1000000,
         step: 5000,
         default: 200000,
         unit: 'eur',
-        seed: seedEmp(200000),
+        seed: seedLoan(200000),
       },
       {
-        key: 'taux',
+        key: 'interestRate',
         min: 0.5,
         max: 10,
         step: 0.05,
         default: 3.85,
         unit: 'pct',
-        seed: seedSim('taux', 3.85),
+        seed: seedSim('interestRate', 3.85),
       },
       {
-        key: 'duree',
+        key: 'loanTerm',
         min: 5,
         max: 30,
         step: 1,
         default: 20,
         unit: 'years',
-        seed: seedSim('duree', 20),
+        seed: seedSim('loanTerm', 20),
       },
     ],
-    compute: v => ({ value: mensualite(v.emp, v.taux, v.duree), unit: 'eurMonth' }),
+    compute: v => ({
+      value: monthlyPayment(v.loanAmount, v.interestRate, v.loanTerm),
+      unit: 'eurMonth',
+    }),
   },
   {
-    id: 'amortissement',
+    id: 'amortization',
     group: 'credit',
-    i18nKey: 'doc.concepts.amortissement',
+    i18nKey: 'doc.concepts.amortization',
     render: 'bars',
     inputs: [
       {
-        key: 'emp',
+        key: 'loanAmount',
         min: 10000,
         max: 1000000,
         step: 5000,
         default: 200000,
         unit: 'eur',
-        seed: seedEmp(200000),
+        seed: seedLoan(200000),
       },
       {
-        key: 'taux',
+        key: 'interestRate',
         min: 0.5,
         max: 10,
         step: 0.05,
         default: 3.85,
         unit: 'pct',
-        seed: seedSim('taux', 3.85),
+        seed: seedSim('interestRate', 3.85),
       },
       {
-        key: 'duree',
+        key: 'loanTerm',
         min: 5,
         max: 30,
         step: 1,
         default: 20,
         unit: 'years',
-        seed: seedSim('duree', 20),
+        seed: seedSim('loanTerm', 20),
       },
     ],
     compute: v => {
-      const { interest, capital } = yearlyAmort(v.emp, v.taux, v.duree);
-      const xLabels = Array.from({ length: v.duree }, (_, i) => String(i + 1));
+      const { interest, principal } = yearlyAmortization(v.loanAmount, v.interestRate, v.loanTerm);
+      const xLabels = Array.from({ length: v.loanTerm }, (_, i) => String(i + 1));
       return {
         kind: 'bars',
         stacked: true,
         xLabels,
         series: [
-          { label: 'amort.interets', data: interest },
-          { label: 'amort.capital', data: capital },
+          { label: 'amortization.interest', data: interest },
+          { label: 'amortization.principal', data: principal },
         ],
         notes: [
           {
@@ -182,148 +185,151 @@ export const CONCEPTS = [
     },
   },
   {
-    id: 'assurance',
+    id: 'insurance',
     group: 'credit',
-    i18nKey: 'doc.concepts.assurance',
+    i18nKey: 'doc.concepts.insurance',
     render: 'number',
     inputs: [
       {
-        key: 'emp',
+        key: 'loanAmount',
         min: 10000,
         max: 1000000,
         step: 5000,
         default: 200000,
         unit: 'eur',
-        seed: seedEmp(200000),
+        seed: seedLoan(200000),
       },
       {
-        key: 'assurance',
+        key: 'insuranceRate',
         min: 0,
         max: 1,
         step: 0.01,
         default: 0.25,
         unit: 'pct',
-        seed: seedSim('assurance', 0.25),
+        seed: seedSim('insuranceRate', 0.25),
       },
     ],
-    compute: v => ({ value: (v.emp * (v.assurance / 100)) / 12, unit: 'eurMonth' }),
+    compute: v => ({ value: (v.loanAmount * (v.insuranceRate / 100)) / 12, unit: 'eurMonth' }),
   },
   {
-    id: 'coutCredit',
+    id: 'creditCost',
     group: 'credit',
-    i18nKey: 'doc.concepts.coutCredit',
+    i18nKey: 'doc.concepts.creditCost',
     render: 'number',
     inputs: [
       {
-        key: 'emp',
+        key: 'loanAmount',
         min: 10000,
         max: 1000000,
         step: 5000,
         default: 200000,
         unit: 'eur',
-        seed: seedEmp(200000),
+        seed: seedLoan(200000),
       },
       {
-        key: 'taux',
+        key: 'interestRate',
         min: 0.5,
         max: 10,
         step: 0.05,
         default: 3.85,
         unit: 'pct',
-        seed: seedSim('taux', 3.85),
+        seed: seedSim('interestRate', 3.85),
       },
       {
-        key: 'duree',
+        key: 'loanTerm',
         min: 5,
         max: 30,
         step: 1,
         default: 20,
         unit: 'years',
-        seed: seedSim('duree', 20),
+        seed: seedSim('loanTerm', 20),
       },
       {
-        key: 'assurance',
+        key: 'insuranceRate',
         min: 0,
         max: 1,
         step: 0.01,
         default: 0.25,
         unit: 'pct',
-        seed: seedSim('assurance', 0.25),
+        seed: seedSim('insuranceRate', 0.25),
       },
     ],
     compute: v => {
-      const { interest } = yearlyAmort(v.emp, v.taux, v.duree);
-      const totInt = interest.reduce((a, b) => a + b, 0);
-      const totAss = ((v.emp * (v.assurance / 100)) / 12) * v.duree * 12;
+      const { interest } = yearlyAmortization(v.loanAmount, v.interestRate, v.loanTerm);
+      const totalInterest = interest.reduce((a, b) => a + b, 0);
+      const totalInsurance = ((v.loanAmount * (v.insuranceRate / 100)) / 12) * v.loanTerm * 12;
       return {
-        value: totInt + totAss,
+        value: totalInterest + totalInsurance,
         unit: 'eur',
         notes: [
-          { label: 'doc.notes.interest', value: totInt, unit: 'eur' },
-          { label: 'doc.notes.insurance', value: totAss, unit: 'eur' },
+          { label: 'doc.notes.interest', value: totalInterest, unit: 'eur' },
+          { label: 'doc.notes.insurance', value: totalInsurance, unit: 'eur' },
         ],
       };
     },
   },
 
-  // ════ RENDEMENT ════
+  // ════ YIELD ════
   {
-    id: 'rendBrut',
-    group: 'rendement',
-    i18nKey: 'doc.concepts.rendBrut',
+    id: 'grossYield',
+    group: 'yield',
+    i18nKey: 'doc.concepts.grossYield',
     render: 'number',
     inputs: [
       {
-        key: 'loyer',
+        key: 'rent',
         min: 100,
         max: 8000,
         step: 50,
         default: 1000,
         unit: 'eur',
-        seed: seedSim('loyer', 1000),
+        seed: seedSim('rent', 1000),
       },
-      { key: 'ct', min: 10000, max: 2000000, step: 5000, default: 285000, unit: 'eur' },
+      { key: 'totalCost', min: 10000, max: 2000000, step: 5000, default: 285000, unit: 'eur' },
     ],
-    compute: v => ({ value: v.ct > 0 ? ((v.loyer * 12) / v.ct) * 100 : null, unit: 'pct' }),
+    compute: v => ({
+      value: v.totalCost > 0 ? ((v.rent * 12) / v.totalCost) * 100 : null,
+      unit: 'pct',
+    }),
   },
   {
-    id: 'rendNet',
-    group: 'rendement',
-    i18nKey: 'doc.concepts.rendNet',
+    id: 'netYield',
+    group: 'yield',
+    i18nKey: 'doc.concepts.netYield',
     render: 'number',
     inputs: [
       {
-        key: 'loyer',
+        key: 'rent',
         min: 100,
         max: 8000,
         step: 50,
         default: 1000,
         unit: 'eur',
-        seed: seedSim('loyer', 1000),
+        seed: seedSim('rent', 1000),
       },
       {
-        key: 'vacance',
+        key: 'vacancyRate',
         min: 0,
         max: 30,
         step: 0.5,
         default: 5,
         unit: 'pct',
-        seed: seedSim('vacance', 5),
+        seed: seedSim('vacancyRate', 5),
       },
       { key: 'charges', min: 0, max: 20000, step: 100, default: 2700, unit: 'eur' },
-      { key: 'ct', min: 10000, max: 2000000, step: 5000, default: 285000, unit: 'eur' },
+      { key: 'totalCost', min: 10000, max: 2000000, step: 5000, default: 285000, unit: 'eur' },
     ],
     compute: v => {
-      const net = v.loyer * (1 - v.vacance / 100) * 12 - v.charges;
-      return { value: v.ct > 0 ? (net / v.ct) * 100 : null, unit: 'pct' };
+      const net = v.rent * (1 - v.vacancyRate / 100) * 12 - v.charges;
+      return { value: v.totalCost > 0 ? (net / v.totalCost) * 100 : null, unit: 'pct' };
     },
   },
 
-  // ════ CAPITALISATION ════
+  // ════ COMPOUNDING ════
   {
-    id: 'revalorisation',
-    group: 'capitalisation',
-    i18nKey: 'doc.concepts.revalorisation',
+    id: 'compounding',
+    group: 'compounding',
+    i18nKey: 'doc.concepts.compounding',
     render: 'line',
     inputs: [
       {
@@ -333,98 +339,98 @@ export const CONCEPTS = [
         step: 5000,
         default: 250000,
         unit: 'eur',
-        seed: seedSim('prixAchat', 250000),
+        seed: seedSim('purchasePrice', 250000),
       },
       {
-        key: 'taux',
+        key: 'rate',
         min: -2,
         max: 10,
         step: 0.1,
         default: 2,
         unit: 'pct',
-        seed: seedSim('revalBien', 2),
+        seed: seedSim('propertyGrowth', 2),
       },
     ],
     compute: v => ({
       kind: 'line',
       xLabels: years1to30.map(String),
       series: [
-        { label: 'doc.notes.value', data: years1to30.map(y => revalorise(v.base, v.taux, y)) },
+        { label: 'doc.notes.value', data: years1to30.map(y => compound(v.base, v.rate, y)) },
       ],
-      notes: [{ label: 'doc.notes.at30', value: revalorise(v.base, v.taux, 30), unit: 'eur' }],
+      notes: [{ label: 'doc.notes.at30', value: compound(v.base, v.rate, 30), unit: 'eur' }],
     }),
   },
   {
-    id: 'etfPur',
-    group: 'capitalisation',
-    i18nKey: 'doc.concepts.etfPur',
+    id: 'etfScenario',
+    group: 'compounding',
+    i18nKey: 'doc.concepts.etfScenario',
     render: 'line',
     inputs: [
       {
-        key: 'apportETF',
+        key: 'etfDownPayment',
         min: 0,
         max: 500000,
         step: 5000,
         default: 60000,
         unit: 'eur',
-        seed: seedG('apportETF', 60000),
+        seed: seedG('etfDownPayment', 60000),
       },
       {
-        key: 'rendAlt',
+        key: 'altReturn',
         min: 0,
         max: 12,
         step: 0.1,
         default: 6,
         unit: 'pct',
-        seed: seedG('rendAlt', 6),
+        seed: seedG('altReturn', 6),
       },
       {
-        key: 'budgetMensuel',
+        key: 'monthlyBudget',
         min: 0,
         max: 10000,
         step: 100,
         default: 2500,
         unit: 'eur',
-        seed: seedG('budgetMensuel', 2500),
+        seed: seedG('monthlyBudget', 2500),
       },
       {
-        key: 'loyerPerso',
+        key: 'personalRent',
         min: 0,
         max: 5000,
         step: 50,
         default: 900,
         unit: 'eur',
-        seed: seedG('loyerPerso', 900),
+        seed: seedG('personalRent', 900),
       },
       {
-        key: 'revalBudget',
+        key: 'budgetGrowth',
         min: 0,
         max: 5,
         step: 0.1,
         default: 0,
         unit: 'pct',
-        seed: seedG('revalBudget', 0),
+        seed: seedG('budgetGrowth', 0),
       },
       {
-        key: 'revalLoyerPerso',
+        key: 'personalRentGrowth',
         min: 0,
         max: 5,
         step: 0.1,
         default: 2,
         unit: 'pct',
-        seed: seedG('revalLoyerPerso', 2),
+        seed: seedG('personalRentGrowth', 2),
       },
     ],
     compute: v => {
       const g = {
-        apportETF: v.apportETF,
-        rendAlt: v.rendAlt,
-        budgetMensuel: v.budgetMensuel,
-        loyerPerso: v.loyerPerso,
-        revalBudget: v.revalBudget,
-        revalLoyerPerso: v.revalLoyerPerso,
+        etfDownPayment: v.etfDownPayment,
+        altReturn: v.altReturn,
+        monthlyBudget: v.monthlyBudget,
+        personalRent: v.personalRent,
+        budgetGrowth: v.budgetGrowth,
+        personalRentGrowth: v.personalRentGrowth,
       };
-      const arr = computeEtfPur(g);
+      const arr = computeEtfScenario(g);
       return {
         kind: 'line',
         xLabels: arr.map(e => String(e.yr)),
@@ -437,11 +443,11 @@ export const CONCEPTS = [
     },
   },
 
-  // ════ FISCALITÉ ════
+  // ════ TAXATION ════
   {
-    id: 'impotLoc',
-    group: 'fiscalite',
-    i18nKey: 'doc.concepts.impotLoc',
+    id: 'rentalTax',
+    group: 'taxation',
+    i18nKey: 'doc.concepts.rentalTax',
     render: 'number',
     inputs: [
       {
@@ -451,130 +457,153 @@ export const CONCEPTS = [
         default: 'lmnp',
         seed: seedG('regime', 'lmnp'),
       },
-      { key: 'le', min: 0, max: 60000, step: 500, default: 12000, unit: 'eur' },
-      { key: 'chg', min: 0, max: 30000, step: 500, default: 3500, unit: 'eur' },
-      { key: 'ab', min: 0, max: 40000, step: 500, default: 6250, unit: 'eur' },
-      { key: 'at', min: 0, max: 20000, step: 250, default: 1500, unit: 'eur' },
-      { key: 'intAnnuel', min: 0, max: 40000, step: 500, default: 6000, unit: 'eur' },
-      { key: 'tmi', min: 0, max: 45, step: 1, default: 30, unit: 'pct', seed: seedSim('tmi', 30) },
+      { key: 'effectiveRent', min: 0, max: 60000, step: 500, default: 12000, unit: 'eur' },
+      { key: 'charges', min: 0, max: 30000, step: 500, default: 3500, unit: 'eur' },
+      { key: 'buildingDepreciation', min: 0, max: 40000, step: 500, default: 6250, unit: 'eur' },
+      { key: 'worksDepreciation', min: 0, max: 20000, step: 250, default: 1500, unit: 'eur' },
+      { key: 'annualInterest', min: 0, max: 40000, step: 500, default: 6000, unit: 'eur' },
       {
-        key: 'ps',
+        key: 'marginalTaxRate',
+        min: 0,
+        max: 45,
+        step: 1,
+        default: 30,
+        unit: 'pct',
+        seed: seedSim('marginalTaxRate', 30),
+      },
+      {
+        key: 'socialCharges',
         min: 0,
         max: 20,
         step: 0.1,
         default: 17.2,
         unit: 'pct',
-        seed: seedSim('ps', 17.2),
+        seed: seedSim('socialCharges', 17.2),
       },
     ],
     compute: v => ({
-      value: impLoc(v.le, v.chg, v.ab, v.at, v.tmi, v.ps, v.regime, v.intAnnuel),
+      value: rentalTax(
+        v.effectiveRent,
+        v.charges,
+        v.buildingDepreciation,
+        v.worksDepreciation,
+        v.marginalTaxRate,
+        v.socialCharges,
+        v.regime,
+        v.annualInterest
+      ),
       unit: 'eur',
     }),
   },
 
-  // ════ PLUS-VALUE ════
+  // ════ CAPITAL GAINS ════
   {
-    id: 'abattements',
-    group: 'plusvalue',
-    i18nKey: 'doc.concepts.abattements',
+    id: 'allowances',
+    group: 'capitalGains',
+    i18nKey: 'doc.concepts.allowances',
     render: 'line',
     inputs: [],
     compute: () => ({
       kind: 'line',
       xLabels: years1to30.map(String),
       series: [
-        { label: 'doc.notes.abatIR', data: years1to30.map(y => Math.min(100, abattementIR(y))) },
-        { label: 'doc.notes.abatPS', data: years1to30.map(y => Math.min(100, abattementPS(y))) },
+        {
+          label: 'doc.notes.allowanceIncomeTax',
+          data: years1to30.map(y => Math.min(100, allowanceIncomeTax(y))),
+        },
+        {
+          label: 'doc.notes.allowanceSocialTax',
+          data: years1to30.map(y => Math.min(100, allowanceSocialTax(y))),
+        },
       ],
     }),
   },
   {
-    id: 'revente',
-    group: 'plusvalue',
-    i18nKey: 'doc.concepts.revente',
+    id: 'resale',
+    group: 'capitalGains',
+    i18nKey: 'doc.concepts.resale',
     render: 'line',
     inputs: [
       {
-        key: 'prixAchat',
+        key: 'purchasePrice',
         min: 10000,
         max: 2000000,
         step: 5000,
         default: 250000,
         unit: 'eur',
-        seed: seedSim('prixAchat', 250000),
+        seed: seedSim('purchasePrice', 250000),
       },
       {
-        key: 'travaux',
+        key: 'renovationCosts',
         min: 0,
         max: 400000,
         step: 1000,
         default: 15000,
         unit: 'eur',
-        seed: seedSim('travaux', 15000),
+        seed: seedSim('renovationCosts', 15000),
       },
       {
-        key: 'revalBien',
+        key: 'propertyGrowth',
         min: -2,
         max: 10,
         step: 0.1,
         default: 2,
         unit: 'pct',
-        seed: seedSim('revalBien', 2),
+        seed: seedSim('propertyGrowth', 2),
       },
       {
-        key: 'fraisVente',
+        key: 'sellingFees',
         min: 0,
         max: 10,
         step: 0.5,
         default: 4,
         unit: 'pct',
-        seed: seedSim('fraisVente', 4),
+        seed: seedSim('sellingFees', 4),
       },
       {
-        key: 'impotPV',
+        key: 'capitalGainsTax',
         min: 0,
         max: 50,
         step: 1,
         default: 19,
         unit: 'pct',
-        seed: seedSim('impotPV', 19),
+        seed: seedSim('capitalGainsTax', 19),
       },
       {
-        key: 'psPV',
+        key: 'capitalGainsSocialCharges',
         min: 0,
         max: 20,
         step: 0.1,
         default: 17.2,
         unit: 'pct',
-        seed: seedSim('psPV', 17.2),
+        seed: seedSim('capitalGainsSocialCharges', 17.2),
       },
-      { key: 'rest', min: 0, max: 1000000, step: 5000, default: 0, unit: 'eur' },
+      { key: 'remaining', min: 0, max: 1000000, step: 5000, default: 0, unit: 'eur' },
     ],
     compute: v => {
       const p = {
-        mode: 'loc',
-        prixAchat: v.prixAchat,
-        travaux: v.travaux,
-        revalBien: v.revalBien,
-        fraisVente: v.fraisVente,
-        impotPV: v.impotPV,
-        psPV: v.psPV,
+        mode: 'rental',
+        purchasePrice: v.purchasePrice,
+        renovationCosts: v.renovationCosts,
+        propertyGrowth: v.propertyGrowth,
+        sellingFees: v.sellingFees,
+        capitalGainsTax: v.capitalGainsTax,
+        capitalGainsSocialCharges: v.capitalGainsSocialCharges,
       };
-      const data = years1to30.map(y => computeResale(p, v.rest, y).reventeNet);
+      const data = years1to30.map(y => computeResale(p, v.remaining, y).netResaleProceeds);
       return {
         kind: 'line',
         xLabels: years1to30.map(String),
-        series: [{ label: 'doc.notes.reventeNet', data }],
+        series: [{ label: 'doc.notes.netResaleProceeds', data }],
       };
     },
   },
 
-  // ════ RENTABILITÉ (TRI / VAN / MOIC) ════
+  // ════ PROFITABILITY (IRR / NPV / MOIC) ════
   {
-    id: 'triVanMoic',
-    group: 'rentabilite',
-    i18nKey: 'doc.concepts.triVanMoic',
+    id: 'irrNpvMoic',
+    group: 'profitability',
+    i18nKey: 'doc.concepts.irrNpvMoic',
     render: 'line',
     inputs: [
       {
@@ -585,19 +614,19 @@ export const CONCEPTS = [
         unit: 'eur',
       },
       {
-        key: 'tauxActu',
+        key: 'discountRate',
         min: 0,
         max: 15,
         step: 0.1,
         default: 3,
         unit: 'pct',
-        seed: seedG('tauxActu', 3),
+        seed: seedG('discountRate', 3),
       },
     ],
     compute: v => {
       const flows = v.flows;
-      const tri = irr(flows); // null si non-convergent
-      const van = npv(flows, v.tauxActu / 100);
+      const tri = irr(flows); // null if non-convergent
+      const van = npv(flows, v.discountRate / 100);
       const inflow = flows.slice(1).reduce((a, b) => a + b, 0);
       const moic = flows[0] !== 0 ? inflow / -flows[0] : null;
       // NPV(r) curve from −40% to +40% — its zero-crossing is the IRR.

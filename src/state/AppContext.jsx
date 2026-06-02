@@ -8,9 +8,11 @@ import {
   useRef,
 } from 'react';
 import { DEFAULT_G, DEFAULT_SIMS, KEYS, resolveAutoFields, simCopyPayload } from './definitions.js';
-import { compute, computeEtfPur, crossoverYear } from '@immo-renta/engine';
+import { compute, computeEtfScenario, crossoverYear } from '@immo-renta/engine';
 
-const STORAGE_KEY = 'immorenta_state';
+// Bumped to v2 with the English-identifier migration: old French-keyed state is
+// intentionally ignored (no back-compat) rather than silently half-loaded.
+const STORAGE_KEY = 'immorenta_state_v2';
 
 function loadState() {
   try {
@@ -49,7 +51,7 @@ export function AppProvider({ children }) {
   // becomes available once a copy is made and resets on reload (Ctrl+C-like).
   const [clipboard, setClipboard] = useState(null);
 
-  const etfPurGlobal = useMemo(() => computeEtfPur(G), [G]);
+  const etfScenarioGlobal = useMemo(() => computeEtfScenario(G), [G]);
 
   /** resolvedSims: auto fields replaced by computed values. Use for display and compute(). */
   const resolvedSims = useMemo(() => {
@@ -72,10 +74,10 @@ export function AppProvider({ children }) {
   const crossovers = useMemo(() => {
     const r = {};
     KEYS.forEach(k => {
-      r[k] = crossoverYear(RES[k], etfPurGlobal, G);
+      r[k] = crossoverYear(RES[k], etfScenarioGlobal, G);
     });
     return r;
-  }, [RES, etfPurGlobal, G]);
+  }, [RES, etfScenarioGlobal, G]);
 
   const updateG = useCallback(updates => {
     setG(prev => ({ ...prev, ...updates }));
@@ -145,7 +147,7 @@ export function AppProvider({ children }) {
         openGrp,
         toggleOpenGrp,
         RES,
-        etfPurGlobal,
+        etfScenarioGlobal,
         crossovers,
       }}
     >

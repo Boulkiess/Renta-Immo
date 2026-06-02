@@ -51,7 +51,7 @@ export default function KpiTable({ sections, sims, activeKeys, indicatorLabel })
               </span>
             </th>
           ))}
-          <th style={{ ...headTh, color: '#94a3b8' }}>ETF pur</th>
+          <th style={{ ...headTh, color: '#94a3b8' }}>Pure ETF</th>
         </tr>
       </thead>
       <tbody>

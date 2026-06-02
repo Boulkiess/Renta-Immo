@@ -82,7 +82,7 @@ export default function Legend() {
       ))}
       <EtfRef>
         <DashLine />
-        {t('legend.etfPur', { apport: Math.round(G.apportETF / 1000) })}
+        {t('legend.etfReference', { downPayment: Math.round(G.etfDownPayment / 1000) })}
       </EtfRef>
     </Wrap>
   );

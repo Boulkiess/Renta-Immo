@@ -8,7 +8,7 @@ import { Menu, MenuItem } from './Menu.jsx';
 const renderMenu = ui => render(<ThemeProvider theme={darkTheme}>{ui}</ThemeProvider>);
 
 describe('Menu (jsdom)', () => {
-  it('cliquer le trigger ouvre puis ferme le menu', () => {
+  it('clicking the trigger opens then closes the menu', () => {
     renderMenu(
       <Menu trigger={<span>⋮</span>} title="menu">
         <MenuItem onClick={() => {}}>Action</MenuItem>
@@ -22,7 +22,7 @@ describe('Menu (jsdom)', () => {
     expect(screen.queryByText('Action')).toBeNull();
   });
 
-  it('un clic à l’extérieur ferme le menu', () => {
+  it('a click outside closes the menu', () => {
     renderMenu(
       <Menu trigger={<span>⋮</span>} title="menu">
         <MenuItem onClick={() => {}}>Action</MenuItem>
@@ -34,7 +34,7 @@ describe('Menu (jsdom)', () => {
     expect(screen.queryByText('Action')).toBeNull();
   });
 
-  it('cliquer un item déclenche le handler puis ferme le menu', () => {
+  it('clicking an item triggers the handler then closes the menu', () => {
     const onClick = vi.fn();
     renderMenu(
       <Menu trigger={<span>⋮</span>} title="menu">
@@ -47,7 +47,7 @@ describe('Menu (jsdom)', () => {
     expect(screen.queryByText('Action')).toBeNull();
   });
 
-  it('un item désactivé ne déclenche pas son handler', () => {
+  it('a disabled item does not trigger its handler', () => {
     const onClick = vi.fn();
     renderMenu(
       <Menu trigger={<span>⋮</span>} title="menu">
@@ -59,7 +59,7 @@ describe('Menu (jsdom)', () => {
     fireEvent.click(screen.getByTitle('menu'));
     fireEvent.click(screen.getByText('Coller'));
     expect(onClick).not.toHaveBeenCalled();
-    // menu reste ouvert (l'item disabled n'a pas fermé)
+    // menu stays open (the disabled item did not close it)
     expect(screen.getByText('Coller')).toBeInTheDocument();
   });
 });

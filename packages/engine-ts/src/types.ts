@@ -3,87 +3,87 @@
 // the main authoring-ergonomics difference between the two variants.
 
 export type Regime = 'lmnp' | 'microbic' | 'nu';
-export type Mode = 'loc' | 'rp';
+export type Mode = 'rental' | 'primary';
 
 /** Global settings shared across the 3 simulations. Mirrors state's DEFAULT_G. */
 export interface Globals {
   regime: Regime;
   horizon: number;
-  tauxActu: number;
-  rendAlt: number;
-  loyerPerso: number;
-  revalLoyerPerso: number;
-  budgetMensuel: number;
-  revalBudget: number;
-  revalCharges?: number;
-  investirSurplus: boolean;
-  apportETF: number;
+  discountRate: number;
+  altReturn: number;
+  personalRent: number;
+  personalRentGrowth: number;
+  monthlyBudget: number;
+  budgetGrowth: number;
+  chargesGrowth?: number;
+  investSurplus: boolean;
+  etfDownPayment: number;
   inflation: number;
 }
 
 /** One simulation's financial parameters. Mirrors state's mkDef(). */
 export interface SimParams {
   mode: Mode;
-  prixAchat: number;
-  fraisNotaire: number;
-  travaux: number;
-  fraisAgence: number;
-  fraisDossier?: number;
-  apport: number;
-  taux: number;
-  duree: number;
-  assurance: number;
-  revalBien: number;
-  fraisVente: number;
-  loyer: number;
-  vacance: number;
-  taxeFonciere: number;
-  chargesCopro: number;
-  assurPNO: number;
-  fraisGestion: number;
-  provision: number;
-  revalLoyer: number;
-  tmi: number;
-  ps: number;
-  amortBien: number;
-  amortTravaux: number;
-  impotPV: number;
-  psPV: number;
-  taxeFonciereRP: number;
-  chargesCoproRP: number;
-  assurHab: number;
-  provisionRP: number;
+  purchasePrice: number;
+  notaryFees: number;
+  renovationCosts: number;
+  agencyFees: number;
+  loanFees?: number;
+  downPayment: number;
+  interestRate: number;
+  loanTerm: number;
+  insuranceRate: number;
+  propertyGrowth: number;
+  sellingFees: number;
+  rent: number;
+  vacancyRate: number;
+  propertyTax: number;
+  condoFees: number;
+  landlordInsurance: number;
+  managementFees: number;
+  maintenanceReserve: number;
+  rentGrowth: number;
+  marginalTaxRate: number;
+  socialCharges: number;
+  propertyDepreciation: number;
+  renovationDepreciation: number;
+  capitalGainsTax: number;
+  capitalGainsSocialCharges: number;
+  propertyTaxPrimary: number;
+  condoFeesPrimary: number;
+  homeInsurance: number;
+  maintenanceReservePrimary: number;
 }
 
 export interface AmortMonth {
-  inter: number;
-  cap: number;
-  assur: number;
-  rest: number;
+  interest: number;
+  principal: number;
+  insurance: number;
+  remaining: number;
 }
 
-export interface FluxYear {
+export interface FlowYear {
   yr: number;
-  le: number;
-  chg: number;
-  ann: number;
-  imp: number;
-  cfN: number;
-  cfC: number;
+  effectiveRent: number;
+  charges: number;
+  annuity: number;
+  tax: number;
+  netCashFlow: number;
+  cumulativeCashFlow: number;
   coc: number | null;
-  vb: number;
-  rest: number;
-  patNet: number;
-  patTotal: number;
-  etfPoche: number;
-  reventeNet: number;
-  bilanRevente: number;
-  bilanTotal: number;
-  bilanCash: number;
-  pr: number;
+  propertyValue: number;
+  remainingCapital: number;
+  netWorth: number;
+  totalWorth: number;
+  etfPocket: number;
+  netResaleProceeds: number;
+  resaleBalance: number;
+  totalBalance: number;
+  cashBalance: number;
+  resalePrice: number;
 }
 
-export interface EtfPurYear {
+export interface EtfScenarioYear {
   yr: number;
   cap: number;
   capNet: number;
@@ -98,36 +98,36 @@ export interface EtfKpis {
 }
 
 export interface ResaleResult {
-  pr: number;
-  fa: number;
-  reventeNet: number;
+  resalePrice: number;
+  sellingFee: number;
+  netResaleProceeds: number;
 }
 
-export interface ReventeRow {
+export interface ResaleRow {
   yr: number;
-  pr: number;
-  rest: number;
-  bilanRevente: number;
+  resalePrice: number;
+  remainingCapital: number;
+  resaleBalance: number;
 }
 
 export interface ComputeResult {
-  ct: number;
-  emp: number;
-  mens: number;
-  assM: number;
-  totInt: number;
-  totAss: number;
-  rendBrut: number;
-  rendNet: number;
-  cfM: number;
-  be: number | null;
-  beRevente: number | null;
-  flux: FluxYear[];
-  amort: AmortMonth[];
+  totalCost: number;
+  loanAmount: number;
+  monthlyPayment: number;
+  monthlyInsurance: number;
+  totalInterest: number;
+  totalInsurance: number;
+  grossYield: number;
+  netYield: number;
+  monthlyCashFlow: number;
+  breakEven: number | null;
+  resaleBreakEven: number | null;
+  flows: FlowYear[];
+  amortization: AmortMonth[];
   tri10: number | null;
   tri15: number | null;
   tri20: number | null;
   van: number | null;
   moic: number;
-  revente: ReventeRow[];
+  resaleByYear: ResaleRow[];
 }

@@ -3,92 +3,91 @@
 /**
  * Global settings shared across the 3 simulations. Mirrors state's DEFAULT_G.
  * @typedef {object} Globals
- * @property {'lmnp'|'microbic'|'nu'} regime   Locative tax regime (global).
- * @property {number} horizon          Calculation horizon in years (1–30).
- * @property {number} tauxActu         Discount rate for NPV (%).
- * @property {number} rendAlt          Alternative (ETF) annual return (%).
- * @property {number} loyerPerso       Personal monthly rent (€/month).
- * @property {number} revalLoyerPerso  Annual revaluation of personal rent (%).
- * @property {number} budgetMensuel    Available monthly budget (€/month).
- * @property {number} revalBudget      Annual budget revaluation (%).
- * @property {number} [revalCharges]   Annual fixed-charges revaluation (%, default 2).
- * @property {boolean} investirSurplus Reinvest the monthly surplus into the ETF pocket.
- * @property {number} apportETF        Hypothetical capital invested in the ETF reference.
- * @property {number} inflation        Inflation (%), used by real-terms KPIs.
+ * @property {'lmnp'|'microbic'|'nu'} regime   Rental tax regime (global).
+ * @property {number} horizon            Calculation horizon in years (1–30).
+ * @property {number} discountRate       Discount rate for NPV (%).
+ * @property {number} altReturn          Alternative (ETF) annual return (%).
+ * @property {number} personalRent       Personal monthly rent (€/month).
+ * @property {number} personalRentGrowth Annual revaluation of personal rent (%).
+ * @property {number} monthlyBudget      Available monthly budget (€/month).
+ * @property {number} budgetGrowth       Annual budget revaluation (%).
+ * @property {number} [chargesGrowth]    Annual fixed-charges revaluation (%, default 2).
+ * @property {boolean} investSurplus     Reinvest the monthly surplus into the ETF pocket.
+ * @property {number} etfDownPayment     Hypothetical capital invested in the ETF reference.
+ * @property {number} inflation          Inflation (%), used by real-terms KPIs.
  */
 
 /**
  * One simulation's financial parameters. Mirrors state's mkDef(). Both the
- * locative ('loc') and résidence-principale ('rp') field sets are always present;
- * compute() reads the subset matching `mode`.
+ * rental ('rental') and primary-residence ('primary') field sets are always
+ * present; compute() reads the subset matching `mode`.
  * @typedef {object} SimParams
- * @property {'loc'|'rp'} mode
- * @property {number} prixAchat
- * @property {number} fraisNotaire
- * @property {number} travaux
- * @property {number} fraisAgence
- * @property {number} [fraisDossier]
- * @property {number} apport
- * @property {number} taux
- * @property {number} duree
- * @property {number} assurance
- * @property {number} revalBien
- * @property {number} fraisVente
- * @property {number} loyer
- * @property {number} vacance
- * @property {number} taxeFonciere
- * @property {number} chargesCopro
- * @property {number} assurPNO
- * @property {number} fraisGestion
- * @property {number} provision
- * @property {number} revalLoyer
- * @property {number} tmi
- * @property {number} ps
- * @property {number} amortBien
- * @property {number} amortTravaux
- * @property {number} impotPV
- * @property {number} psPV
- * @property {number} taxeFonciereRP
- * @property {number} chargesCoproRP
- * @property {number} assurHab
- * @property {number} provisionRP
+ * @property {'rental'|'primary'} mode
+ * @property {number} purchasePrice
+ * @property {number} notaryFees
+ * @property {number} renovationCosts
+ * @property {number} agencyFees
+ * @property {number} [loanFees]
+ * @property {number} downPayment
+ * @property {number} interestRate
+ * @property {number} loanTerm
+ * @property {number} insuranceRate
+ * @property {number} propertyGrowth
+ * @property {number} sellingFees
+ * @property {number} rent
+ * @property {number} vacancyRate
+ * @property {number} propertyTax
+ * @property {number} condoFees
+ * @property {number} landlordInsurance
+ * @property {number} managementFees
+ * @property {number} maintenanceReserve
+ * @property {number} rentGrowth
+ * @property {number} marginalTaxRate
+ * @property {number} socialCharges
+ * @property {number} propertyDepreciation
+ * @property {number} renovationDepreciation
+ * @property {number} capitalGainsTax
+ * @property {number} capitalGainsSocialCharges
+ * @property {number} propertyTaxPrimary
+ * @property {number} condoFeesPrimary
+ * @property {number} homeInsurance
+ * @property {number} maintenanceReservePrimary
  */
 
-// ── Constantes fiscales ───────────────────────────────────────
-const PFU_RATE = 0.3; // flat tax (PFU) sur la plus-value ETF (CTO)
-const MICROBIC_ABATTEMENT = 0.5; // abattement forfaitaire Micro-BIC (meublé non classé)
-// Abattements progressifs sur la plus-value immobilière (art. 150 VC CGI)
-const ABAT_IR_PER_YEAR = 6; // %/an, années 6→21 (96 % cumulés à la 21e)
-const ABAT_PS_PER_YEAR = 1.65; // %/an, années 6→21
-const ABAT_PS_AT_22 = (21 - 5) * ABAT_PS_PER_YEAR + 1.6; // 28,0 % cumulés à la 22e (bonus PS 1,6)
-const ABAT_PS_LATE_PER_YEAR = 9; // %/an, années 23→30
-const ABAT_FULL = 100; // exonération totale
+// ── Tax constants ─────────────────────────────────────────────
+const PFU_RATE = 0.3; // flat tax (PFU) on the ETF capital gain (CTO)
+const MICROBIC_ABATTEMENT = 0.5; // flat Micro-BIC allowance (non-classified furnished)
+// Progressive allowances on the real-estate capital gain (art. 150 VC CGI)
+const ALLOWANCE_INCOME_TAX_PER_YEAR = 6; // %/yr, years 6→21 (96 % cumulative at year 21)
+const ALLOWANCE_SOCIAL_TAX_PER_YEAR = 1.65; // %/yr, years 6→21
+const ALLOWANCE_SOCIAL_TAX_AT_22 = (21 - 5) * ALLOWANCE_SOCIAL_TAX_PER_YEAR + 1.6; // 28.0 % cumulative at year 22 (social-tax bonus 1.6)
+const ALLOWANCE_SOCIAL_TAX_LATE_PER_YEAR = 9; // %/yr, years 23→30
+const ALLOWANCE_FULL = 100; // full exemption
 
-// Revalorisation composée : base × (1 + taux%)^périodes
-// Exporté pour la doc interactive (DocPanel) — single source of truth partagée
-// avec le moteur. Ne pas dupliquer cette formule ailleurs.
 /**
  * Compound revaluation: base × (1 + ratePct%)^periods.
+ * Exported for the interactive documentation (DocPanel) — a single source of
+ * truth shared with the engine. Do not duplicate this formula elsewhere.
  * @param {number} base
  * @param {number} ratePct
  * @param {number} periods
  * @returns {number}
  */
-export const revalorise = (base, ratePct, periods) => base * Math.pow(1 + ratePct / 100, periods);
+export const compound = (base, ratePct, periods) => base * Math.pow(1 + ratePct / 100, periods);
 
-// Surplus annuel du scénario de RÉFÉRENCE ETF : budget revalorisé − loyer perso revalorisé.
-// ⚠️ Ne PAS confondre avec le surplus in-loop de compute() (budget − sorties réelles du bien) :
-// ce sont deux grandeurs distinctes. surplusAt() unifie uniquement computeEtfPur + computeEtfKpis.
+// Annual surplus of the ETF REFERENCE scenario: revalued budget − revalued personal rent.
+// ⚠️ Do NOT confuse with compute()'s in-loop surplus (budget − real property outflows):
+// these are two distinct quantities. annualSurplus() unifies only computeEtfScenario + computeEtfKpis.
 /**
  * @param {Globals} g
  * @param {number} yr
  * @returns {number}
  */
-export const surplusAt = (g, yr) =>
+export const annualSurplus = (g, yr) =>
   Math.max(
     0,
-    revalorise(g.budgetMensuel * 12, g.revalBudget, yr - 1) -
-      revalorise(g.loyerPerso * 12, g.revalLoyerPerso, yr - 1)
+    compound(g.monthlyBudget * 12, g.budgetGrowth, yr - 1) -
+      compound(g.personalRent * 12, g.personalRentGrowth, yr - 1)
   );
 
 /**
@@ -118,50 +117,63 @@ export function irr(flows, guess = 0.1, maxIter = 100, tol = 1e-7) {
   return null;
 }
 
-/** @param {number} yr @returns {number} Abattement IR (%) — art. 150 VC CGI. */
-export function abattementIR(yr) {
+/** @param {number} yr @returns {number} Income-tax allowance (%) — art. 150 VC CGI. */
+export function allowanceIncomeTax(yr) {
   if (yr <= 5) return 0;
-  if (yr <= 21) return (yr - 5) * ABAT_IR_PER_YEAR; // 6 %/an de la 6e à la 21e → 96 %
-  return ABAT_FULL; // 4 % à la 22e = exonération totale
+  if (yr <= 21) return (yr - 5) * ALLOWANCE_INCOME_TAX_PER_YEAR; // 6 %/yr from year 6 to 21 → 96 %
+  return ALLOWANCE_FULL; // 4 % at year 22 = full exemption
 }
 
-/** @param {number} yr @returns {number} Abattement PS (%) — art. 150 VC CGI. */
-export function abattementPS(yr) {
+/** @param {number} yr @returns {number} Social-tax allowance (%) — art. 150 VC CGI. */
+export function allowanceSocialTax(yr) {
   if (yr <= 5) return 0;
-  if (yr <= 21) return (yr - 5) * ABAT_PS_PER_YEAR; // 1,65 %/an de la 6e à la 21e
-  if (yr === 22) return ABAT_PS_AT_22; // 28,0 %
-  if (yr <= 30) return ABAT_PS_AT_22 + (yr - 22) * ABAT_PS_LATE_PER_YEAR; // 9 %/an, 23e→30e
-  return ABAT_FULL;
+  if (yr <= 21) return (yr - 5) * ALLOWANCE_SOCIAL_TAX_PER_YEAR; // 1.65 %/yr from year 6 to 21
+  if (yr === 22) return ALLOWANCE_SOCIAL_TAX_AT_22; // 28.0 %
+  if (yr <= 30) return ALLOWANCE_SOCIAL_TAX_AT_22 + (yr - 22) * ALLOWANCE_SOCIAL_TAX_LATE_PER_YEAR; // 9 %/yr, years 23→30
+  return ALLOWANCE_FULL;
 }
 
 /**
- * Locative income tax for one year.
- * @param {number} le  Effective rent (after vacancy).
- * @param {number} chg Annual charges.
- * @param {number} ab  Building amortization (LMNP).
- * @param {number} at  Works amortization (LMNP).
- * @param {number} tmi Marginal income tax rate (%).
- * @param {number} ps  Social levies (%).
+ * Rental income tax for one year.
+ * @param {number} effectiveRent  Effective rent (after vacancy).
+ * @param {number} charges        Annual charges.
+ * @param {number} buildingDepreciation  Building depreciation (LMNP).
+ * @param {number} worksDepreciation     Works depreciation (LMNP).
+ * @param {number} marginalTaxRate Marginal income tax rate (%).
+ * @param {number} socialCharges  Social levies (%).
  * @param {'lmnp'|'microbic'|'nu'} regime
- * @param {number} [intAnnuel] Deductible loan interest for the year.
+ * @param {number} [annualInterest] Deductible loan interest for the year.
  * @returns {number}
  */
-export function impLoc(le, chg, ab, at, tmi, ps, regime, intAnnuel = 0) {
-  let ri;
-  if (regime === 'lmnp') ri = Math.max(0, le - chg - ab - at - intAnnuel);
-  else if (regime === 'microbic') ri = Math.max(0, le * MICROBIC_ABATTEMENT);
-  else ri = Math.max(0, le - chg - intAnnuel); // 'nu' (Foncier nu)
-  return ri * ((tmi + ps) / 100);
+export function rentalTax(
+  effectiveRent,
+  charges,
+  buildingDepreciation,
+  worksDepreciation,
+  marginalTaxRate,
+  socialCharges,
+  regime,
+  annualInterest = 0
+) {
+  let taxable;
+  if (regime === 'lmnp')
+    taxable = Math.max(
+      0,
+      effectiveRent - charges - buildingDepreciation - worksDepreciation - annualInterest
+    );
+  else if (regime === 'microbic') taxable = Math.max(0, effectiveRent * MICROBIC_ABATTEMENT);
+  else taxable = Math.max(0, effectiveRent - charges - annualInterest); // 'nu' (bare ownership)
+  return taxable * ((marginalTaxRate + socialCharges) / 100);
 }
 
 /** @param {Globals} g @returns {{yr:number, cap:number, capNet:number}[]} */
-export function computeEtfPur(g) {
+export function computeEtfScenario(g) {
   const result = [];
-  let cap = g.apportETF;
-  let totalContribs = g.apportETF;
-  const r = g.rendAlt / 100;
+  let cap = g.etfDownPayment;
+  let totalContribs = g.etfDownPayment;
+  const r = g.altReturn / 100;
   for (let yr = 1; yr <= 30; yr++) {
-    const surplus = surplusAt(g, yr);
+    const surplus = annualSurplus(g, yr);
     cap = cap * (1 + r) + surplus;
     totalContribs += surplus;
     const gain = Math.max(0, cap - totalContribs);
@@ -171,298 +183,360 @@ export function computeEtfPur(g) {
   return result;
 }
 
-// KPIs ETF (TRI/VAN/MOIC) à l'horizon g.horizon — déplacés depuis KpisTab.jsx pour
-// passer sous le filet golden-master. Voir CLAUDE.md § « Colonne ETF pur — KpisTab ».
-//   TRI_ETF      = rendAlt (exact : les flux ETF s'annulent en VPN au taux rendAlt)
-//   TRI_real_ETF = (1 + rendAlt) / (1 + inflation) − 1
-//   VAN_ETF      = −apportETF + Σ (−surplusAt) / (1+tauxActu)^t + cap[hz] / (1+tauxActu)^hz
-//   MOIC_ETF     = (cap[hz] − Σ surplusAt) / apportETF   (null si apportETF = 0)
+// ETF KPIs (IRR/NPV/MOIC) at horizon g.horizon — moved here from KpisTab.jsx to sit
+// under the golden-master net. See CLAUDE.md § "ETF column — KpisTab".
+//   IRR_ETF      = altReturn (exact: ETF flows cancel out in NPV at rate altReturn)
+//   IRR_real_ETF = (1 + altReturn) / (1 + inflation) − 1
+//   NPV_ETF      = −etfDownPayment + Σ (−annualSurplus) / (1+discountRate)^t + cap[hz] / (1+discountRate)^hz
+//   MOIC_ETF     = (cap[hz] − Σ annualSurplus) / etfDownPayment   (null if etfDownPayment = 0)
 /**
  * @param {Globals} g
  * @returns {{tri:number, triReal:number, van:number, moic:number|null, surplusTotal:number}}
  */
 export function computeEtfKpis(g) {
   const hz = g.horizon;
-  const capHz = computeEtfPur(g)[hz - 1]?.cap ?? 0;
-  const tri = g.rendAlt / 100;
+  const capHz = computeEtfScenario(g)[hz - 1]?.cap ?? 0;
+  const tri = g.altReturn / 100;
   const triReal = (1 + tri) / (1 + g.inflation / 100) - 1;
-  let van = -g.apportETF;
+  let van = -g.etfDownPayment;
   let surplusTotal = 0;
   for (let t = 1; t <= hz; t++) {
-    const s = surplusAt(g, t);
-    van += -s / Math.pow(1 + g.tauxActu / 100, t);
+    const s = annualSurplus(g, t);
+    van += -s / Math.pow(1 + g.discountRate / 100, t);
     surplusTotal += s;
   }
-  van += capHz / Math.pow(1 + g.tauxActu / 100, hz);
-  const moic = g.apportETF > 0 ? (capHz - surplusTotal) / g.apportETF : null;
+  van += capHz / Math.pow(1 + g.discountRate / 100, hz);
+  const moic = g.etfDownPayment > 0 ? (capHz - surplusTotal) / g.etfDownPayment : null;
   return { tri, triReal, van, moic, surplusTotal };
 }
 
-// ── Îlots purs extraits de compute() (testés transitivement via golden-master) ──
+// ── Pure islands extracted from compute() (tested transitively via golden-master) ──
 
-// Tableau d'amortissement mensuel (annuité constante). amort[m-1] = mois m.
-// Boucle ≥ 12 mois pour garantir au moins une année même sur prêt très court.
+// Monthly amortization schedule (constant annuity). amortization[m-1] = month m.
+// Loop ≥ 12 months to guarantee at least one year even on a very short loan.
 /**
- * Monthly amortization schedule (constant annuity). amort[m-1] = month m.
- * @param {number} emp  Borrowed principal.
- * @param {number} tM   Monthly rate.
- * @param {number} nM   Number of monthly payments.
- * @param {number} mens Monthly payment.
- * @param {number} assM Monthly insurance.
- * @returns {{inter:number, cap:number, assur:number, rest:number}[]}
+ * @param {number} loanAmount      Borrowed principal.
+ * @param {number} monthlyRate     Monthly rate.
+ * @param {number} numPayments     Number of monthly payments.
+ * @param {number} monthlyPayment  Monthly payment.
+ * @param {number} monthlyInsurance Monthly insurance.
+ * @returns {{interest:number, principal:number, insurance:number, remaining:number}[]}
  */
-export function buildAmortization(emp, tM, nM, mens, assM) {
-  const amort = [];
-  let cap = emp;
-  for (let m = 1; m <= Math.max(nM, 12); m++) {
-    const inter = cap * tM;
-    const capM = Math.max(0, mens - inter);
-    cap = Math.max(0, cap - capM);
-    amort.push({ inter, cap: capM, assur: assM, rest: cap });
+export function buildAmortization(
+  loanAmount,
+  monthlyRate,
+  numPayments,
+  monthlyPayment,
+  monthlyInsurance
+) {
+  const amortization = [];
+  let balance = loanAmount;
+  for (let m = 1; m <= Math.max(numPayments, 12); m++) {
+    const interest = balance * monthlyRate;
+    const principalPaid = Math.max(0, monthlyPayment - interest);
+    balance = Math.max(0, balance - principalPaid);
+    amortization.push({
+      interest,
+      principal: principalPaid,
+      insurance: monthlyInsurance,
+      remaining: balance,
+    });
   }
-  return amort;
+  return amortization;
 }
 
-// Revente à l'année yr : prix de revente (travaux inclus), frais, plus-value
-// imposée puis produit net. iPV avec abattements progressifs en mode 'loc' ; RP exonérée.
+// Resale at year yr: resale price (renovation included), fees, taxed capital gain,
+// then net proceeds. Capital-gains tax with progressive allowances in 'rental' mode; primary is exempt.
 /**
  * @param {SimParams} p
- * @param {number} rest Outstanding loan capital at year yr.
+ * @param {number} remaining Outstanding loan capital at year yr.
  * @param {number} yr
- * @returns {{pr:number, fa:number, reventeNet:number}}
+ * @returns {{resalePrice:number, sellingFee:number, netResaleProceeds:number}}
  */
-export function computeResale(p, rest, yr) {
-  const pr = revalorise(p.prixAchat + p.travaux, p.revalBien, yr);
-  const fa = pr * (p.fraisVente / 100);
-  const pvB = Math.max(0, pr - p.prixAchat - p.travaux);
-  let iPV = 0;
-  if (p.mode === 'loc') {
-    const abIR = Math.min(100, abattementIR(yr));
-    const abPS = Math.min(100, abattementPS(yr));
-    iPV = (pvB * (p.impotPV * (1 - abIR / 100) + p.psPV * (1 - abPS / 100))) / 100;
+export function computeResale(p, remaining, yr) {
+  const resalePrice = compound(p.purchasePrice + p.renovationCosts, p.propertyGrowth, yr);
+  const sellingFee = resalePrice * (p.sellingFees / 100);
+  const grossGain = Math.max(0, resalePrice - p.purchasePrice - p.renovationCosts);
+  let capitalGainsTax = 0;
+  if (p.mode === 'rental') {
+    const allowanceIR = Math.min(100, allowanceIncomeTax(yr));
+    const allowancePS = Math.min(100, allowanceSocialTax(yr));
+    capitalGainsTax =
+      (grossGain *
+        (p.capitalGainsTax * (1 - allowanceIR / 100) +
+          p.capitalGainsSocialCharges * (1 - allowancePS / 100))) /
+      100;
   }
-  return { pr, fa, reventeNet: pr - rest - fa - iPV };
+  return {
+    resalePrice,
+    sellingFee,
+    netResaleProceeds: resalePrice - remaining - sellingFee - capitalGainsTax,
+  };
 }
 
-// TRI / VAN / MOIC à un horizon. Purs. flux 0-based ; irrFlows[0] = −apport.
+// IRR / NPV / MOIC at a horizon. Pure. flows 0-based; irrFlows[0] = −downPayment.
 /**
- * @param {{reventeNet:number}[]} flux
- * @param {number[]} irrFlows  0-based; irrFlows[0] = −apport.
+ * @param {{netResaleProceeds:number}[]} flows
+ * @param {number[]} irrFlows  0-based; irrFlows[0] = −downPayment.
  * @param {number} horizon
  * @returns {number|null}
  */
-export function calcTRI(flux, irrFlows, horizon) {
+export function calcTRI(flows, irrFlows, horizon) {
   if (horizon > 30 || horizon < 1) return null;
-  const flows = [...irrFlows.slice(0, horizon + 1)];
-  flows[horizon] += flux[horizon - 1].reventeNet;
-  return irr(flows);
+  const flowsAtHorizon = [...irrFlows.slice(0, horizon + 1)];
+  flowsAtHorizon[horizon] += flows[horizon - 1].netResaleProceeds;
+  return irr(flowsAtHorizon);
 }
 
 /**
- * @param {{reventeNet:number}[]} flux
+ * @param {{netResaleProceeds:number}[]} flows
  * @param {number[]} irrFlows
  * @param {Globals} g
  * @param {number} horizon
  * @returns {number|null}
  */
-export function calcVAN(flux, irrFlows, g, horizon) {
+export function calcVAN(flows, irrFlows, g, horizon) {
   if (horizon > 30 || horizon < 1) return null;
-  const r = g.tauxActu / 100;
-  let van = irrFlows[0]; // −apport
+  const r = g.discountRate / 100;
+  let van = irrFlows[0]; // −downPayment
   for (let t = 1; t <= horizon && t <= 30; t++) {
-    let cf = irrFlows[t]; // mêmes flux que le TRI : loyerPersoAnn réintégré
-    if (t === horizon) cf += flux[t - 1].reventeNet;
+    let cf = irrFlows[t]; // same flows as the IRR: personal rent reintegrated
+    if (t === horizon) cf += flows[t - 1].netResaleProceeds;
     van += cf / Math.pow(1 + r, t);
   }
   return van;
 }
 
 /**
- * @param {{reventeNet:number}[]} flux
+ * @param {{netResaleProceeds:number}[]} flows
  * @param {number[]} irrFlows
  * @param {number} horizon
- * @param {number} apport
+ * @param {number} downPayment
  * @returns {number}
  */
-export function calcMoic(flux, irrFlows, horizon, apport) {
-  const last = flux[horizon - 1];
+export function calcMoic(flows, irrFlows, horizon, downPayment) {
+  const last = flows[horizon - 1];
   if (!last) return 0;
-  return (last.reventeNet + irrFlows.slice(1, horizon + 1).reduce((a, b) => a + b, 0)) / apport;
+  return (
+    (last.netResaleProceeds + irrFlows.slice(1, horizon + 1).reduce((a, b) => a + b, 0)) /
+    downPayment
+  );
 }
 
 /**
  * Core financial engine. Pure: given a simulation's params and globals, returns
- * monthly payments, the 30-year flux array, IRR at 10/15/20y, NPV, MOIC, resale.
+ * monthly payments, the 30-year flows array, IRR at 10/15/20y, NPV, MOIC, resale.
  * @param {SimParams} p
  * @param {Globals} g
  */
 export function compute(p, g) {
-  const ct = p.prixAchat + p.fraisNotaire + p.travaux + p.fraisAgence + (p.fraisDossier ?? 0);
-  const emp = Math.max(0, ct - p.apport);
-  // Capital réellement immobilisé dans le bien : plafonné au coût total. Un apport
-  // qui dépasse `ct` (achat comptant sur-financé) laisse un reliquat de cash. Ce
-  // reliquat ne fait pas partie du rendement du bien (TRI/VAN/MOIC, patNet, bilans
-  // opérationnels restent calés sur apportInvesti).
-  const apportInvesti = Math.min(p.apport, ct);
-  // Reliquat d'apport au-delà du coût d'acquisition : investi en ETF si le toggle
-  // surplus→ETF est actif (sinon conservé en cash, hors modèle). Il alimente la
-  // poche ETF (patTotal / bilanTotal) ; la mise de départ totale devient alors
-  // apportInvesti + etfSeed (= p.apport quand le reliquat est investi).
-  const etfSeed = g.investirSurplus ? Math.max(0, p.apport - ct) : 0;
-  const apportTotal = apportInvesti + etfSeed;
-  const tM = p.taux / 100 / 12,
-    nM = p.duree * 12;
-  const mens =
-    emp > 0 && tM > 0 ? (emp * tM) / (1 - Math.pow(1 + tM, -nM)) : emp > 0 ? emp / nM : 0;
-  const assM = (emp * (p.assurance / 100)) / 12;
+  const totalCost =
+    p.purchasePrice + p.notaryFees + p.renovationCosts + p.agencyFees + (p.loanFees ?? 0);
+  const loanAmount = Math.max(0, totalCost - p.downPayment);
+  // Capital actually tied up in the property: capped at the total cost. A down
+  // payment that exceeds `totalCost` (over-funded cash purchase) leaves a cash
+  // remainder. That remainder is not part of the property return (IRR/NPV/MOIC,
+  // netWorth, operational balances stay anchored on investedDownPayment).
+  const investedDownPayment = Math.min(p.downPayment, totalCost);
+  // Down-payment remainder beyond the acquisition cost: invested in the ETF if the
+  // surplus→ETF toggle is on (otherwise kept as cash, outside the model). It feeds
+  // the ETF pocket (totalWorth / totalBalance); the total starting stake then
+  // becomes investedDownPayment + etfSeed (= p.downPayment when the remainder is invested).
+  const etfSeed = g.investSurplus ? Math.max(0, p.downPayment - totalCost) : 0;
+  const totalDownPayment = investedDownPayment + etfSeed;
+  const monthlyRate = p.interestRate / 100 / 12,
+    numPayments = p.loanTerm * 12;
+  const monthlyPayment =
+    loanAmount > 0 && monthlyRate > 0
+      ? (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -numPayments))
+      : loanAmount > 0
+        ? loanAmount / numPayments
+        : 0;
+  const monthlyInsurance = (loanAmount * (p.insuranceRate / 100)) / 12;
 
-  const amort = buildAmortization(emp, tM, nM, mens, assM);
+  const amortization = buildAmortization(
+    loanAmount,
+    monthlyRate,
+    numPayments,
+    monthlyPayment,
+    monthlyInsurance
+  );
 
-  const ab = p.prixAchat * (p.amortBien / 100),
-    at = p.travaux * (p.amortTravaux / 100);
-  const flux = [];
-  let cfC = 0;
-  let irrCfC = 0; // cumul des flux ajustés (cfN + loyerPersoAnn) — base TRI/VAN/MOIC
-  const irrFlows = [-apportInvesti];
-  const rAlt = g.rendAlt / 100;
-  let etfCap = etfSeed; // reliquat d'apport investi en ETF dès l'année 0 (compose comme apportETF)
-  let amortReport = 0; // report d'amortissement LMNP non utilisé (années déficitaires)
+  const buildingDepreciation = p.purchasePrice * (p.propertyDepreciation / 100),
+    worksDepreciation = p.renovationCosts * (p.renovationDepreciation / 100);
+  const flows = [];
+  let cumulativeCashFlow = 0;
+  let irrCumulative = 0; // cumulative adjusted flows (netCashFlow + personalRentAnnual) — IRR/NPV/MOIC basis
+  const irrFlows = [-investedDownPayment];
+  const altRate = g.altReturn / 100;
+  let etfCapital = etfSeed; // down-payment remainder invested in ETF from year 0 (compounds like etfDownPayment)
+  let depreciationCarry = 0; // unused LMNP depreciation carried over (loss-making years)
 
   for (let yr = 1; yr <= 30; yr++) {
-    const mi = Math.min(yr * 12, amort.length) - 1;
-    const rest = amort[mi]?.rest ?? 0;
-    const ann = yr <= p.duree ? mens * 12 : 0;
-    const asp = yr <= p.duree ? assM * 12 : 0;
-    const vb = revalorise(p.prixAchat, p.revalBien, yr);
-    const loyerPersoAnn = revalorise(g.loyerPerso * 12, g.revalLoyerPerso, yr - 1);
+    const monthIdx = Math.min(yr * 12, amortization.length) - 1;
+    const remaining = amortization[monthIdx]?.remaining ?? 0;
+    const annuity = yr <= p.loanTerm ? monthlyPayment * 12 : 0;
+    const annualInsurance = yr <= p.loanTerm ? monthlyInsurance * 12 : 0;
+    const propertyValue = compound(p.purchasePrice, p.propertyGrowth, yr);
+    const personalRentAnnual = compound(g.personalRent * 12, g.personalRentGrowth, yr - 1);
 
-    let cfN,
-      le = 0,
-      chg = 0,
-      imp = 0;
+    let netCashFlow,
+      effectiveRent = 0,
+      charges = 0,
+      tax = 0;
 
-    if (p.mode === 'loc') {
-      const lb = revalorise(p.loyer * 12, p.revalLoyer, yr - 1);
-      le = lb * (1 - p.vacance / 100);
-      const fC = revalorise(1, g.revalCharges ?? 2, yr - 1);
-      chg =
-        (p.taxeFonciere + p.chargesCopro + p.assurPNO + p.provision) * fC +
-        lb * (p.fraisGestion / 100);
-      const intAnnuel = amort.slice((yr - 1) * 12, yr * 12).reduce((s, m) => s + m.inter, 0);
+    if (p.mode === 'rental') {
+      const grossRent = compound(p.rent * 12, p.rentGrowth, yr - 1);
+      effectiveRent = grossRent * (1 - p.vacancyRate / 100);
+      const chargesFactor = compound(1, g.chargesGrowth ?? 2, yr - 1);
+      charges =
+        (p.propertyTax + p.condoFees + p.landlordInsurance + p.maintenanceReserve) * chargesFactor +
+        grossRent * (p.managementFees / 100);
+      const annualInterest = amortization
+        .slice((yr - 1) * 12, yr * 12)
+        .reduce((s, m) => s + m.interest, 0);
       if (g.regime === 'lmnp') {
-        // LMNP réel : intérêts + amortissements déductibles ; déficit reporté aux années suivantes
-        const riRaw = le - chg - ab - at - intAnnuel - amortReport;
-        const ri = Math.max(0, riRaw);
-        amortReport = riRaw < 0 ? -riRaw : 0;
-        imp = ri * ((p.tmi + p.ps) / 100);
+        // LMNP real: interest + depreciation deductible; loss carried over to later years
+        const taxableRaw =
+          effectiveRent -
+          charges -
+          buildingDepreciation -
+          worksDepreciation -
+          annualInterest -
+          depreciationCarry;
+        const taxable = Math.max(0, taxableRaw);
+        depreciationCarry = taxableRaw < 0 ? -taxableRaw : 0;
+        tax = taxable * ((p.marginalTaxRate + p.socialCharges) / 100);
       } else {
-        imp = impLoc(le, chg, ab, at, p.tmi, p.ps, g.regime, intAnnuel);
+        tax = rentalTax(
+          effectiveRent,
+          charges,
+          buildingDepreciation,
+          worksDepreciation,
+          p.marginalTaxRate,
+          p.socialCharges,
+          g.regime,
+          annualInterest
+        );
       }
-      cfN = le - chg - ann - asp - imp - loyerPersoAnn;
+      netCashFlow = effectiveRent - charges - annuity - annualInsurance - tax - personalRentAnnual;
     } else {
-      const fCrp = revalorise(1, g.revalCharges ?? 2, yr - 1);
-      chg = (p.taxeFonciereRP + p.chargesCoproRP + p.assurHab + p.provisionRP) * fCrp;
-      cfN = -(chg + ann + asp);
-      le = loyerPersoAnn;
+      const chargesFactor = compound(1, g.chargesGrowth ?? 2, yr - 1);
+      charges =
+        (p.propertyTaxPrimary +
+          p.condoFeesPrimary +
+          p.homeInsurance +
+          p.maintenanceReservePrimary) *
+        chargesFactor;
+      netCashFlow = -(charges + annuity + annualInsurance);
+      effectiveRent = personalRentAnnual;
     }
-    cfC += cfN;
+    cumulativeCashFlow += netCashFlow;
 
-    const realOutAnn = p.mode === 'loc' ? -cfN : chg + ann + asp;
-    const budgetAnn = revalorise(g.budgetMensuel * 12, g.revalBudget, yr - 1);
-    const surplusAnn = Math.max(0, budgetAnn - realOutAnn);
-    etfCap = etfCap * (1 + rAlt) + (g.investirSurplus ? surplusAnn : 0);
+    const realOutflow = p.mode === 'rental' ? -netCashFlow : charges + annuity + annualInsurance;
+    const annualBudget = compound(g.monthlyBudget * 12, g.budgetGrowth, yr - 1);
+    const budgetSurplus = Math.max(0, annualBudget - realOutflow);
+    etfCapital = etfCapital * (1 + altRate) + (g.investSurplus ? budgetSurplus : 0);
 
-    const { pr, reventeNet } = computeResale(p, rest, yr);
-    irrCfC += cfN + loyerPersoAnn;
-    const bilanRevente = reventeNet + cfC - apportInvesti;
-    const bilanTotal = reventeNet + etfCap - apportTotal;
-    // bilanCash : bilan revente en cash sur la même base que TRI/VAN/MOIC — le
-    // loyer perso (LOC : coût subi / RP : loyer économisé) est réintégré, ce qui
-    // rend le passage à zéro interprétable comme « durée de détention pour ne pas perdre ».
-    const bilanCash = reventeNet + irrCfC - apportInvesti;
-    const patTotal = vb - rest + etfCap;
+    const { resalePrice, netResaleProceeds } = computeResale(p, remaining, yr);
+    irrCumulative += netCashFlow + personalRentAnnual;
+    const resaleBalance = netResaleProceeds + cumulativeCashFlow - investedDownPayment;
+    const totalBalance = netResaleProceeds + etfCapital - totalDownPayment;
+    // cashBalance: resale balance in cash on the same basis as IRR/NPV/MOIC — the
+    // personal rent (rental: sunk cost / primary: saved rent) is reintegrated, which
+    // makes the zero-crossing interpretable as "holding period to not lose money".
+    const cashBalance = netResaleProceeds + irrCumulative - investedDownPayment;
+    const totalWorth = propertyValue - remaining + etfCapital;
 
-    flux.push({
+    flows.push({
       yr,
-      le,
-      chg,
-      ann: ann + asp,
-      imp,
-      cfN,
-      cfC,
-      coc: apportInvesti > 0 ? (cfN / apportInvesti) * 100 : null,
-      vb,
-      rest,
-      patNet: vb - rest + cfC - apportInvesti,
-      patTotal,
-      etfPoche: etfCap,
-      reventeNet,
-      bilanRevente,
-      bilanTotal,
-      bilanCash,
-      pr,
+      effectiveRent,
+      charges,
+      annuity: annuity + annualInsurance,
+      tax,
+      netCashFlow,
+      cumulativeCashFlow,
+      coc: investedDownPayment > 0 ? (netCashFlow / investedDownPayment) * 100 : null,
+      propertyValue,
+      remainingCapital: remaining,
+      netWorth: propertyValue - remaining + cumulativeCashFlow - investedDownPayment,
+      totalWorth,
+      etfPocket: etfCapital,
+      netResaleProceeds,
+      resaleBalance,
+      totalBalance,
+      cashBalance,
+      resalePrice,
     });
 
-    // Both modes add loyerPersoAnn to TRI/VAN flows:
-    // LOC: removes personal rent from costs (sunk cost unrelated to the investment)
-    // RP: adds saved rent as a benefit (you no longer pay it)
-    irrFlows.push(cfN + loyerPersoAnn);
+    // Both modes add personalRentAnnual to IRR/NPV flows:
+    // rental: removes personal rent from costs (sunk cost unrelated to the investment)
+    // primary: adds saved rent as a benefit (you no longer pay it)
+    irrFlows.push(netCashFlow + personalRentAnnual);
   }
 
-  const totInt = amort.reduce((s, m) => s + m.inter, 0);
-  const totAss = amort.reduce((s, m) => s + m.assur, 0);
-  const rendBrut = p.mode === 'loc' ? ((p.loyer * 12) / ct) * 100 : 0;
-  let rendNet = 0;
-  if (p.mode === 'loc') {
-    const lnA =
-      p.loyer * (1 - p.vacance / 100) * 12 -
-      (p.taxeFonciere +
-        p.chargesCopro +
-        p.assurPNO +
-        p.provision +
-        p.loyer * 12 * (p.fraisGestion / 100));
-    rendNet = (lnA / ct) * 100;
+  const totalInterest = amortization.reduce((s, m) => s + m.interest, 0);
+  const totalInsurance = amortization.reduce((s, m) => s + m.insurance, 0);
+  const grossYield = p.mode === 'rental' ? ((p.rent * 12) / totalCost) * 100 : 0;
+  let netYield = 0;
+  if (p.mode === 'rental') {
+    const netAnnual =
+      p.rent * (1 - p.vacancyRate / 100) * 12 -
+      (p.propertyTax +
+        p.condoFees +
+        p.landlordInsurance +
+        p.maintenanceReserve +
+        p.rent * 12 * (p.managementFees / 100));
+    netYield = (netAnnual / totalCost) * 100;
   }
-  const cfM = p.mode === 'loc' ? p.loyer - mens - assM - g.loyerPerso : g.loyerPerso - mens - assM;
-  const be = flux.findIndex(f => f.cfC >= 0);
-  const beRevente = flux.findIndex(f => f.bilanCash >= 0);
+  const monthlyCashFlow =
+    p.mode === 'rental'
+      ? p.rent - monthlyPayment - monthlyInsurance - g.personalRent
+      : g.personalRent - monthlyPayment - monthlyInsurance;
+  const breakEven = flows.findIndex(f => f.cumulativeCashFlow >= 0);
+  const resaleBreakEven = flows.findIndex(f => f.cashBalance >= 0);
 
   return {
-    ct,
-    emp,
-    mens,
-    assM,
-    totInt,
-    totAss,
-    rendBrut,
-    rendNet,
-    cfM,
-    be: be >= 0 ? be + 1 : null,
-    beRevente: beRevente >= 0 ? beRevente + 1 : null,
-    flux,
-    amort,
-    tri10: calcTRI(flux, irrFlows, 10),
-    tri15: calcTRI(flux, irrFlows, 15),
-    tri20: calcTRI(flux, irrFlows, 20),
-    van: calcVAN(flux, irrFlows, g, g.horizon),
-    moic: calcMoic(flux, irrFlows, g.horizon, apportInvesti),
-    revente: flux.map(f => ({ yr: f.yr, pr: f.pr, rest: f.rest, bilanRevente: f.bilanRevente })),
+    totalCost,
+    loanAmount,
+    monthlyPayment,
+    monthlyInsurance,
+    totalInterest,
+    totalInsurance,
+    grossYield,
+    netYield,
+    monthlyCashFlow,
+    breakEven: breakEven >= 0 ? breakEven + 1 : null,
+    resaleBreakEven: resaleBreakEven >= 0 ? resaleBreakEven + 1 : null,
+    flows,
+    amortization,
+    tri10: calcTRI(flows, irrFlows, 10),
+    tri15: calcTRI(flows, irrFlows, 15),
+    tri20: calcTRI(flows, irrFlows, 20),
+    van: calcVAN(flows, irrFlows, g, g.horizon),
+    moic: calcMoic(flows, irrFlows, g.horizon, investedDownPayment),
+    resaleByYear: flows.map(f => ({
+      yr: f.yr,
+      resalePrice: f.resalePrice,
+      remainingCapital: f.remainingCapital,
+      resaleBalance: f.resaleBalance,
+    })),
   };
 }
 
 /**
- * First year where immo patTotal ≥ ETF reference cap. Null if surplus not invested.
- * @param {{flux:{patTotal:number}[]}} res  A compute() result.
- * @param {{cap:number}[]} etfPurGlobal      A computeEtfPur() result.
+ * First year where property totalWorth ≥ ETF reference cap. Null if surplus not invested.
+ * @param {{flows:{totalWorth:number}[]}} res  A compute() result.
+ * @param {{cap:number}[]} etfScenarioGlobal   A computeEtfScenario() result.
  * @param {Globals} g
  * @returns {number|null}
  */
-export function crossoverYear(res, etfPurGlobal, g) {
-  if (!etfPurGlobal.length || !g.investirSurplus) return null;
+export function crossoverYear(res, etfScenarioGlobal, g) {
+  if (!etfScenarioGlobal.length || !g.investSurplus) return null;
   for (let i = 0; i < 30; i++) {
-    const immo = res.flux[i]?.patTotal;
-    const etf = etfPurGlobal[i]?.cap;
-    if (immo != null && etf != null && immo >= etf) return i + 1;
+    const property = res.flows[i]?.totalWorth;
+    const etf = etfScenarioGlobal[i]?.cap;
+    if (property != null && etf != null && property >= etf) return i + 1;
   }
   return null;
 }

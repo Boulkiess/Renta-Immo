@@ -6,7 +6,9 @@
     "import": "Import",
     "exportCsv": "CSV",
     "exportJson": "{ } JSON",
-    "exportYaml": "YAML"
+    "exportYaml": "YAML",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode"
   },
   "tabs": {
     "charts": "Charts",
@@ -22,6 +24,10 @@
     "fr": "FR",
     "en": "EN"
   },
+  "common": {
+    "real": "real",
+    "nominal": "nominal"
+  },
   "global": {
     "title": "Global",
     "inflation": "Inflation",
@@ -33,17 +39,17 @@
       "nu": "Bare rental"
     },
     "horizon": "Horizon",
-    "tauxActu": "Discount rate (NPV)",
-    "rendAlt": "Alt. investment return (net)",
-    "loyerPerso": "Current rent paid",
-    "revalLoyerPerso": "Rent revaluation",
-    "budgetMensuel": "Monthly budget",
-    "revalBudget": "Budget growth",
-    "revalCharges": "Charges growth",
-    "investirSurplus": "Surplus→ETF",
-    "apportETF": "Pure ETF contribution",
+    "discountRate": "Discount rate (NPV)",
+    "altReturn": "Alt. investment return (net)",
+    "personalRent": "Current rent paid",
+    "personalRentGrowth": "Rent revaluation",
+    "monthlyBudget": "Monthly budget",
+    "budgetGrowth": "Budget growth",
+    "chargesGrowth": "Charges growth",
+    "investSurplus": "Surplus→ETF",
+    "etfDownPayment": "Pure ETF contribution",
     "hypoTitle": "Active growth assumptions",
-    "hypoSummary": "Inflation {{inflation}}% · Charges +{{revalCharges}}%/yr · Budget +{{revalBudget}}%/yr · Rent +{{revalLoyerPerso}}%/yr",
+    "hypoSummary": "Inflation {{inflation}}% · Charges +{{chargesGrowth}}%/yr · Budget +{{budgetGrowth}}%/yr · Rent +{{personalRentGrowth}}%/yr",
     "units": {
       "perYear": "%/yr",
       "years": "yrs",
@@ -53,67 +59,63 @@
     }
   },
   "sim": {
-    "loc": "Rental",
-    "rp": "Primary",
+    "rental": "Rental",
+    "primary": "Primary",
     "menu": "Actions on this simulation",
     "disable": "Disable",
     "copy": "Copy",
     "paste": "Paste",
     "hide": "hide",
     "show": "show",
-    "disabled": "Disabled"
+    "disabled": "Disabled",
+    "collapseTitle": "Collapse — keeps the simulation in the charts",
+    "expandTitle": "Expand panel"
   },
   "kpi": {
-    "rendBrut": "Gross yield",
-    "rendNet": "Net yield",
-    "mensualite": "Monthly payment",
-    "cfMensuel": "Real CF/mo",
-    "effortMois": "Effort/mo",
-    "patrimTotal": "Total wealth {{horizon}}y",
-    "vsEtfPur": "vs pure ETF",
-    "anN": "Yr {{n}}",
-    "gt30ans": "> 30 yrs",
-    "pointMort": "Break-even"
+    "monthlyPayment": "Monthly payment",
+    "monthlyCashFlow": "Real CF/mo",
+    "monthlyEffort": "Effort/mo",
+    "totalWorth": "Total wealth {{horizon}}y"
   },
   "groups": {
     "Acquisition": "Acquisition",
-    "Financement": "Financing",
-    "Revente": "Sale",
-    "Revenus": "Rental income",
+    "Financing": "Financing",
+    "Sale": "Sale",
+    "Income": "Rental income",
     "Charges": "Operating expenses",
-    "Fiscalité": "Taxation",
-    "Résidence principale": "Primary residence"
+    "Taxation": "Taxation",
+    "Primary residence": "Primary residence"
   },
   "fields": {
-    "prixAchat": { "label": "Purchase price" },
-    "fraisNotaire": { "label": "Notary fees" },
-    "travaux": { "label": "Renovation works" },
-    "fraisAgence": { "label": "Buyer's agent fees" },
-    "fraisDossier": { "label": "File & broker fees" },
-    "apport": { "label": "Down payment" },
-    "taux": { "label": "Interest rate" },
-    "duree": { "label": "Duration (yrs)" },
-    "assurance": { "label": "Mortgage insurance" },
-    "revalBien": { "label": "Property appreciation %/yr" },
-    "fraisVente": { "label": "Selling agent fees" },
-    "loyer": { "label": "Gross monthly rent" },
-    "vacance": { "label": "Vacancy rate" },
-    "taxeFonciere": { "label": "Property tax (€/yr)" },
-    "chargesCopro": { "label": "HOA fees (€/yr)" },
-    "assurPNO": { "label": "Landlord insurance (€/yr)" },
-    "fraisGestion": { "label": "Property management" },
-    "provision": { "label": "Maintenance reserve (€/yr)" },
-    "revalLoyer": { "label": "Rent increase %/yr" },
-    "tmi": { "label": "Income tax bracket" },
-    "ps": { "label": "Social contributions" },
-    "amortBien": { "label": "Property depreciation %/yr" },
-    "amortTravaux": { "label": "Works depreciation %/yr" },
-    "impotPV": { "label": "Capital gains tax" },
-    "psPV": { "label": "Social contributions on gains" },
-    "taxeFonciereRP": { "label": "Property tax" },
-    "chargesCoproRP": { "label": "HOA fees (€/yr)" },
-    "assurHab": { "label": "Home insurance (€/yr)" },
-    "provisionRP": { "label": "Maintenance reserve (€/yr)" }
+    "purchasePrice": { "label": "Purchase price" },
+    "notaryFees": { "label": "Notary fees" },
+    "renovationCosts": { "label": "Renovation works" },
+    "agencyFees": { "label": "Buyer's agent fees" },
+    "loanFees": { "label": "File & broker fees" },
+    "downPayment": { "label": "Down payment" },
+    "interestRate": { "label": "Interest rate" },
+    "loanTerm": { "label": "Duration (yrs)" },
+    "insuranceRate": { "label": "Mortgage insurance" },
+    "propertyGrowth": { "label": "Property appreciation %/yr" },
+    "sellingFees": { "label": "Selling agent fees" },
+    "rent": { "label": "Gross monthly rent" },
+    "vacancyRate": { "label": "Vacancy rate" },
+    "propertyTax": { "label": "Property tax (€/yr)" },
+    "condoFees": { "label": "HOA fees (€/yr)" },
+    "landlordInsurance": { "label": "Landlord insurance (€/yr)" },
+    "managementFees": { "label": "Property management" },
+    "maintenanceReserve": { "label": "Maintenance reserve (€/yr)" },
+    "rentGrowth": { "label": "Rent increase %/yr" },
+    "marginalTaxRate": { "label": "Income tax bracket" },
+    "socialCharges": { "label": "Social contributions" },
+    "propertyDepreciation": { "label": "Property depreciation %/yr" },
+    "renovationDepreciation": { "label": "Works depreciation %/yr" },
+    "capitalGainsTax": { "label": "Capital gains tax" },
+    "capitalGainsSocialCharges": { "label": "Social contributions on gains" },
+    "propertyTaxPrimary": { "label": "Property tax" },
+    "condoFeesPrimary": { "label": "HOA fees (€/yr)" },
+    "homeInsurance": { "label": "Home insurance (€/yr)" },
+    "maintenanceReservePrimary": { "label": "Maintenance reserve (€/yr)" }
   },
   "tooltips": {
     "inflation": {
@@ -129,215 +131,218 @@
       "title": "Rental tax regime",
       "body": "<b>LMNP Real</b>: deductible depreciation (property + works).<br><b>Micro-BIC</b>: 50% flat deduction.<br><b>Bare rental</b>: actual expenses, no depreciation."
     },
-    "tauxActu": {
+    "discountRate": {
       "title": "Discount rate (NPV)",
       "body": "Rate used to calculate Net Present Value. Represents the opportunity cost of capital."
     },
-    "rendAlt": {
+    "altReturn": {
       "title": "ETF / alternative investment return (nominal, after-tax)",
       "body": "Nominal annual return after tax. Enter after deducting taxation: ~8% gross ETF World → ~5-6% net after 30% flat tax. With 2% inflation, 6% nominal = ~4% real — the real IRR is computed automatically in the KPIs table."
     },
-    "budgetMensuel": {
+    "monthlyBudget": {
       "title": "Monthly housing + investment budget",
       "body": "Fixed monthly envelope. The surplus not consumed by real costs is automatically invested in ETF."
     },
-    "revalBudget": {
+    "budgetGrowth": {
       "title": "Annual budget growth %/yr",
       "body": "Annual increase of your available budget (salary raises). Grows the ETF surplus each year. 0% = fixed budget."
     },
-    "revalCharges": {
+    "chargesGrowth": {
       "title": "Fixed charges annual growth %/yr",
       "body": "Annual increase rate for property tax, co-ownership charges, insurance and maintenance reserves. Typically 2–3%/yr in France. Management fees (proportional to rent) are not affected.",
-      "code": "charges[yr] = (propertyTax + copro + insurance + reserve) × (1 + revalCharges/100)^(yr−1)"
+      "code": "charges[yr] = (propertyTax + condoFees + insurance + reserve) × (1 + chargesGrowth/100)^(yr−1)"
     },
-    "investirSurplus": {
+    "investSurplus": {
       "title": "Invest surplus in ETF",
       "body": "If enabled: the difference between the monthly budget and real outflows is invested in ETF. The dashed line = pure ETF reference scenario."
     },
-    "apportETF": {
+    "etfDownPayment": {
       "title": "Pure ETF reference contribution",
       "body": "Starting capital for the pure ETF scenario. No property purchase — contribution + monthly surplus are compounded in ETF."
     },
-    "prixAchat": {
+    "purchasePrice": {
       "title": "Net purchase price",
       "body": "Price paid to the seller, excluding notary and agency fees."
     },
-    "fraisNotaire": {
+    "notaryFees": {
       "title": "Notary fees",
       "body": "7-8% for existing properties, 2-3% for new builds. <b>Auto: 8% × purchase price.</b>"
     },
-    "travaux": {
+    "renovationCosts": {
       "title": "Renovation works",
       "body": "Under LMNP Real, depreciable over several years.",
       "code": "Works depreciation = Works × Rate"
     },
-    "fraisAgence": { "title": "Buyer's agent fees", "body": "Agent commission paid by the buyer." },
-    "fraisDossier": {
+    "agencyFees": {
+      "title": "Buyer's agent fees",
+      "body": "Agent commission paid by the buyer."
+    },
+    "loanFees": {
       "title": "File & broker fees",
       "body": "Bank origination fees and/or mortgage broker commission. Included in total acquisition cost and borrowed amount.",
-      "code": "ct = purchasePrice + notaryFees + works + agencyFees + fileFees"
+      "code": "totalCost = purchasePrice + notaryFees + works + agencyFees + loanFees"
     },
-    "apport": {
+    "downPayment": {
       "title": "Down payment",
       "body": "Own capital invested. Reduces the loan amount but also the leverage."
     },
-    "taux": {
+    "interestRate": {
       "title": "Nominal interest rate",
       "body": "Nominal loan rate. Auto mode: France average rates (updated 05/2026) — 7y 3.25% · 10y 3.30% · 15y 3.45% · 20y 3.55% · 25y 3.70%.",
       "code": "Payment = K×(r/12)/(1−(1+r/12)^−n)"
     },
-    "duree": {
+    "loanTerm": {
       "title": "Loan duration",
       "body": "Longer = lower monthly payment but higher total cost."
     },
-    "assurance": {
+    "insuranceRate": {
       "title": "Mortgage insurance (PMI)",
       "body": "0.10-0.40%/yr of capital depending on profile.",
       "code": "Monthly insurance = Capital × rate / 12"
     },
-    "revalBien": {
+    "propertyGrowth": {
       "title": "Property appreciation",
       "body": "Annual increase assumption. ~2-3%/yr historical average in France.",
       "code": "Value year N = Price × (1+rate)^N"
     },
-    "fraisVente": {
+    "sellingFees": {
       "title": "Selling agent fees",
       "body": "3-7% of sale price. Negotiable or avoidable via private sale."
     },
-    "loyer": {
+    "rent": {
       "title": "Gross monthly rent",
       "body": "Excluding recoverable charges. Key driver of profitability.",
       "code": "Gross yield = Rent×12 / Total cost"
     },
-    "vacance": {
+    "vacancyRate": {
       "title": "Vacancy rate",
       "body": "5-8% in tight markets, 10-15% in rural areas.",
       "code": "Collected rent = Gross rent × (1−vacancy)"
     },
-    "taxeFonciere": {
+    "propertyTax": {
       "title": "Property tax",
       "body": "Annual local tax. Varies significantly by municipality. <b>Auto: 0.5% × purchase price.</b>"
     },
-    "chargesCopro": {
+    "condoFees": {
       "title": "Non-recoverable HOA fees",
       "body": "Remain the owner's responsibility."
     },
-    "assurPNO": {
+    "landlordInsurance": {
       "title": "Landlord insurance",
       "body": "Mandatory in co-ownership. €100-300/yr."
     },
-    "fraisGestion": {
+    "managementFees": {
       "title": "Property management",
       "body": "6-9% incl. tax of collected rents if using an agency."
     },
-    "provision": {
+    "maintenanceReserve": {
       "title": "Maintenance reserve",
       "body": "Precautionary savings. Rule of thumb: ~1% of value/yr. <b>Auto: 0.5% × purchase price.</b>"
     },
-    "revalLoyer": {
+    "rentGrowth": {
       "title": "Rent increase",
       "body": "Capped by the rent index. 1-4%/yr depending on inflation.",
       "code": "Rent year N = Rent × (1+rate)^(N−1)"
     },
-    "tmi": {
+    "marginalTaxRate": {
       "title": "Income tax bracket",
       "body": "Marginal rate: 0%, 11%, 30%, 41% or 45%.",
       "code": "Tax = Taxable income × (bracket + social contributions)"
     },
-    "ps": {
+    "socialCharges": {
       "title": "Social contributions",
       "body": "17.2% on rental income (CSG+CRDS+solidarity)."
     },
-    "amortBien": {
+    "propertyDepreciation": {
       "title": "Property depreciation",
       "body": "LMNP Real only. Typical 25-40 yrs → 2.5-4%/yr."
     },
-    "amortTravaux": {
+    "renovationDepreciation": {
       "title": "Works depreciation",
       "body": "LMNP Real. Typical 7-10 yrs → 10-14%/yr."
     },
-    "impotPV": {
+    "capitalGainsTax": {
       "title": "Capital gains tax",
       "body": "19% income tax + 17.2% social contributions = 36.2%. Progressive allowances. Primary residence exempt."
     },
-    "psPV": {
+    "capitalGainsSocialCharges": {
       "title": "Social contributions on capital gains",
       "body": "17.2%. Full exemption after 30 years."
     },
-    "loyerPerso": {
+    "personalRent": {
       "title": "Current rent you pay",
       "body": "Monthly rent you pay. Rental mode: subtracted from CF. Primary: savings if you buy.",
       "code": "Real CF (rental) = Rental CF − Personal rent\nSavings (primary) = Personal rent − Monthly payment"
     },
-    "revalLoyerPerso": {
+    "personalRentGrowth": {
       "title": "Market rent revaluation %/yr",
       "body": "Annual increase of your rent. ~1-3%/yr indexed."
     },
-    "assurHab": {
+    "homeInsurance": {
       "title": "Home insurance",
       "body": "Owner-occupier home insurance. €200-500/yr."
     },
-    "chargesCoproRP": {
+    "condoFeesPrimary": {
       "title": "HOA fees (primary residence)",
       "body": "All charges (no recoverable/non-recoverable split). €50-200/mo."
     },
-    "taxeFonciereRP": {
+    "propertyTaxPrimary": {
       "title": "Property tax (primary residence)",
       "body": "Same tax as for rental. No housing tax since 2023 for primary residences. <b>Auto: 0.5% × purchase price.</b>"
     },
-    "provisionRP": {
+    "maintenanceReservePrimary": {
       "title": "Maintenance reserve (primary)",
       "body": "Annual maintenance budget. ~1% of property value. <b>Auto: 0.5% × purchase price.</b>"
     },
-    "kpi.coutTotal": {
+    "kpi.totalCost": {
       "title": "Total acquisition cost",
       "body": "Purchase price + notary fees + works + agency fees. This is the base used to compute yields.",
-      "code": "ct = price + notaryFees + works + agencyFees"
+      "code": "totalCost = price + notaryFees + works + agencyFees"
     },
-    "kpi.emprunte": {
+    "kpi.loanAmount": {
       "title": "Loan amount",
       "body": "Total cost − down payment. Financial leverage amplifies gains <em>and</em> losses.",
-      "code": "loan = max(0, ct − downPayment)"
+      "code": "loan = max(0, totalCost − downPayment)"
     },
-    "kpi.mensualiteAss": {
+    "kpi.monthlyPaymentIns": {
       "title": "Monthly payment + insurance",
       "body": "Fixed annuity + mortgage insurance calculated on the initial capital (fixed for the entire loan term).",
       "code": "payment = loan×(r/12)/(1−(1+r/12)^−n)"
     },
-    "kpi.coutCredit": {
+    "kpi.creditCost": {
       "title": "Total credit cost",
       "body": "Sum of all interest payments + all insurance premiums over the full loan term."
     },
-    "kpi.rendBrut": {
+    "kpi.grossYield": {
       "title": "Gross rental yield",
       "body": "Static indicator computed at year 0, before expenses, taxes, and debt service.",
       "code": "Gross yield = Rent×12 / Total acquisition cost"
     },
-    "kpi.rendNet": {
+    "kpi.netYield": {
       "title": "Net rental yield",
       "body": "Effective rent (after vacancy) − annual expenses, divided by total cost. Excludes debt service and taxes.",
       "code": "Net yield = (Eff. rent − Expenses) / Total cost"
     },
-    "kpi.cfMensuel": {
+    "kpi.monthlyCashFlow": {
       "title": "Real cash-flow / month",
       "body": "Net monthly flow for year 1: rents collected − all expenses − loan payment − tax − personal rent. Negative = cash effort.",
       "code": "Monthly CF = annualCF[yr 1] / 12"
     },
-    "kpi.effortRP": {
+    "kpi.monthlyEffort": {
       "title": "Monthly effort",
       "body": "Extra monthly cost of the investment vs staying a renter. Positive = you spend more than today. Negative = investment is cheaper.",
       "code": "Effort = −annualCF[yr 1]/12 − personalRent"
     },
-    "kpi.breakeven": {
+    "kpi.breakEven": {
       "title": "Cash-flow break-even",
       "body": "First year where cumulative net cash flows turn positive. Excludes property appreciation."
     },
-    "kpi.tri": {
+    "kpi.irr": {
       "title": "IRR — Internal Rate of Return",
       "body": "Discount rate that makes the NPV equal to zero. Accounts for sale proceeds, all net flows, and rent saved/paid depending on mode.",
       "code": "NPV(IRR) = 0  [Newton-Raphson]"
     },
-    "kpi.van": {
+    "kpi.npv": {
       "title": "NPV — Net Present Value",
       "body": "Sum of future cash flows discounted at the opportunity rate. Positive = investment creates value vs the alternative placement.",
       "code": "NPV = −downPmt + Σ flow/(1+r)^t + sale/(1+r)^n"
@@ -350,56 +355,46 @@
     "kpi.coc": {
       "title": "Cash-on-cash return (yr 1)",
       "body": "Annual yield of the year-1 net operating cash flow relative to the initial down payment. Simple and immediate: how much cash the property generates per euro invested this year. Does not account for resale value or time value of money. ETF column: a capitalising ETF distributes no cash, so the only real year-1 outflow is the personal rent → −personalRent / etfDownPayment (cash effort, negative).",
-      "code": "coc = cfN[yr 1] / downPayment × 100   (ETF: −personalRent×12 / etfDownPayment × 100)"
+      "code": "coc = netCashFlow[yr 1] / downPayment × 100   (ETF: −personalRent×12 / etfDownPayment × 100)"
     },
-    "kpi.beRevente": {
+    "kpi.resaleBreakEven": {
       "title": "Resale break-even",
-      "body": "First year where reselling no longer makes you lose money, in nominal terms and on the IRR/NPV basis (saved rent for RP / paid rent for LOC reintegrated). Accounts for purchase and sale fees. Ignores opportunity cost (an ETF may do better even if you 'don't lose').",
-      "code": "first year where reventeNet + Σ(cfN + rent) − downPmt ≥ 0"
+      "body": "First year where reselling no longer makes you lose money, in nominal terms and on the IRR/NPV basis (saved rent for primary / paid rent for rental reintegrated). Accounts for purchase and sale fees. Ignores opportunity cost (an ETF may do better even if you 'don't lose').",
+      "code": "first year where netResaleProceeds + Σ(netCashFlow + rent) − downPmt ≥ 0"
     },
-    "kpi.bilanRevente": {
+    "kpi.resaleBalance": {
       "title": "Net sale profit",
       "body": "Cash gain if you sell at this horizon: net sale proceeds + cumulative cash flows − initial down payment. Measures what you actually pocketed in cash.",
-      "code": "bilanRevente = reventeNet + cfC − downPmt"
+      "code": "resaleBalance = netResaleProceeds + cumulCF − downPmt"
     },
-    "kpi.bilanTotal": {
+    "kpi.totalBalance": {
       "title": "Total sale profit",
       "body": "Overall gain if you sell: net sale proceeds + ETF pocket from reinvested surplus − initial down payment. The most complete metric for comparing two scenarios.",
-      "code": "bilanTotal = reventeNet + etfCap − downPmt"
+      "code": "totalBalance = netResaleProceeds + etfPocket − downPmt"
     },
-    "kpi.patNet": {
+    "kpi.netWorth": {
       "title": "Net property wealth",
       "body": "Property equity (estimated value − outstanding capital) + cumulative cash flows − initial down payment.",
-      "code": "patNet = (value − balance) + cumulCF − downPmt"
+      "code": "netWorth = (value − balance) + cumulCF − downPmt"
     },
-    "kpi.patTotal": {
+    "kpi.totalWorth": {
       "title": "Total wealth",
       "body": "Property equity + ETF pocket built from reinvested monthly surplus. Compared to pure ETF scenario to evaluate the crossover.",
-      "code": "patTotal = (value − balance) + etfPocket"
+      "code": "totalWorth = (value − balance) + etfPocket"
     },
-    "kpi.etfPur": {
-      "title": "Pure ETF (reference scenario)",
-      "body": "Alternative scenario: ETF contribution invested upfront + monthly surplus (budget − personal rent) compounded at the alternative return. No property purchase.",
-      "code": "cap[n] = cap[n−1]×(1+r) + surplus"
-    },
-    "kpi.avantageEtf": {
-      "title": "Advantage vs pure ETF",
-      "body": "Total property wealth − pure ETF at the horizon. Positive = real estate outperforms the ETF reference portfolio.",
-      "code": "Advantage = patTotal − etfPureCap"
-    },
-    "kpi.crossover": {
-      "title": "Crossover vs pure ETF",
-      "body": "First year where total property wealth (equity + ETF from surplus) exceeds the pure ETF. Before this point, the ETF scenario is more profitable."
-    },
-    "kpi.triReal": {
+    "kpi.irrReal": {
       "title": "Real IRR (inflation-adjusted)",
       "body": "Nominal IRR adjusted for inflation using the Fisher equation. Measures return in constant euros, above inflation.",
       "code": "Real IRR = (1 + Nominal IRR) / (1 + inflation) − 1"
     },
-    "kpi.patReal": {
+    "kpi.wealthReal": {
       "title": "Real wealth (constant euros)",
       "body": "Nominal wealth deflated by inflation. Expresses purchasing power in today's euros.",
       "code": "Real wealth = Nominal wealth / (1 + inflation)^n"
+    },
+    "kpi.crossover": {
+      "title": "Crossover vs pure ETF",
+      "body": "First year where total property wealth (equity + ETF from surplus) exceeds the pure ETF. Before this point, the ETF scenario is more profitable."
     }
   },
   "charts": {
@@ -421,25 +416,25 @@
       "desc": "Estimated nominal market value based on the configured appreciation rate.",
       "realNote": "Nominal values · real gain ≈ appreciation rate − {{inflation}}%/yr inflation"
     },
-    "revente": {
+    "resale": {
       "title": "Net profit by sale year",
       "desc": "Net gain if you sell this year. Primary residence exempt from capital gains. Dashed = pure ETF reference."
     },
-    "reventeCash": {
+    "resaleCash": {
       "title": "How many years before you stop losing money?",
-      "desc": "Cash balance if you resell this year, on the same basis as IRR/NPV: net resale + cumulative flows + saved rent (RP) or − paid rent (LOC) − down payment. The zero crossing (vertical marker) = minimum holding period to avoid a loss. <b>Nominal</b> values, excluding opportunity cost (vs ETF). <code>bilanCash = reventeNet + Σ(cfN + rent) − down payment</code>"
+      "desc": "Cash balance if you resell this year, on the same basis as IRR/NPV: net resale + cumulative flows + saved rent (primary) or − paid rent (rental) − down payment. The zero crossing (vertical marker) = minimum holding period to avoid a loss. <b>Nominal</b> values, excluding opportunity cost (vs ETF). <code>cashBalance = netResaleProceeds + Σ(netCashFlow + rent) − down payment</code>"
     },
-    "reventeDetail": "Detail by key year",
-    "amort": {
+    "resaleDetail": "Detail by key year",
+    "amortization": {
       "title": "Annual loan breakdown",
       "desc": "At the start most goes to interest, then the capital portion increases progressively."
     },
-    "amortCap": {
+    "amortizationBalance": {
       "title": "Outstanding loan balance"
     }
   },
   "legend": {
-    "etfPur": "Pure ETF — {{apport}}k€ contribution",
+    "etfReference": "Pure ETF — {{downPayment}}k€ contribution",
     "hint": "Click to hide/show"
   },
   "kpisTable": {
@@ -448,55 +443,53 @@
     "descReal": "Greyed rows = values in constant euros (inflation-adjusted at {{inflation}}%).",
     "indicator": "Indicator",
     "type": "Type",
-    "coutTotal": "Total acquisition cost",
-    "emprunte": "Loan amount",
-    "mensualiteAss": "Monthly payment + insurance",
-    "coutCredit": "Total loan cost",
-    "rendBrut": "Gross yield",
-    "rendNet": "Net yield",
-    "cfMensuel": "Real CF/mo",
+    "catCosts": "Costs & Financing",
+    "catYields": "Yields & Cash-flow",
+    "catReturns": "IRR / NPV / MOIC",
+    "catWealth": "Wealth",
+    "totalCost": "Total acquisition cost",
+    "loanAmount": "Loan amount",
+    "monthlyPaymentIns": "Monthly payment + insurance",
+    "creditCost": "Total loan cost",
+    "grossYield": "Gross yield",
+    "netYield": "Net yield",
+    "monthlyCashFlow": "Real CF/mo",
     "coc": "Cash-on-cash (yr 1)",
-    "effortRP": "Monthly effort",
-    "breakeven": "Breakeven cumulative CF",
-    "tri10": "IRR 10y",
-    "tri10Real": "IRR 10y (real)",
-    "tri15": "IRR 15y",
-    "tri15Real": "IRR 15y (real)",
-    "tri20": "IRR 20y",
-    "tri20Real": "IRR 20y (real)",
-    "van": "NPV ({{tauxActu}}%, {{horizon}}y)",
+    "monthlyEffort": "Monthly effort",
+    "breakEven": "Breakeven cumulative CF",
+    "irr10": "IRR 10y",
+    "irr10Real": "IRR 10y (real)",
+    "irr15": "IRR 15y",
+    "irr15Real": "IRR 15y (real)",
+    "irr20": "IRR 20y",
+    "irr20Real": "IRR 20y (real)",
+    "npv": "NPV ({{discountRate}}%, {{horizon}}y)",
     "moic": "MOIC {{horizon}}y",
-    "beRevente": "Resale break-even",
-    "bilanReventeHz": "Net sale profit {{horizon}}y",
-    "bilanTotalHz": "Total sale profit {{horizon}}y",
-    "patNet": "Net property wealth {{horizon}}y",
-    "patTotal": "Total wealth {{horizon}}y",
-    "patTotalReal": "Real wealth {{horizon}}y",
-    "patTotal30": "Total wealth 30y",
-    "patTotal30Real": "Real wealth 30y",
-    "etfPurHorizon": "Pure ETF {{horizon}}y",
-    "etfPur30": "Pure ETF 30y",
-    "avantageEtf": "Advantage vs pure ETF {{horizon}}y",
+    "resaleBreakEven": "Resale break-even",
+    "resaleBalanceHz": "Net sale profit {{horizon}}y",
+    "totalBalanceHz": "Total sale profit {{horizon}}y",
+    "netWorth": "Net property wealth {{horizon}}y",
+    "totalWorth": "Total wealth {{horizon}}y",
+    "totalWorthReal": "Real wealth {{horizon}}y",
+    "totalWorth30": "Total wealth 30y",
+    "totalWorth30Real": "Real wealth 30y",
     "crossover": "Crossover vs pure ETF",
-    "locatif": "Rental",
-    "rp": "Primary",
-    "anneeN": "Yr {{n}}",
-    "gt30ans": "> 30 yrs",
-    "anneeN2": "Year {{n}}"
+    "yearN": "Yr {{n}}",
+    "gt30y": "> 30 yrs"
   },
-  "revente": {
-    "revente": "Sale price:",
-    "capitalRestant": "Outstanding capital:",
-    "etfPoche": "ETF pocket:",
-    "bilanTotal": "Total profit:",
-    "bilanImmo": "Property profit:",
+  "resale": {
+    "salePrice": "Sale price:",
+    "etfPocket": "ETF pocket:",
     "yr": "Yr {{n}}"
   },
-  "amort": {
-    "capital": "Capital",
-    "interets": "Interest",
-    "assurance": "Insurance",
-    "capitalRembourse": "Capital repaid"
+  "amortization": {
+    "principal": "Capital",
+    "interest": "Interest",
+    "insurance": "Insurance",
+    "principalRepaid": "Capital repaid"
+  },
+  "summary": {
+    "totalWorthCard": "Total worth · {{hz}}y"
   },
   "import": {
     "error": "Import error:\n{{msg}}",
@@ -518,31 +511,31 @@
     "units": { "perMonth": " /mo", "years": "yrs" },
     "groups": {
       "credit": "Credit",
-      "rendement": "Yield",
-      "capitalisation": "Compounding",
-      "fiscalite": "Taxation",
-      "plusvalue": "Capital gains",
-      "rentabilite": "Profitability (IRR/NPV/MOIC)"
+      "yield": "Yield",
+      "compounding": "Compounding",
+      "taxation": "Taxation",
+      "capitalGains": "Capital gains",
+      "profitability": "Profitability (IRR/NPV/MOIC)"
     },
     "inputs": {
-      "emp": "Loan amount",
-      "ct": "Total acquisition cost",
+      "loanAmount": "Loan amount",
+      "totalCost": "Total acquisition cost",
       "charges": "Annual expenses",
       "base": "Initial value",
-      "le": "Effective rent (after vacancy)",
-      "chg": "Deductible expenses",
-      "ab": "Property depreciation",
-      "at": "Works depreciation",
-      "intAnnuel": "Annual loan interest",
-      "rest": "Outstanding capital",
+      "rate": "Annual rate",
+      "effectiveRent": "Effective rent (after vacancy)",
+      "buildingDepreciation": "Property depreciation",
+      "worksDepreciation": "Works depreciation",
+      "annualInterest": "Annual loan interest",
+      "remaining": "Outstanding capital",
       "flows": "Cash flows (year 0 → 6)",
-      "tauxActu": "Discount rate",
-      "apportETF": "ETF contribution",
-      "rendAlt": "ETF return",
-      "budgetMensuel": "Monthly budget",
-      "loyerPerso": "Personal rent",
-      "revalBudget": "Budget growth",
-      "revalLoyerPerso": "Rent revaluation",
+      "discountRate": "Discount rate",
+      "etfDownPayment": "ETF contribution",
+      "altReturn": "ETF return",
+      "monthlyBudget": "Monthly budget",
+      "personalRent": "Personal rent",
+      "budgetGrowth": "Budget growth",
+      "personalRentGrowth": "Rent revaluation",
       "regime": "Tax regime"
     },
     "notes": {
@@ -556,68 +549,68 @@
       "value": "Value",
       "capGross": "Gross capital",
       "capNet": "Net capital (after PFU)",
-      "reventeNet": "Net sale proceeds",
+      "netResaleProceeds": "Net sale proceeds",
       "npvCurve": "NPV(rate)",
-      "abatIR": "Income-tax allowance",
-      "abatPS": "Social-contrib. allowance"
+      "allowanceIncomeTax": "Income-tax allowance",
+      "allowanceSocialTax": "Social-contrib. allowance"
     },
     "concepts": {
-      "mensualite": {
+      "monthlyPayment": {
         "title": "Monthly loan payment",
         "body": "Constant annuity: a fixed monthly payment that repays the loan over its term. A higher rate or amount raises it; a longer term lowers it (but costs more overall).",
         "code": "payment = loan × (r/12) / (1 − (1 + r/12)^−n)"
       },
-      "amortissement": {
+      "amortization": {
         "title": "Amortization breakdown",
         "body": "Each payment splits between interest (on the outstanding balance) and capital. Early on most of it is interest; the capital share grows year after year.",
         "code": "interest[m] = balance × r/12   ·   capital[m] = payment − interest[m]"
       },
-      "assurance": {
+      "insurance": {
         "title": "Mortgage insurance",
         "body": "Borrower insurance, charged on the initial capital (group-insurance practice), so it stays flat for the whole loan.",
         "code": "monthly insurance = loan × rate / 12"
       },
-      "coutCredit": {
+      "creditCost": {
         "title": "Total cost of credit",
         "body": "Everything the loan costs beyond the borrowed capital: all interest plus all insurance premiums over the term.",
         "code": "cost = Σ interest + insurance × n"
       },
-      "rendBrut": {
+      "grossYield": {
         "title": "Gross yield",
         "body": "Annual rent divided by the total acquisition cost, before any expense or tax. A quick first screen, computed at year 0.",
         "code": "gross yield = rent × 12 / total cost"
       },
-      "rendNet": {
+      "netYield": {
         "title": "Net yield",
         "body": "Effective rent (after vacancy) minus annual operating expenses, over the total cost. Excludes debt service and tax.",
         "code": "net yield = (rent × (1 − vacancy) × 12 − expenses) / total cost"
       },
-      "revalorisation": {
+      "compounding": {
         "title": "Compound revaluation",
         "body": "How a value grows when it compounds at a fixed annual rate. The same engine helper powers property appreciation, rent indexation and budget growth.",
         "code": "value[n] = base × (1 + rate)^n"
       },
-      "etfPur": {
+      "etfScenario": {
         "title": "Pure ETF scenario",
         "body": "The reference alternative: invest the contribution upfront, then add the monthly surplus (budget − personal rent) every year, all compounding at the ETF return. Net capital applies a 30% flat tax (PFU) on the gain.",
         "code": "cap[n] = cap[n−1] × (1 + r) + surplus"
       },
-      "impotLoc": {
+      "rentalTax": {
         "title": "Rental income tax",
         "body": "Tax on rental income depends on the regime. LMNP Real deducts interest and depreciation; Micro-BIC applies a 50% flat allowance; Bare rental deducts actual expenses and interest. Switch the regime to compare.",
         "code": "tax = taxable income × (income bracket + social contributions)"
       },
-      "abattements": {
+      "allowances": {
         "title": "Capital-gains allowances",
         "body": "Holding allowances reduce the taxable gain over time. Income tax is fully exempt after 22 years; social contributions after 30 years. Rental only — the primary residence is always exempt.",
         "code": "exempt IR ≥ 22 yrs · exempt PS ≥ 30 yrs"
       },
-      "revente": {
+      "resale": {
         "title": "Net sale proceeds by year",
         "body": "What you actually pocket if you sell in year N: resale price (works included) minus outstanding capital, selling fees and capital-gains tax. The allowances above flatten the tax as the years pass.",
         "code": "net = price − balance − fees − gains tax"
       },
-      "triVanMoic": {
+      "irrNpvMoic": {
         "title": "IRR · NPV · MOIC",
         "body": "Edit the cash flows (year 0 is your initial outlay). The curve is the NPV at each discount rate — where it crosses zero is the IRR. NPV reads the curve at your discount rate; MOIC is the simple multiple of money out over money in.",
         "code": "NPV(IRR) = 0   ·   MOIC = Σ inflows / outflow"

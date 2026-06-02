@@ -7,8 +7,8 @@ import SimPanel from './SimPanel.jsx';
 
 const seed = over => ({ A: { ...over } });
 
-describe('SimPanel — dispatch des 3 branches (jsdom)', () => {
-  it('branche désactivée : strip "off" + bouton réactiver, pas de sliders', () => {
+describe('SimPanel — dispatch of the 3 branches (jsdom)', () => {
+  it('disabled branch: "off" strip + reactivate button, no sliders', () => {
     const { container } = renderWithProviders(<SimPanel simKey="A" />, {
       simsOverride: seed({ enabled: false, label: 'SimOff' }),
     });
@@ -17,7 +17,7 @@ describe('SimPanel — dispatch des 3 branches (jsdom)', () => {
     expect(container.querySelector('input[type="range"]')).toBeNull();
   });
 
-  it('branche réduite : label vertical + patrimoine (€), pas de sliders', () => {
+  it('collapsed branch: vertical label + wealth (€), no sliders', () => {
     const { container } = renderWithProviders(<SimPanel simKey="A" />, {
       simsOverride: seed({ enabled: true, collapsed: true, label: 'SimMini' }),
     });
@@ -26,12 +26,12 @@ describe('SimPanel — dispatch des 3 branches (jsdom)', () => {
     expect(container.querySelector('input[type="range"]')).toBeNull();
   });
 
-  it('branche complète : champ label éditable, boutons mode, chips KPI, sliders', () => {
+  it('full branch: editable label field, mode buttons, KPI chips, sliders', () => {
     const { container } = renderWithProviders(<SimPanel simKey="A" />, {
-      simsOverride: seed({ enabled: true, collapsed: false, label: 'SimFull', mode: 'loc' }),
+      simsOverride: seed({ enabled: true, collapsed: false, label: 'SimFull', mode: 'rental' }),
     });
     expect(screen.getByDisplayValue('SimFull')).toBeInTheDocument();
-    // chips KPI : la mensualité est un montant € ; sliders présents
+    // KPI chips: the monthly payment is a € amount; sliders present
     expect(container.textContent).toMatch(/€/);
     expect(container.querySelectorAll('input[type="range"]').length).toBeGreaterThan(0);
   });
@@ -40,26 +40,26 @@ describe('SimPanel — dispatch des 3 branches (jsdom)', () => {
 /** Reads selected sim fields from the shared AppContext for integration asserts. */
 function Probe() {
   const { sims } = useApp();
-  return <div data-testid="probe">{`${sims.B.label}|${sims.B.prixAchat}|${sims.B.mode}`}</div>;
+  return <div data-testid="probe">{`${sims.B.label}|${sims.B.purchasePrice}|${sims.B.mode}`}</div>;
 }
 
-describe('SimPanel — menu contextuel copier/coller (jsdom)', () => {
-  it('en-tête : kebab présent, pas de switch ; 3 items dont « Coller » désactivé sans copie', () => {
+describe('SimPanel — copy/paste context menu (jsdom)', () => {
+  it('header: kebab present, no switch; 3 items, "Paste" disabled without a copy', () => {
     const { container } = renderWithProviders(<SimPanel simKey="A" />, {
-      simsOverride: seed({ enabled: true, collapsed: false, mode: 'loc' }),
+      simsOverride: seed({ enabled: true, collapsed: false, mode: 'rental' }),
     });
-    // plus de checkbox (l'ancien Toggle)
+    // no more checkbox (the old Toggle)
     expect(container.querySelector('input[type="checkbox"]')).toBeNull();
 
     fireEvent.click(screen.getByTitle('Actions sur cette simulation'));
     expect(screen.getByText('Désactiver')).toBeInTheDocument();
     expect(screen.getByText('Copier')).toBeInTheDocument();
-    const coller = screen.getByText('Coller');
-    expect(coller).toBeInTheDocument();
-    expect(coller.closest('button')).toBeDisabled();
+    const paste = screen.getByText('Coller');
+    expect(paste).toBeInTheDocument();
+    expect(paste.closest('button')).toBeDisabled();
   });
 
-  it('copier A → coller B : B prend mode+params de A mais garde son label, A reste activée', () => {
+  it('copy A → paste B: B takes A mode+params but keeps its label, A stays enabled', () => {
     renderWithProviders(
       <>
         <SimPanel simKey="A" />
@@ -68,24 +68,30 @@ describe('SimPanel — menu contextuel copier/coller (jsdom)', () => {
       </>,
       {
         simsOverride: {
-          A: { enabled: true, collapsed: false, mode: 'loc', prixAchat: 280000 },
-          B: { enabled: true, collapsed: false, mode: 'rp', prixAchat: 320000, label: 'RP B' },
+          A: { enabled: true, collapsed: false, mode: 'rental', purchasePrice: 280000 },
+          B: {
+            enabled: true,
+            collapsed: false,
+            mode: 'primary',
+            purchasePrice: 320000,
+            label: 'RP B',
+          },
         },
       }
     );
 
     const probe = () => screen.getByTestId('probe').textContent;
-    expect(probe()).toBe('RP B|320000|rp');
+    expect(probe()).toBe('RP B|320000|primary');
 
     const triggers = screen.getAllByTitle('Actions sur cette simulation');
-    // Copier sur A
+    // Copy on A
     fireEvent.click(triggers[0]);
     fireEvent.click(screen.getByText('Copier'));
-    // Coller sur B (désormais actif)
+    // Paste on B (now enabled)
     fireEvent.click(triggers[1]);
     fireEvent.click(screen.getByText('Coller'));
 
-    // B = clone financier de A, mais garde son identité
-    expect(probe()).toBe('RP B|280000|loc');
+    // B = financial clone of A, but keeps its identity
+    expect(probe()).toBe('RP B|280000|rental');
   });
 });

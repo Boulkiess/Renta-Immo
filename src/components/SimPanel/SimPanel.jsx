@@ -30,7 +30,7 @@ export default function SimPanel({ simKey }) {
       <CollapsedPanel
         col={col}
         label={p.label}
-        patTotal={RES[simKey].flux[G.horizon - 1]?.patTotal}
+        totalWorth={RES[simKey].flows[G.horizon - 1]?.totalWorth}
         onExpand={() => updateSim(simKey, 'collapsed', false)}
       />
     );

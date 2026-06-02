@@ -53,9 +53,9 @@ const X_LABELS = Array.from({ length: 30 }, (_, i) => String(i + 1));
 
 export default function ChartsTab() {
   const { t } = useTranslation();
-  const { sims, RES, etfPurGlobal, G, crossovers } = useApp();
+  const { sims, RES, etfScenarioGlobal, G, crossovers } = useApp();
   const theme = useTheme();
-  const deps = [sims, RES, etfPurGlobal, G, theme.name];
+  const deps = [sims, RES, etfScenarioGlobal, G, theme.name];
 
   const activeKeys = KEYS.filter(k => sims[k].enabled);
 
@@ -67,20 +67,20 @@ export default function ChartsTab() {
     activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map((f, i) => dfl(f.cfC, i)),
+      data: RES[k].flows.map((f, i) => dfl(f.cumulativeCashFlow, i)),
     }));
   const patDs = () => {
     const infl = G.inflation / 100;
     const ds = activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map((f, i) => dfl(f.patTotal, i)),
+      data: RES[k].flows.map((f, i) => dfl(f.totalWorth, i)),
     }));
     ds.push({
       color: '#94a3b8',
       dashed: true,
-      label: 'ETF pur',
-      data: etfPurGlobal.map((e, i) => dfl(e.cap, i)),
+      label: 'Pure ETF',
+      data: etfScenarioGlobal.map((e, i) => dfl(e.cap, i)),
     });
     // In nominal mode only, add a secondary dashed line for the real ETF value.
     // In real mode the main line is already deflated, so this would be redundant.
@@ -88,8 +88,8 @@ export default function ChartsTab() {
       ds.push({
         color: '#94a3b840',
         dashed: true,
-        label: 'ETF pur (réel)',
-        data: etfPurGlobal.map((e, i) => e.cap / Math.pow(1 + infl, i + 1)),
+        label: 'Pure ETF (real)',
+        data: etfScenarioGlobal.map((e, i) => e.cap / Math.pow(1 + infl, i + 1)),
       });
     }
     return ds;
@@ -98,13 +98,13 @@ export default function ChartsTab() {
     activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map((f, i) => dfl(f.cfN, i)),
+      data: RES[k].flows.map((f, i) => dfl(f.netCashFlow, i)),
     }));
   const vbDs = () =>
     activeKeys.map(k => ({
       color: COL[k],
       label: sims[k].label,
-      data: RES[k].flux.map((f, i) => dfl(f.vb, i)),
+      data: RES[k].flows.map((f, i) => dfl(f.propertyValue, i)),
     }));
 
   return (
@@ -129,7 +129,7 @@ export default function ChartsTab() {
           draw={c => {
             const ann = activeKeys
               .filter(k => crossovers[k] != null && crossovers[k] <= 30)
-              .map(k => ({ x: crossovers[k], color: COL[k] + '99', label: `an ${crossovers[k]}` }));
+              .map(k => ({ x: crossovers[k], color: COL[k] + '99', label: `yr ${crossovers[k]}` }));
             drawLine(c, patDs(), X_LABELS, ann);
           }}
           deps={[...deps, crossovers]}

@@ -1,7 +1,7 @@
 import { KEYS, mkDef } from '../state/definitions.js';
 
 // ── Export ─────────────────────────────────────────────────
-export function buildExportData(G, sims, RES, etfPurGlobal) {
+export function buildExportData(G, sims, RES, etfScenarioGlobal) {
   const d = { global: { ...G }, simulations: {} };
   KEYS.forEach(k => {
     const p = sims[k],
@@ -11,40 +11,40 @@ export function buildExportData(G, sims, RES, etfPurGlobal) {
       enabled: p.enabled,
       inputs: { ...p },
       computed: {
-        coutTotal: r.ct,
-        montantEmprunte: r.emp,
-        mensualite: Math.round(r.mens),
-        assuranceMensuelle: Math.round(r.assM),
-        totalInterets: Math.round(r.totInt),
-        totalAssurance: Math.round(r.totAss),
-        rendementBrut: p.mode === 'loc' ? +r.rendBrut.toFixed(4) : null,
-        rendementNet: p.mode === 'loc' ? +r.rendNet.toFixed(4) : null,
-        cashflowMensuel: Math.round(r.cfM),
-        breakevenAns: r.be,
-        tri10ans: r.tri10 != null ? +(r.tri10 * 100).toFixed(4) : null,
-        tri15ans: r.tri15 != null ? +(r.tri15 * 100).toFixed(4) : null,
-        tri20ans: r.tri20 != null ? +(r.tri20 * 100).toFixed(4) : null,
-        van: Math.round(r.van),
+        totalCost: r.totalCost,
+        loanAmount: r.loanAmount,
+        monthlyPayment: Math.round(r.monthlyPayment),
+        monthlyInsurance: Math.round(r.monthlyInsurance),
+        totalInterest: Math.round(r.totalInterest),
+        totalInsurance: Math.round(r.totalInsurance),
+        grossYield: p.mode === 'rental' ? +r.grossYield.toFixed(4) : null,
+        netYield: p.mode === 'rental' ? +r.netYield.toFixed(4) : null,
+        monthlyCashFlow: Math.round(r.monthlyCashFlow),
+        breakEvenYears: r.breakEven,
+        irr10y: r.tri10 != null ? +(r.tri10 * 100).toFixed(4) : null,
+        irr15y: r.tri15 != null ? +(r.tri15 * 100).toFixed(4) : null,
+        irr20y: r.tri20 != null ? +(r.tri20 * 100).toFixed(4) : null,
+        npv: Math.round(r.van),
         moic: r.moic ? +r.moic.toFixed(4) : null,
-        flux: r.flux.map(f => ({
-          annee: f.yr,
-          ...(p.mode === 'loc'
-            ? { loyersEncaisses: Math.round(f.le) }
-            : { loyerEconomise: Math.round(f.le) }),
-          charges: Math.round(f.chg),
-          annuitePlusAssurance: Math.round(f.ann),
-          ...(p.mode === 'loc' ? { impots: Math.round(f.imp) } : {}),
-          cfNet: Math.round(f.cfN),
-          cfCumule: Math.round(f.cfC),
-          valeurBien: Math.round(f.vb),
-          capitalRestant: Math.round(f.rest),
-          patrimoineNet: Math.round(f.patNet),
-          patrimoineTotal: Math.round(f.patTotal),
-          etfPoche: Math.round(f.etfPoche),
-          reventeNette: Math.round(f.reventeNet),
-          bilanRevente: Math.round(f.bilanRevente),
+        flows: r.flows.map(f => ({
+          year: f.yr,
+          ...(p.mode === 'rental'
+            ? { rentReceived: Math.round(f.effectiveRent) }
+            : { savedRent: Math.round(f.effectiveRent) }),
+          charges: Math.round(f.charges),
+          annuityPlusInsurance: Math.round(f.annuity),
+          ...(p.mode === 'rental' ? { tax: Math.round(f.tax) } : {}),
+          netCashFlow: Math.round(f.netCashFlow),
+          cumulativeCashFlow: Math.round(f.cumulativeCashFlow),
+          propertyValue: Math.round(f.propertyValue),
+          remainingCapital: Math.round(f.remainingCapital),
+          netWorth: Math.round(f.netWorth),
+          totalWorth: Math.round(f.totalWorth),
+          etfPocket: Math.round(f.etfPocket),
+          netResale: Math.round(f.netResaleProceeds),
+          resaleBalance: Math.round(f.resaleBalance),
         })),
-        etfPurRef: etfPurGlobal.map(e => ({ annee: e.yr, capitalEtf: Math.round(e.cap) })),
+        etfReference: etfScenarioGlobal.map(e => ({ year: e.yr, etfCapital: Math.round(e.cap) })),
       },
     };
   });
@@ -113,61 +113,61 @@ function exportCSV(d) {
   const row = (...c) => lines.push(c.map(esc).join(','));
   const lbls = KEYS.map(k => d.simulations[k].label);
 
-  row('## Paramètres globaux');
-  row('Paramètre', 'Valeur', 'Unité');
+  row('## Global parameters');
+  row('Parameter', 'Value', 'Unit');
   [
-    ['Inflation', d.global.inflation, '%/an'],
-    ['Régime fiscal', d.global.regime],
-    ['Horizon', d.global.horizon, 'ans'],
-    ["Taux d'actualisation (VAN)", d.global.tauxActu, '%'],
-    ['Rdt placement alternatif (net)', d.global.rendAlt, '%'],
-    ['Loyer perso (€/mois)', d.global.loyerPerso, '€/mois'],
-    ['Reval. loyer perso (%/an)', d.global.revalLoyerPerso, '%/an'],
-    ['Budget mensuel (€/mois)', d.global.budgetMensuel, '€/mois'],
-    ['Investir surplus ETF', d.global.investirSurplus ? 'true' : 'false'],
-    ['Apport ETF pur (€)', d.global.apportETF, '€'],
+    ['Inflation', d.global.inflation, '%/yr'],
+    ['Tax regime', d.global.regime],
+    ['Horizon', d.global.horizon, 'years'],
+    ['Discount rate (NPV)', d.global.discountRate, '%'],
+    ['Alternative return (net)', d.global.altReturn, '%'],
+    ['Personal rent (€/mo)', d.global.personalRent, '€/mo'],
+    ['Personal rent growth (%/yr)', d.global.personalRentGrowth, '%/yr'],
+    ['Monthly budget (€/mo)', d.global.monthlyBudget, '€/mo'],
+    ['Invest ETF surplus', d.global.investSurplus ? 'true' : 'false'],
+    ['ETF reference down payment (€)', d.global.etfDownPayment, '€'],
   ].forEach(r => row(...r));
   row('');
-  row('## Paramètres des simulations');
-  row('Paramètre', ...lbls);
+  row('## Simulation parameters');
+  row('Parameter', ...lbls);
   // (abbreviated — full mapping identical to legacy io code)
   row('');
   KEYS.forEach(k => {
     const s = d.simulations[k],
-      isLoc = s.inputs.mode === 'loc';
-    row(`## Flux annuels — ${s.label}`);
+      isRental = s.inputs.mode === 'rental';
+    row(`## Yearly flows — ${s.label}`);
     row(
-      'Année',
-      isLoc ? 'Loyers (€)' : 'Loyer éco. (€)',
+      'Year',
+      isRental ? 'Rent (€)' : 'Saved rent (€)',
       'Charges (€)',
-      'Annuité+Ass (€)',
-      ...(isLoc ? ['Impôts (€)'] : []),
-      'CF net (€)',
-      'CF cumulé (€)',
-      'Valeur bien (€)',
-      'Capital restant (€)',
-      'Patrimoine total (€)',
-      'ETF poche (€)',
-      'Revente nette (€)',
-      'Bilan (€)',
-      'ETF pur (€)'
+      'Annuity+Ins (€)',
+      ...(isRental ? ['Tax (€)'] : []),
+      'Net CF (€)',
+      'Cumulative CF (€)',
+      'Property value (€)',
+      'Remaining capital (€)',
+      'Total worth (€)',
+      'ETF pocket (€)',
+      'Net resale (€)',
+      'Balance (€)',
+      'ETF reference (€)'
     );
-    s.computed.flux.forEach((f, i) => {
+    s.computed.flows.forEach((f, i) => {
       row(
-        f.annee,
-        isLoc ? f.loyersEncaisses : f.loyerEconomise,
+        f.year,
+        isRental ? f.rentReceived : f.savedRent,
         f.charges,
-        f.annuitePlusAssurance,
-        ...(isLoc ? [f.impots] : []),
-        f.cfNet,
-        f.cfCumule,
-        f.valeurBien,
-        f.capitalRestant,
-        f.patrimoineTotal ?? '',
-        f.etfPoche ?? '',
-        f.reventeNette,
-        f.bilanRevente,
-        s.computed.etfPurRef?.[i]?.capitalEtf ?? ''
+        f.annuityPlusInsurance,
+        ...(isRental ? [f.tax] : []),
+        f.netCashFlow,
+        f.cumulativeCashFlow,
+        f.propertyValue,
+        f.remainingCapital,
+        f.totalWorth ?? '',
+        f.etfPocket ?? '',
+        f.netResale,
+        f.resaleBalance,
+        s.computed.etfReference?.[i]?.etfCapital ?? ''
       );
     });
     row('');
@@ -266,18 +266,31 @@ function parseYAMLFlat(text) {
   return flat;
 }
 
+const GLOBAL_IMPORT_KEYS = [
+  'inflation',
+  'regime',
+  'horizon',
+  'discountRate',
+  'altReturn',
+  'personalRent',
+  'personalRentGrowth',
+  'monthlyBudget',
+  'investSurplus',
+  'etfDownPayment',
+];
+
 function applyGlobalFromObj(g, updateG) {
   const map = {
     inflation: v => +v,
     regime: v => String(v),
     horizon: v => +v,
-    tauxActu: v => +v,
-    rendAlt: v => +v,
-    loyerPerso: v => +v,
-    revalLoyerPerso: v => +v,
-    budgetMensuel: v => +v,
-    investirSurplus: v => v === true || v === 'true',
-    apportETF: v => +v,
+    discountRate: v => +v,
+    altReturn: v => +v,
+    personalRent: v => +v,
+    personalRentGrowth: v => +v,
+    monthlyBudget: v => +v,
+    investSurplus: v => v === true || v === 'true',
+    etfDownPayment: v => +v,
   };
   const updates = {};
   Object.entries(map).forEach(([k, fn]) => {
@@ -292,7 +305,7 @@ function applySimFromObj(key, data, updateSimBulk) {
   if (data.label != null) updates.label = String(data.label);
   if (data.enabled != null) updates.enabled = data.enabled === true || data.enabled === 'true';
   const inp = data.inputs || {};
-  Object.keys(mkDef('loc')).forEach(f => {
+  Object.keys(mkDef('rental')).forEach(f => {
     if (inp[f] == null) return;
     if (f === 'mode' || f === 'label') updates[f] = String(inp[f]);
     else if (f === 'enabled') updates[f] = inp[f] === true || inp[f] === 'true';
@@ -319,18 +332,7 @@ export function handleImport(file, { updateG, updateSimBulk }) {
       } else if (ext === 'yaml' || ext === 'yml') {
         const flat = parseYAMLFlat(text);
         const g = {};
-        [
-          'inflation',
-          'regime',
-          'horizon',
-          'tauxActu',
-          'rendAlt',
-          'loyerPerso',
-          'revalLoyerPerso',
-          'budgetMensuel',
-          'investirSurplus',
-          'apportETF',
-        ].forEach(k => {
+        GLOBAL_IMPORT_KEYS.forEach(k => {
           if (flat[`global.${k}`] != null) g[k] = flat[`global.${k}`];
         });
         applyGlobalFromObj(g, updateG);
@@ -340,7 +342,7 @@ export function handleImport(file, { updateG, updateSimBulk }) {
             enabled: flat[`simulations.${k}.enabled`],
             inputs: {},
           };
-          Object.keys(mkDef('loc')).forEach(f => {
+          Object.keys(mkDef('rental')).forEach(f => {
             const v = flat[`simulations.${k}.inputs.${f}`];
             if (v != null) data.inputs[f] = v;
           });
@@ -348,29 +350,29 @@ export function handleImport(file, { updateG, updateSimBulk }) {
         });
       } else if (ext === 'csv') {
         const sections = parseCSVSections(text);
-        const gSec = sections['Paramètres globaux'];
+        const gSec = sections['Global parameters'];
         if (gSec) {
           const g = {};
           for (const r of gSec.rows) {
             const [p, v] = r;
             if (p === 'Inflation') g.inflation = +v;
-            else if (p === 'Régime fiscal') g.regime = v;
+            else if (p === 'Tax regime') g.regime = v;
             else if (p === 'Horizon') g.horizon = +v;
-            else if (p === "Taux d'actualisation (VAN)") g.tauxActu = +v;
-            else if (p === 'Rdt placement alternatif (net)') g.rendAlt = +v;
-            else if (p === 'Loyer perso (€/mois)') g.loyerPerso = +v;
-            else if (p === 'Reval. loyer perso (%/an)') g.revalLoyerPerso = +v;
-            else if (p === 'Budget mensuel (€/mois)') g.budgetMensuel = +v;
-            else if (p === 'Investir surplus ETF') g.investirSurplus = v === 'true';
-            else if (p === 'Apport ETF pur (€)') g.apportETF = +v;
+            else if (p === 'Discount rate (NPV)') g.discountRate = +v;
+            else if (p === 'Alternative return (net)') g.altReturn = +v;
+            else if (p === 'Personal rent (€/mo)') g.personalRent = +v;
+            else if (p === 'Personal rent growth (%/yr)') g.personalRentGrowth = +v;
+            else if (p === 'Monthly budget (€/mo)') g.monthlyBudget = +v;
+            else if (p === 'Invest ETF surplus') g.investSurplus = v === 'true';
+            else if (p === 'ETF reference down payment (€)') g.etfDownPayment = +v;
           }
           applyGlobalFromObj(g, updateG);
         }
       } else {
-        throw new Error(`Format non supporté : ${ext}`);
+        throw new Error(`Unsupported format: ${ext}`);
       }
     } catch (err) {
-      alert('Erreur importation :\n' + err.message);
+      alert('Import error:\n' + err.message);
     }
   };
   reader.readAsText(file, 'UTF-8');

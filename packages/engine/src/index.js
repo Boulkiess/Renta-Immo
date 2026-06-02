@@ -1,5 +1,4 @@
-// Public API of the financial engine (Phase 1 of the package extraction —
-// see CLAUDE.md / extraction plan). This barrel is the single import surface
+// Public API of the financial engine. This barrel is the single import surface
 // for the pure engine; consumers import from here, never from compute.js
 // directly. Everything re-exported below is pure (no React, no DOM) and covered
 // by the golden-master + ground-truth suites in __tests__/.
@@ -10,16 +9,16 @@
 export {
   // Orchestration
   compute,
-  computeEtfPur,
+  computeEtfScenario,
   computeEtfKpis,
   crossoverYear,
   // Pure helpers (testable in isolation)
   irr,
-  revalorise,
-  surplusAt,
-  abattementIR,
-  abattementPS,
-  impLoc,
+  compound,
+  annualSurplus,
+  allowanceIncomeTax,
+  allowanceSocialTax,
+  rentalTax,
   buildAmortization,
   computeResale,
   calcTRI,

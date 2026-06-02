@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CONCEPTS, GROUPS, mensualite, npv, yearlyAmort } from '../concepts.js';
+import { CONCEPTS, GROUPS, monthlyPayment, npv, yearlyAmortization } from '../concepts.js';
 import en from '../../../i18n/locales/en.json';
 import fr from '../../../i18n/locales/fr.json';
 
@@ -87,37 +87,41 @@ describe('registry integrity', () => {
 });
 
 describe('helpers', () => {
-  it('mensualite matches the engine annuity (200k / 3.85% / 20y ≈ 1196 €/mo)', () => {
-    const m = mensualite(200000, 3.85, 20);
+  it('monthlyPayment matches the engine annuity (200k / 3.85% / 20y ≈ 1196 €/mo)', () => {
+    const m = monthlyPayment(200000, 3.85, 20);
     expect(m).toBeGreaterThan(1194);
     expect(m).toBeLessThan(1199);
   });
 
-  it('mensualite handles zero-rate loan (emp / nM)', () => {
-    expect(mensualite(120000, 0, 10)).toBeCloseTo(1000, 6);
+  it('monthlyPayment handles zero-rate loan (loan / nM)', () => {
+    expect(monthlyPayment(120000, 0, 10)).toBeCloseTo(1000, 6);
   });
 
   it('npv at r=0 is the plain sum of flows', () => {
     expect(npv([-100, 50, 60], 0)).toBeCloseTo(10, 9);
   });
 
-  it('yearlyAmort interest+capital roughly equals the loan over its life', () => {
-    const { interest, capital } = yearlyAmort(200000, 3.85, 20);
+  it('yearlyAmortization interest+principal roughly equals the loan over its life', () => {
+    const { interest, principal } = yearlyAmortization(200000, 3.85, 20);
     expect(interest.length).toBe(20);
-    expect(capital.reduce((a, b) => a + b, 0)).toBeCloseTo(200000, -1);
+    expect(principal.reduce((a, b) => a + b, 0)).toBeCloseTo(200000, -1);
   });
 });
 
 describe('adapter correctness', () => {
-  it('mensualite concept → ~1196 €/mo at defaults', () => {
-    const r = byId('mensualite').compute({ emp: 200000, taux: 3.85, duree: 20 });
+  it('monthlyPayment concept → ~1196 €/mo at defaults', () => {
+    const r = byId('monthlyPayment').compute({
+      loanAmount: 200000,
+      interestRate: 3.85,
+      loanTerm: 20,
+    });
     expect(r.unit).toBe('eurMonth');
     expect(r.value).toBeGreaterThan(1194);
     expect(r.value).toBeLessThan(1199);
   });
 
-  it('abattements curve hits 96% (IR) at yr 21, 100% at yr 22; PS 100% at yr 30', () => {
-    const r = byId('abattements').compute({});
+  it('allowances curve hits 96% (IR) at yr 21, 100% at yr 22; PS 100% at yr 30', () => {
+    const r = byId('allowances').compute({});
     const [ir, ps] = r.series;
     expect(ir.data[4]).toBe(0); // yr 5
     expect(ir.data[20]).toBe(96); // yr 21
@@ -126,30 +130,38 @@ describe('adapter correctness', () => {
     expect(ps.data[29]).toBe(100); // yr 30
   });
 
-  it('impotLoc differs by regime for the same inputs', () => {
-    const base = { le: 12000, chg: 3500, ab: 6250, at: 1500, intAnnuel: 6000, tmi: 30, ps: 17.2 };
-    const lmnp = byId('impotLoc').compute({ ...base, regime: 'lmnp' }).value;
-    const micro = byId('impotLoc').compute({ ...base, regime: 'microbic' }).value;
-    const nu = byId('impotLoc').compute({ ...base, regime: 'nu' }).value;
-    expect(lmnp).toBe(0); // deficit → no tax
-    expect(micro).toBeCloseTo(6000 * 0.472, 4); // 50% abatement × (30+17.2)%
-    expect(nu).toBeCloseTo(2500 * 0.472, 4); // (le − chg − int) × 47.2%
+  it('rentalTax differs by regime for the same inputs', () => {
+    const base = {
+      effectiveRent: 12000,
+      charges: 3500,
+      buildingDepreciation: 6250,
+      worksDepreciation: 1500,
+      annualInterest: 6000,
+      marginalTaxRate: 30,
+      socialCharges: 17.2,
+    };
+    const lmnp = byId('rentalTax').compute({ ...base, regime: 'lmnp' }).value;
+    const micro = byId('rentalTax').compute({ ...base, regime: 'microbic' }).value;
+    const nu = byId('rentalTax').compute({ ...base, regime: 'nu' }).value;
+    expect(lmnp).toBe(0); // loss → no tax
+    expect(micro).toBeCloseTo(6000 * 0.472, 4); // 50% allowance × (30+17.2)%
+    expect(nu).toBeCloseTo(2500 * 0.472, 4); // (rent − charges − interest) × 47.2%
   });
 
-  it('rendBrut concept → 4.21% at 1000€ rent / 285k cost', () => {
-    const r = byId('rendBrut').compute({ loyer: 1000, ct: 285000 });
+  it('grossYield concept → 4.21% at 1000€ rent / 285k cost', () => {
+    const r = byId('grossYield').compute({ rent: 1000, totalCost: 285000 });
     expect(r.value).toBeCloseTo((12000 / 285000) * 100, 6);
   });
 
-  it('etfPur returns 30 finite years', () => {
-    const r = byId('etfPur').compute(defaults(byId('etfPur')));
+  it('etfScenario returns 30 finite years', () => {
+    const r = byId('etfScenario').compute(defaults(byId('etfScenario')));
     expect(r.series[0].data.length).toBe(30);
     expect(Number.isFinite(r.series[0].data[29])).toBe(true);
   });
 
-  it('triVanMoic computes MOIC and a converging IRR at defaults', () => {
-    const c = byId('triVanMoic');
-    const r = c.compute({ flows: [-50000, 3000, 3000, 3500, 3500, 4000, 70000], tauxActu: 3 });
+  it('irrNpvMoic computes MOIC and a converging IRR at defaults', () => {
+    const c = byId('irrNpvMoic');
+    const r = c.compute({ flows: [-50000, 3000, 3000, 3500, 3500, 4000, 70000], discountRate: 3 });
     const moic = r.notes.find(n => n.label === 'doc.notes.moic').value;
     const tri = r.notes.find(n => n.label === 'doc.notes.tri').value;
     expect(moic).toBeCloseTo(87000 / 50000, 6);
@@ -159,18 +171,18 @@ describe('adapter correctness', () => {
 
 describe('failure modes (no NaN leaks, explicit nulls)', () => {
   it('IRR non-convergence → null (all-negative flows)', () => {
-    const r = byId('triVanMoic').compute({ flows: [-50000, -1000, -1000, -1000], tauxActu: 3 });
+    const r = byId('irrNpvMoic').compute({ flows: [-50000, -1000, -1000, -1000], discountRate: 3 });
     const tri = r.notes.find(n => n.label === 'doc.notes.tri').value;
     expect(tri).toBeNull();
   });
 
   it('MOIC with zero initial outflow → null (no divide-by-zero)', () => {
-    const r = byId('triVanMoic').compute({ flows: [0, 1000, 1000], tauxActu: 3 });
+    const r = byId('irrNpvMoic').compute({ flows: [0, 1000, 1000], discountRate: 3 });
     const moic = r.notes.find(n => n.label === 'doc.notes.moic').value;
     expect(moic).toBeNull();
   });
 
-  it('rendBrut with zero cost → null, not Infinity', () => {
-    expect(byId('rendBrut').compute({ loyer: 1000, ct: 0 }).value).toBeNull();
+  it('grossYield with zero cost → null, not Infinity', () => {
+    expect(byId('grossYield').compute({ rent: 1000, totalCost: 0 }).value).toBeNull();
   });
 });

@@ -5,7 +5,7 @@ import { renderWithProviders } from '../../test-utils/renderWithProviders.jsx';
 import FieldGroup from './FieldGroup.jsx';
 import { getGroups, AUTOABLE_FIELDS } from '../../state/definitions.js';
 
-const groups = getGroups('loc');
+const groups = getGroups('rental');
 const firstGroup = groups[0];
 const autoGroup = groups.find(g => g.f.some(f => AUTOABLE_FIELDS.has(f.k)));
 
@@ -15,13 +15,13 @@ const renderGroup = (group, simsOverride) =>
   });
 
 describe('FieldGroup (jsdom)', () => {
-  it('rend les champs du groupe (au moins un input numérique + un slider)', () => {
+  it('renders the group fields (at least one numeric input + one slider)', () => {
     const { container } = renderGroup(firstGroup);
     expect(container.querySelectorAll('input[inputmode="decimal"]').length).toBeGreaterThan(0);
     expect(container.querySelectorAll('input[type="range"]').length).toBeGreaterThan(0);
   });
 
-  it('flèche haut incrémente d’un pas ; shift+flèche incrémente de 10 pas (D9#8)', () => {
+  it('arrow up increments by one step; shift+arrow increments by 10 steps (D9#8)', () => {
     const { container } = renderGroup(firstGroup);
     const input = container.querySelector('input[inputmode="decimal"]');
     const v0 = parseFloat(input.value);
@@ -37,8 +37,8 @@ describe('FieldGroup (jsdom)', () => {
     expect(d2).toBeCloseTo(d1 * 10, 6);
   });
 
-  it('cliquer le badge AUTO bascule l’état disabled d’un slider', () => {
-    if (!autoGroup) return; // garde : aucun champ autoable dans ce mode
+  it('clicking the AUTO badge toggles a slider disabled state', () => {
+    if (!autoGroup) return; // guard: no autoable field in this mode
     const { container } = renderGroup(autoGroup, { A: { autoFields: [] } });
     const disabledCount = () =>
       [...container.querySelectorAll('input[type="range"]')].filter(r => r.disabled).length;

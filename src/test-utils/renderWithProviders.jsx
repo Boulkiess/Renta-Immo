@@ -5,7 +5,7 @@ import i18n from '../i18n/index.js';
 import { darkTheme } from '../theme/themes.js';
 import { AppProvider } from '../state/AppContext.jsx';
 
-const STORAGE_KEY = 'immorenta_state';
+const STORAGE_KEY = 'immorenta_state_v2';
 
 /**
  * Render a component inside the REAL provider tree (theme + i18n + AppContext),

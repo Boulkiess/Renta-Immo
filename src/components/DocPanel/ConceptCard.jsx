@@ -220,7 +220,7 @@ export default function ConceptCard({ concept, ctx }) {
                       <FlowIn
                         key={i}
                         type="number"
-                        aria-label={t('revente.yr', { n: i })}
+                        aria-label={t('resale.yr', { n: i })}
                         value={f}
                         onChange={e => {
                           const next = [...vals[inp.key]];

@@ -121,184 +121,184 @@ export default function GlobalStrip() {
         </Field>
 
         <Field>
-          <InfoButton tooltipKey="tauxActu" />
-          <Label>{t('global.tauxActu')}</Label>
+          <InfoButton tooltipKey="discountRate" />
+          <Label>{t('global.discountRate')}</Label>
           <NumInput
             type="number"
             min="0"
             max="15"
             step="0.5"
-            value={G.tauxActu}
-            onChange={e => updateG({ tauxActu: +e.target.value })}
+            value={G.discountRate}
+            onChange={e => updateG({ discountRate: +e.target.value })}
           />
           <DraggableUnit
             min={0}
             max={15}
             step={0.5}
-            val={G.tauxActu}
-            onChange={v => updateG({ tauxActu: v })}
+            val={G.discountRate}
+            onChange={v => updateG({ discountRate: v })}
           >
             {u.percent}
           </DraggableUnit>
         </Field>
 
         <Field>
-          <InfoButton tooltipKey="rendAlt" />
-          <Label>{t('global.rendAlt')}</Label>
+          <InfoButton tooltipKey="altReturn" />
+          <Label>{t('global.altReturn')}</Label>
           <NumInput
             type="number"
             min="0"
             max="20"
             step="0.5"
-            value={G.rendAlt}
-            onChange={e => updateG({ rendAlt: +e.target.value })}
+            value={G.altReturn}
+            onChange={e => updateG({ altReturn: +e.target.value })}
           />
           <DraggableUnit
             min={0}
             max={20}
             step={0.5}
-            val={G.rendAlt}
-            onChange={v => updateG({ rendAlt: v })}
+            val={G.altReturn}
+            onChange={v => updateG({ altReturn: v })}
           >
             {u.percent}
           </DraggableUnit>
         </Field>
 
         <Field>
-          <InfoButton tooltipKey="loyerPerso" />
-          <Label>{t('global.loyerPerso')}</Label>
+          <InfoButton tooltipKey="personalRent" />
+          <Label>{t('global.personalRent')}</Label>
           <NumInput
             type="number"
             min="0"
             max="5000"
             step="50"
-            value={G.loyerPerso}
-            onChange={e => updateG({ loyerPerso: +e.target.value })}
+            value={G.personalRent}
+            onChange={e => updateG({ personalRent: +e.target.value })}
           />
           <DraggableUnit
             min={0}
             max={5000}
             step={50}
-            val={G.loyerPerso}
-            onChange={v => updateG({ loyerPerso: v })}
+            val={G.personalRent}
+            onChange={v => updateG({ personalRent: v })}
           >
             {u.perMonth}
           </DraggableUnit>
         </Field>
 
         <Field>
-          <InfoButton tooltipKey="revalLoyerPerso" />
-          <Label>{t('global.revalLoyerPerso')}</Label>
+          <InfoButton tooltipKey="personalRentGrowth" />
+          <Label>{t('global.personalRentGrowth')}</Label>
           <NumInput
             type="number"
             min="0"
             max="5"
             step="0.1"
-            value={G.revalLoyerPerso}
-            onChange={e => updateG({ revalLoyerPerso: +e.target.value })}
+            value={G.personalRentGrowth}
+            onChange={e => updateG({ personalRentGrowth: +e.target.value })}
           />
           <DraggableUnit
             min={0}
             max={5}
             step={0.1}
-            val={G.revalLoyerPerso}
-            onChange={v => updateG({ revalLoyerPerso: v })}
+            val={G.personalRentGrowth}
+            onChange={v => updateG({ personalRentGrowth: v })}
           >
             {u.perYear}
           </DraggableUnit>
         </Field>
 
         <Field>
-          <InfoButton tooltipKey="budgetMensuel" />
-          <Label>{t('global.budgetMensuel')}</Label>
+          <InfoButton tooltipKey="monthlyBudget" />
+          <Label>{t('global.monthlyBudget')}</Label>
           <NumInput
             $w="62px"
             type="number"
             min="500"
             max="20000"
             step="100"
-            value={G.budgetMensuel}
-            onChange={e => updateG({ budgetMensuel: +e.target.value })}
+            value={G.monthlyBudget}
+            onChange={e => updateG({ monthlyBudget: +e.target.value })}
           />
           <DraggableUnit
             min={500}
             max={20000}
             step={100}
-            val={G.budgetMensuel}
-            onChange={v => updateG({ budgetMensuel: v })}
+            val={G.monthlyBudget}
+            onChange={v => updateG({ monthlyBudget: v })}
           >
             {u.perMonth}
           </DraggableUnit>
         </Field>
 
         <Field>
-          <InfoButton tooltipKey="revalBudget" />
-          <Label>{t('global.revalBudget')}</Label>
+          <InfoButton tooltipKey="budgetGrowth" />
+          <Label>{t('global.budgetGrowth')}</Label>
           <NumInput
             type="number"
             min="0"
             max="10"
             step="0.1"
-            value={G.revalBudget}
-            onChange={e => updateG({ revalBudget: +e.target.value })}
+            value={G.budgetGrowth}
+            onChange={e => updateG({ budgetGrowth: +e.target.value })}
           />
           <DraggableUnit
             min={0}
             max={10}
             step={0.1}
-            val={G.revalBudget}
-            onChange={v => updateG({ revalBudget: v })}
+            val={G.budgetGrowth}
+            onChange={v => updateG({ budgetGrowth: v })}
           >
             {u.perYear}
           </DraggableUnit>
         </Field>
 
         <Field>
-          <InfoButton tooltipKey="revalCharges" />
-          <Label>{t('global.revalCharges')}</Label>
+          <InfoButton tooltipKey="chargesGrowth" />
+          <Label>{t('global.chargesGrowth')}</Label>
           <NumInput
             type="number"
             min="0"
             max="10"
             step="0.1"
-            value={G.revalCharges ?? 2}
-            onChange={e => updateG({ revalCharges: +e.target.value })}
+            value={G.chargesGrowth ?? 2}
+            onChange={e => updateG({ chargesGrowth: +e.target.value })}
           />
           <DraggableUnit
             min={0}
             max={10}
             step={0.1}
-            val={G.revalCharges ?? 2}
-            onChange={v => updateG({ revalCharges: v })}
+            val={G.chargesGrowth ?? 2}
+            onChange={v => updateG({ chargesGrowth: v })}
           >
             {u.perYear}
           </DraggableUnit>
         </Field>
 
         <Field style={{ gap: 8 }}>
-          <InfoButton tooltipKey="investirSurplus" />
-          <Label>{t('global.investirSurplus')}</Label>
-          <Toggle checked={G.investirSurplus} onChange={v => updateG({ investirSurplus: v })} />
+          <InfoButton tooltipKey="investSurplus" />
+          <Label>{t('global.investSurplus')}</Label>
+          <Toggle checked={G.investSurplus} onChange={v => updateG({ investSurplus: v })} />
         </Field>
 
         <Field>
-          <InfoButton tooltipKey="apportETF" />
-          <Label>{t('global.apportETF')}</Label>
+          <InfoButton tooltipKey="etfDownPayment" />
+          <Label>{t('global.etfDownPayment')}</Label>
           <NumInput
             $w="68px"
             type="number"
             min="0"
             max="500000"
             step="1000"
-            value={G.apportETF}
-            onChange={e => updateG({ apportETF: +e.target.value })}
+            value={G.etfDownPayment}
+            onChange={e => updateG({ etfDownPayment: +e.target.value })}
           />
           <DraggableUnit
             min={0}
             max={500000}
             step={1000}
-            val={G.apportETF}
-            onChange={v => updateG({ apportETF: v })}
+            val={G.etfDownPayment}
+            onChange={v => updateG({ etfDownPayment: v })}
           >
             {u.euros}
           </DraggableUnit>
@@ -308,9 +308,9 @@ export default function GlobalStrip() {
       <HypoBand title={t('global.hypoTitle')}>
         {t('global.hypoSummary', {
           inflation: G.inflation,
-          revalCharges: G.revalCharges ?? 2,
-          revalBudget: G.revalBudget,
-          revalLoyerPerso: G.revalLoyerPerso,
+          chargesGrowth: G.chargesGrowth ?? 2,
+          budgetGrowth: G.budgetGrowth,
+          personalRentGrowth: G.personalRentGrowth,
         })}
       </HypoBand>
     </Strip>

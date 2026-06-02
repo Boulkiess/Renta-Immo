@@ -4,25 +4,23 @@ import { fmtE, fmtP, fmtTRI } from '../../../engine/utils.js';
  * Build the KPI table section/row descriptors. Pure data — no JSX.
  *
  * `t` is injected (react-i18next) rather than imported so the function stays a
- * plain data builder the unit tests can drive. The `.startsWith()` language
- * sniffs for section titles are carried verbatim from the original component
- * (behavior-preserving refactor — not "fixed" here).
+ * plain data builder the unit tests can drive.
  *
  * ETF KPIs (tri/triReal/van/moic) come from the engine's computeEtfKpis(G),
  * not recomputed in the view.
  *
  * @param {Function} t  i18n translator
- * @param {{ G: object, RES: object, sims: object, etfPurGlobal: object[],
+ * @param {{ G: object, RES: object, sims: object, etfScenarioGlobal: object[],
  *           etfKpis: {tri:number,triReal:number,van:number,moic:number|null},
  *           crossovers: object }} ctx
  */
-export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossovers }) {
+export function buildSections(t, { G, RES, sims, etfScenarioGlobal, etfKpis, crossovers }) {
   const hz = G.horizon;
-  const etfHz = etfPurGlobal[hz - 1]?.cap;
-  const etf30 = etfPurGlobal[29]?.cap;
+  const etfHz = etfScenarioGlobal[hz - 1]?.cap;
+  const etf30 = etfScenarioGlobal[29]?.cap;
 
-  const fmtBe = v => (v == null ? '> 30 ans' : t('kpisTable.anneeN', { n: v }));
-  const fmtCross = v => (v == null ? t('kpisTable.gt30ans') : t('kpisTable.anneeN', { n: v }));
+  const fmtBe = v => (v == null ? '> 30y' : t('kpisTable.yearN', { n: v }));
+  const fmtCross = v => (v == null ? t('kpisTable.gt30y') : t('kpisTable.yearN', { n: v }));
   const fmtMoic = v => (v && isFinite(v) ? v.toFixed(2) + 'x' : '—');
 
   const infl = G.inflation / 100;
@@ -35,164 +33,164 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
 
   return [
     {
-      cat: t('kpisTable.coutTotal').startsWith('C') ? 'Coûts & Financement' : 'Costs & Financing',
+      cat: t('kpisTable.catCosts'),
       rows: [
         {
-          label: t('kpisTable.coutTotal'),
-          fmt: k => fmtE(RES[k].ct),
+          label: t('kpisTable.totalCost'),
+          fmt: k => fmtE(RES[k].totalCost),
           better: 'min',
           neg: false,
-          tooltipKey: 'kpi.coutTotal',
+          tooltipKey: 'kpi.totalCost',
         },
         {
-          label: t('kpisTable.emprunte'),
-          fmt: k => fmtE(RES[k].emp),
+          label: t('kpisTable.loanAmount'),
+          fmt: k => fmtE(RES[k].loanAmount),
           better: 'min',
           neg: false,
-          tooltipKey: 'kpi.emprunte',
+          tooltipKey: 'kpi.loanAmount',
         },
         {
-          label: t('kpisTable.mensualiteAss'),
-          fmt: k => fmtE(RES[k].mens + RES[k].assM),
+          label: t('kpisTable.monthlyPaymentIns'),
+          fmt: k => fmtE(RES[k].monthlyPayment + RES[k].monthlyInsurance),
           better: 'min',
           neg: false,
-          tooltipKey: 'kpi.mensualiteAss',
+          tooltipKey: 'kpi.monthlyPaymentIns',
         },
         {
-          label: t('kpisTable.coutCredit'),
-          fmt: k => fmtE(RES[k].totInt + RES[k].totAss),
+          label: t('kpisTable.creditCost'),
+          fmt: k => fmtE(RES[k].totalInterest + RES[k].totalInsurance),
           better: 'min',
           neg: false,
-          tooltipKey: 'kpi.coutCredit',
+          tooltipKey: 'kpi.creditCost',
         },
       ],
     },
     {
-      cat: t('kpisTable.rendBrut').startsWith('R') ? 'Rendements & Cashflow' : 'Yields & Cash-flow',
+      cat: t('kpisTable.catYields'),
       rows: [
         {
-          label: t('kpisTable.rendBrut'),
-          fmt: k => (sims[k].mode === 'loc' ? fmtP(RES[k].rendBrut) : '—'),
+          label: t('kpisTable.grossYield'),
+          fmt: k => (sims[k].mode === 'rental' ? fmtP(RES[k].grossYield) : '—'),
           better: 'max',
           neg: false,
-          tooltipKey: 'kpi.rendBrut',
-          etfVal: G.rendAlt,
+          tooltipKey: 'kpi.grossYield',
+          etfVal: G.altReturn,
           etfFmt: v => fmtP(v),
         },
         {
-          label: t('kpisTable.rendNet'),
-          fmt: k => (sims[k].mode === 'loc' ? fmtP(RES[k].rendNet) : '—'),
+          label: t('kpisTable.netYield'),
+          fmt: k => (sims[k].mode === 'rental' ? fmtP(RES[k].netYield) : '—'),
           better: 'max',
           neg: false,
-          tooltipKey: 'kpi.rendNet',
-          etfVal: G.rendAlt,
+          tooltipKey: 'kpi.netYield',
+          etfVal: G.altReturn,
           etfFmt: v => fmtP(v),
         },
         {
-          label: t('kpisTable.cfMensuel'),
-          fmt: k => fmtE(RES[k].flux[0].cfN / 12),
+          label: t('kpisTable.monthlyCashFlow'),
+          fmt: k => fmtE(RES[k].flows[0].netCashFlow / 12),
           better: 'max',
           neg: true,
-          tooltipKey: 'kpi.cfMensuel',
-          etfVal: -G.loyerPerso,
+          tooltipKey: 'kpi.monthlyCashFlow',
+          etfVal: -G.personalRent,
         },
         {
           label: t('kpisTable.coc'),
-          fmt: k => (RES[k].flux[0]?.coc != null ? fmtP(RES[k].flux[0].coc) : '—'),
+          fmt: k => (RES[k].flows[0]?.coc != null ? fmtP(RES[k].flows[0].coc) : '—'),
           better: 'max',
           neg: true,
           tooltipKey: 'kpi.coc',
-          // ETF: effort cash year 1 mirroring the immo cfN (which subtracts loyerPerso)
+          // ETF: effort cash year 1 mirroring the property netCashFlow (which subtracts personalRent)
           // → only real outflow is the personal rent, no cash distributed by a capitalising ETF.
-          etfVal: G.apportETF > 0 ? (-(G.loyerPerso * 12) / G.apportETF) * 100 : null,
+          etfVal: G.etfDownPayment > 0 ? (-(G.personalRent * 12) / G.etfDownPayment) * 100 : null,
           etfFmt: v => fmtP(v),
         },
         {
-          label: t('kpisTable.effortRP'),
-          fmt: k => fmtE(-RES[k].flux[0].cfN / 12 - G.loyerPerso),
+          label: t('kpisTable.monthlyEffort'),
+          fmt: k => fmtE(-RES[k].flows[0].netCashFlow / 12 - G.personalRent),
           better: 'min',
           neg: true,
-          tooltipKey: 'kpi.effortRP',
+          tooltipKey: 'kpi.monthlyEffort',
           etfVal: 0,
         },
         {
-          label: t('kpisTable.breakeven'),
-          fmt: k => fmtBe(RES[k].be),
+          label: t('kpisTable.breakEven'),
+          fmt: k => fmtBe(RES[k].breakEven),
           better: 'min',
           neg: false,
-          tooltipKey: 'kpi.breakeven',
+          tooltipKey: 'kpi.breakEven',
         },
       ],
     },
     {
-      cat: 'TRI / VAN / MOIC',
+      cat: t('kpisTable.catReturns'),
       rows: [
         {
-          label: t('kpisTable.tri10'),
+          label: t('kpisTable.irr10'),
           fmt: k => fmtTRI(RES[k].tri10),
           better: 'max',
           neg: false,
-          tooltipKey: 'kpi.tri',
+          tooltipKey: 'kpi.irr',
           muted: real,
           etfVal: etfKpis.tri,
           etfFmt: v => fmtTRI(v),
         },
         {
-          label: t('kpisTable.tri10Real'),
+          label: t('kpisTable.irr10Real'),
           fmt: k => fmtTRI(realTri(RES[k].tri10)),
           better: 'max',
           neg: false,
-          tooltipKey: 'kpi.triReal',
+          tooltipKey: 'kpi.irrReal',
           muted: !real,
           etfVal: etfKpis.triReal,
           etfFmt: v => fmtTRI(v),
         },
         {
-          label: t('kpisTable.tri15'),
+          label: t('kpisTable.irr15'),
           fmt: k => fmtTRI(RES[k].tri15),
           better: 'max',
           neg: false,
-          tooltipKey: 'kpi.tri',
+          tooltipKey: 'kpi.irr',
           muted: real,
           etfVal: etfKpis.tri,
           etfFmt: v => fmtTRI(v),
         },
         {
-          label: t('kpisTable.tri15Real'),
+          label: t('kpisTable.irr15Real'),
           fmt: k => fmtTRI(realTri(RES[k].tri15)),
           better: 'max',
           neg: false,
-          tooltipKey: 'kpi.triReal',
+          tooltipKey: 'kpi.irrReal',
           muted: !real,
           etfVal: etfKpis.triReal,
           etfFmt: v => fmtTRI(v),
         },
         {
-          label: t('kpisTable.tri20'),
+          label: t('kpisTable.irr20'),
           fmt: k => fmtTRI(RES[k].tri20),
           better: 'max',
           neg: false,
-          tooltipKey: 'kpi.tri',
+          tooltipKey: 'kpi.irr',
           muted: real,
           etfVal: etfKpis.tri,
           etfFmt: v => fmtTRI(v),
         },
         {
-          label: t('kpisTable.tri20Real'),
+          label: t('kpisTable.irr20Real'),
           fmt: k => fmtTRI(realTri(RES[k].tri20)),
           better: 'max',
           neg: false,
-          tooltipKey: 'kpi.triReal',
+          tooltipKey: 'kpi.irrReal',
           muted: !real,
           etfVal: etfKpis.triReal,
           etfFmt: v => fmtTRI(v),
         },
         {
-          label: t('kpisTable.van', { tauxActu: G.tauxActu, horizon: hz }),
+          label: t('kpisTable.npv', { discountRate: G.discountRate, horizon: hz }),
           fmt: k => fmtE(RES[k].van),
           better: 'max',
           neg: true,
-          tooltipKey: 'kpi.van',
+          tooltipKey: 'kpi.npv',
           etfVal: etfKpis.van,
         },
         {
@@ -207,78 +205,78 @@ export function buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossove
       ],
     },
     {
-      cat: t('kpisTable.patTotal', { horizon: hz }).startsWith('P') ? 'Patrimoine' : 'Wealth',
+      cat: t('kpisTable.catWealth'),
       rows: [
         {
-          label: t('kpisTable.bilanReventeHz', { horizon: hz }),
-          fmt: k => fmtE(RES[k].flux[hz - 1]?.bilanRevente),
+          label: t('kpisTable.resaleBalanceHz', { horizon: hz }),
+          fmt: k => fmtE(RES[k].flows[hz - 1]?.resaleBalance),
           better: 'max',
           neg: true,
-          tooltipKey: 'kpi.bilanRevente',
+          tooltipKey: 'kpi.resaleBalance',
           etfVal: null,
         },
         {
-          label: t('kpisTable.bilanTotalHz', { horizon: hz }),
-          fmt: k => fmtE(RES[k].flux[hz - 1]?.bilanTotal),
+          label: t('kpisTable.totalBalanceHz', { horizon: hz }),
+          fmt: k => fmtE(RES[k].flows[hz - 1]?.totalBalance),
           better: 'max',
           neg: true,
-          tooltipKey: 'kpi.bilanTotal',
+          tooltipKey: 'kpi.totalBalance',
           etfVal: null,
         },
         {
-          label: t('kpisTable.patNet', { horizon: hz }),
-          fmt: k => fmtE(RES[k].flux[hz - 1]?.patNet),
+          label: t('kpisTable.netWorth', { horizon: hz }),
+          fmt: k => fmtE(RES[k].flows[hz - 1]?.netWorth),
           better: 'max',
           neg: true,
-          tooltipKey: 'kpi.patNet',
+          tooltipKey: 'kpi.netWorth',
           etfVal: null,
         },
         {
-          label: t('kpisTable.patTotal', { horizon: hz }),
-          fmt: k => fmtE(RES[k].flux[hz - 1]?.patTotal),
+          label: t('kpisTable.totalWorth', { horizon: hz }),
+          fmt: k => fmtE(RES[k].flows[hz - 1]?.totalWorth),
           better: 'max',
           neg: true,
-          tooltipKey: 'kpi.patTotal',
+          tooltipKey: 'kpi.totalWorth',
           muted: real,
           etfVal: etfHz,
         },
         {
-          label: t('kpisTable.patTotalReal', { horizon: hz }),
-          fmt: k => fmtE(deflate(RES[k].flux[hz - 1]?.patTotal, hz)),
+          label: t('kpisTable.totalWorthReal', { horizon: hz }),
+          fmt: k => fmtE(deflate(RES[k].flows[hz - 1]?.totalWorth, hz)),
           better: 'max',
           neg: true,
-          tooltipKey: 'kpi.patReal',
+          tooltipKey: 'kpi.wealthReal',
           muted: !real,
           etfVal: deflate(etfHz, hz),
         },
         ...(hz < 30
           ? [
               {
-                label: t('kpisTable.patTotal30'),
-                fmt: k => fmtE(RES[k].flux[29]?.patTotal),
+                label: t('kpisTable.totalWorth30'),
+                fmt: k => fmtE(RES[k].flows[29]?.totalWorth),
                 better: 'max',
                 neg: true,
-                tooltipKey: 'kpi.patTotal',
+                tooltipKey: 'kpi.totalWorth',
                 muted: real,
                 etfVal: etf30,
               },
               {
-                label: t('kpisTable.patTotal30Real'),
-                fmt: k => fmtE(deflate(RES[k].flux[29]?.patTotal, 30)),
+                label: t('kpisTable.totalWorth30Real'),
+                fmt: k => fmtE(deflate(RES[k].flows[29]?.totalWorth, 30)),
                 better: 'max',
                 neg: true,
-                tooltipKey: 'kpi.patReal',
+                tooltipKey: 'kpi.wealthReal',
                 muted: !real,
                 etfVal: deflate(etf30, 30),
               },
             ]
           : []),
         {
-          label: t('kpisTable.beRevente'),
-          fmt: k => fmtBe(RES[k].beRevente),
+          label: t('kpisTable.resaleBreakEven'),
+          fmt: k => fmtBe(RES[k].resaleBreakEven),
           better: 'min',
           neg: false,
-          tooltipKey: 'kpi.beRevente',
+          tooltipKey: 'kpi.resaleBreakEven',
           etfVal: null,
         },
         {

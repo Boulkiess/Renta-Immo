@@ -9,62 +9,62 @@ import type { Globals, SimParams } from '../src/index.js';
 const makeG = (over: Partial<Globals> = {}): Globals => ({
   regime: 'lmnp',
   horizon: 20,
-  tauxActu: 3,
-  rendAlt: 6,
-  loyerPerso: 900,
-  revalLoyerPerso: 2,
-  budgetMensuel: 2500,
-  revalBudget: 0,
-  revalCharges: 2,
-  investirSurplus: true,
-  apportETF: 60000,
+  discountRate: 3,
+  altReturn: 6,
+  personalRent: 900,
+  personalRentGrowth: 2,
+  monthlyBudget: 2500,
+  budgetGrowth: 0,
+  chargesGrowth: 2,
+  investSurplus: true,
+  etfDownPayment: 60000,
   inflation: 2,
   ...over,
 });
 
-const mkParams = (mode: 'loc' | 'rp', over: Partial<SimParams> = {}): SimParams => ({
+const mkParams = (mode: 'rental' | 'primary', over: Partial<SimParams> = {}): SimParams => ({
   mode,
-  prixAchat: 250000,
-  fraisNotaire: 20000,
-  travaux: 15000,
-  fraisAgence: 0,
-  fraisDossier: 0,
-  apport: 50000,
-  taux: 3.85,
-  duree: 20,
-  assurance: 0.25,
-  revalBien: 2.0,
-  fraisVente: 4,
-  loyer: 1000,
-  vacance: 5,
-  taxeFonciere: 1200,
-  chargesCopro: 800,
-  assurPNO: 200,
-  fraisGestion: 7,
-  provision: 500,
-  revalLoyer: 1.5,
-  tmi: 30,
-  ps: 17.2,
-  amortBien: 2.5,
-  amortTravaux: 10,
-  impotPV: 19,
-  psPV: 17.2,
-  taxeFonciereRP: 1200,
-  chargesCoproRP: 1200,
-  assurHab: 300,
-  provisionRP: 500,
+  purchasePrice: 250000,
+  notaryFees: 20000,
+  renovationCosts: 15000,
+  agencyFees: 0,
+  loanFees: 0,
+  downPayment: 50000,
+  interestRate: 3.85,
+  loanTerm: 20,
+  insuranceRate: 0.25,
+  propertyGrowth: 2.0,
+  sellingFees: 4,
+  rent: 1000,
+  vacancyRate: 5,
+  propertyTax: 1200,
+  condoFees: 800,
+  landlordInsurance: 200,
+  managementFees: 7,
+  maintenanceReserve: 500,
+  rentGrowth: 1.5,
+  marginalTaxRate: 30,
+  socialCharges: 17.2,
+  propertyDepreciation: 2.5,
+  renovationDepreciation: 10,
+  capitalGainsTax: 19,
+  capitalGainsSocialCharges: 17.2,
+  propertyTaxPrimary: 1200,
+  condoFeesPrimary: 1200,
+  homeInsurance: 300,
+  maintenanceReservePrimary: 500,
   ...over,
 });
 
-// Matrix: loc × 3 regimes, rp, an over-financed sim, and a few global tweaks.
+// Matrix: rental × 3 regimes, primary, an over-funded sim, and a few global tweaks.
 const scenarios: [string, SimParams, Globals][] = [
-  ['loc · lmnp', mkParams('loc'), makeG({ regime: 'lmnp' })],
-  ['loc · microbic', mkParams('loc'), makeG({ regime: 'microbic' })],
-  ['loc · nu', mkParams('loc'), makeG({ regime: 'nu' })],
-  ['rp', mkParams('rp'), makeG()],
-  ['loc · sur-financé', mkParams('loc', { apport: 320000 }), makeG()],
-  ['loc · surplus off', mkParams('loc'), makeG({ investirSurplus: false })],
-  ['rp · horizon 30', mkParams('rp'), makeG({ horizon: 30 })],
+  ['rental · lmnp', mkParams('rental'), makeG({ regime: 'lmnp' })],
+  ['rental · microbic', mkParams('rental'), makeG({ regime: 'microbic' })],
+  ['rental · nu', mkParams('rental'), makeG({ regime: 'nu' })],
+  ['primary', mkParams('primary'), makeG()],
+  ['rental · over-funded', mkParams('rental', { downPayment: 320000 }), makeG()],
+  ['rental · surplus off', mkParams('rental'), makeG({ investSurplus: false })],
+  ['primary · horizon 30', mkParams('primary'), makeG({ horizon: 30 })],
 ];
 
 describe('parity — TS engine matches JS engine', () => {
@@ -72,8 +72,8 @@ describe('parity — TS engine matches JS engine', () => {
     expect(ts.compute(p, g)).toEqual(js.compute(p, g));
   });
 
-  it.each(scenarios)('computeEtfPur() — %s', (_name, _p, g) => {
-    expect(ts.computeEtfPur(g)).toEqual(js.computeEtfPur(g));
+  it.each(scenarios)('computeEtfScenario() — %s', (_name, _p, g) => {
+    expect(ts.computeEtfScenario(g)).toEqual(js.computeEtfScenario(g));
   });
 
   it.each([10, 20, 30])('computeEtfKpis() — horizon %i', hz => {
@@ -81,14 +81,14 @@ describe('parity — TS engine matches JS engine', () => {
     expect(ts.computeEtfKpis(g)).toEqual(js.computeEtfKpis(g));
   });
 
-  it('pure helpers agree (irr, abattements, impLoc)', () => {
+  it('pure helpers agree (irr, allowances, rentalTax)', () => {
     expect(ts.irr([-1000, 0, 1210])).toEqual(js.irr([-1000, 0, 1210]));
     for (let yr = 1; yr <= 31; yr++) {
-      expect(ts.abattementIR(yr)).toEqual(js.abattementIR(yr));
-      expect(ts.abattementPS(yr)).toEqual(js.abattementPS(yr));
+      expect(ts.allowanceIncomeTax(yr)).toEqual(js.allowanceIncomeTax(yr));
+      expect(ts.allowanceSocialTax(yr)).toEqual(js.allowanceSocialTax(yr));
     }
-    expect(ts.impLoc(12000, 3000, 5000, 1000, 30, 17.2, 'lmnp', 2000)).toEqual(
-      js.impLoc(12000, 3000, 5000, 1000, 30, 17.2, 'lmnp', 2000)
+    expect(ts.rentalTax(12000, 3000, 5000, 1000, 30, 17.2, 'lmnp', 2000)).toEqual(
+      js.rentalTax(12000, 3000, 5000, 1000, 30, 17.2, 'lmnp', 2000)
     );
   });
 });

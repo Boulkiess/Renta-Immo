@@ -1,46 +1,46 @@
 import { describe, it, expect } from 'vitest';
 import {
   compute,
-  computeEtfPur,
+  computeEtfScenario,
   computeEtfKpis,
-  surplusAt,
+  annualSurplus,
   irr,
-  abattementIR,
-  abattementPS,
-  impLoc,
+  allowanceIncomeTax,
+  allowanceSocialTax,
+  rentalTax,
 } from '../src/index.js';
 import { makeG, mkParams } from './fixtures.js';
 
-const makeLoc = (over = {}) => mkParams('loc', over);
-const makeRp = (over = {}) => mkParams('rp', over);
+const makeRental = (over = {}) => mkParams('rental', over);
+const makePrimary = (over = {}) => mkParams('primary', over);
 
 describe('irr() — Newton-Raphson', () => {
-  it('résout un flux à TRI connu de 10 %', () => {
+  it('solves a flow with a known IRR of 10 %', () => {
     expect(irr([-100, 110])).toBeCloseTo(0.1, 6);
   });
 
-  it('résout un flux différé à 10 % (1000 → 1210 en 2 ans)', () => {
+  it('solves a deferred flow at 10 % (1000 → 1210 over 2 years)', () => {
     expect(irr([-1000, 0, 1210])).toBeCloseTo(0.1, 6);
   });
 
-  it('retourne null en cas de non-convergence (aucun changement de signe)', () => {
+  it('returns null on non-convergence (no sign change)', () => {
     expect(irr([100, 110])).toBeNull();
   });
 });
 
-describe('abattementIR(yr) — charnières art. 150 VC CGI', () => {
+describe('allowanceIncomeTax(yr) — hinges of art. 150 VC CGI', () => {
   it.each([
     [5, 0],
     [6, 6],
     [21, 96],
     [22, 100],
     [30, 100],
-  ])('année %i → %i %%', (yr, expected) => {
-    expect(abattementIR(yr)).toBeCloseTo(expected, 6);
+  ])('year %i → %i %%', (yr, expected) => {
+    expect(allowanceIncomeTax(yr)).toBeCloseTo(expected, 6);
   });
 });
 
-describe('abattementPS(yr) — charnières art. 150 VC CGI', () => {
+describe('allowanceSocialTax(yr) — hinges of art. 150 VC CGI', () => {
   it.each([
     [5, 0],
     [6, 1.65],
@@ -48,252 +48,254 @@ describe('abattementPS(yr) — charnières art. 150 VC CGI', () => {
     [22, 28.0],
     [30, 100],
     [31, 100],
-  ])('année %i → %f %%', (yr, expected) => {
-    expect(abattementPS(yr)).toBeCloseTo(expected, 6);
+  ])('year %i → %f %%', (yr, expected) => {
+    expect(allowanceSocialTax(yr)).toBeCloseTo(expected, 6);
   });
 });
 
-describe('impLoc() — 3 régimes fiscaux', () => {
-  // le=12000, chg=3000, ab=5000, at=1000, intAnnuel=2000, tmi=30, ps=17,2 → taux global 47,2 %
+describe('rentalTax() — 3 tax regimes', () => {
+  // effectiveRent=12000, charges=3000, buildingDep=5000, worksDep=1000,
+  // annualInterest=2000, marginalTaxRate=30, socialCharges=17.2 → global rate 47.2 %
   const args = [12000, 3000, 5000, 1000, 30, 17.2];
 
-  it('LMNP réel : RI = le − chg − ab − at − int, déficit reporté (clampé à 0)', () => {
-    // RI = max(0, 12000-3000-5000-1000-2000) = 1000 → impôt = 1000 × 0,472 = 472
-    expect(impLoc(...args, 'lmnp', 2000)).toBeCloseTo(472, 6);
+  it('LMNP real: taxable = rent − charges − dep − int, loss carried over (clamped to 0)', () => {
+    // taxable = max(0, 12000-3000-5000-1000-2000) = 1000 → tax = 1000 × 0.472 = 472
+    expect(rentalTax(...args, 'lmnp', 2000)).toBeCloseTo(472, 6);
   });
 
-  it('Micro-BIC : abattement 50 % sur le loyer effectif', () => {
-    // RI = 12000 × 0,5 = 6000 → impôt = 6000 × 0,472 = 2832
-    expect(impLoc(...args, 'microbic', 2000)).toBeCloseTo(2832, 6);
+  it('Micro-BIC: 50 % allowance on the effective rent', () => {
+    // taxable = 12000 × 0.5 = 6000 → tax = 6000 × 0.472 = 2832
+    expect(rentalTax(...args, 'microbic', 2000)).toBeCloseTo(2832, 6);
   });
 
-  it('Foncier nu : RI = le − chg − int (intérêts déductibles)', () => {
-    // RI = max(0, 12000-3000-2000) = 7000 → impôt = 7000 × 0,472 = 3304
-    expect(impLoc(...args, 'nu', 2000)).toBeCloseTo(3304, 6);
+  it('Bare ownership: taxable = rent − charges − int (deductible interest)', () => {
+    // taxable = max(0, 12000-3000-2000) = 7000 → tax = 7000 × 0.472 = 3304
+    expect(rentalTax(...args, 'nu', 2000)).toBeCloseTo(3304, 6);
   });
 
-  it('clampe le revenu imposable à 0 (jamais d’impôt négatif)', () => {
-    expect(impLoc(1000, 5000, 5000, 1000, 30, 17.2, 'lmnp', 2000)).toBe(0);
+  it('clamps taxable income to 0 (never a negative tax)', () => {
+    expect(rentalTax(1000, 5000, 5000, 1000, 30, 17.2, 'lmnp', 2000)).toBe(0);
   });
 });
 
-describe('compute() — mensualité de crédit (annuité constante)', () => {
-  it('cas textbook : 200 000 € à 5 % sur 20 ans ≈ 1319,9 €/mois', () => {
-    const p = makeLoc({
-      prixAchat: 200000,
-      fraisNotaire: 0,
-      travaux: 0,
-      apport: 0,
-      taux: 5,
-      duree: 20,
+describe('compute() — monthly loan payment (constant annuity)', () => {
+  it('textbook case: 200,000 € at 5 % over 20 years ≈ 1319.9 €/month', () => {
+    const p = makeRental({
+      purchasePrice: 200000,
+      notaryFees: 0,
+      renovationCosts: 0,
+      downPayment: 0,
+      interestRate: 5,
+      loanTerm: 20,
     });
     const r = compute(p, makeG());
-    expect(r.emp).toBe(200000);
-    expect(r.mens).toBeCloseTo(1319.9, 0);
+    expect(r.loanAmount).toBe(200000);
+    expect(r.monthlyPayment).toBeCloseTo(1319.9, 0);
   });
 
-  it('prêt à taux 0 : mensualité = capital / nombre de mois', () => {
-    const p = makeLoc({
-      prixAchat: 100000,
-      fraisNotaire: 0,
-      travaux: 0,
-      apport: 0,
-      taux: 0,
-      duree: 20,
+  it('zero-rate loan: monthly payment = principal / number of months', () => {
+    const p = makeRental({
+      purchasePrice: 100000,
+      notaryFees: 0,
+      renovationCosts: 0,
+      downPayment: 0,
+      interestRate: 0,
+      loanTerm: 20,
     });
     const r = compute(p, makeG());
-    expect(r.mens).toBeCloseTo(100000 / 240, 6);
+    expect(r.monthlyPayment).toBeCloseTo(100000 / 240, 6);
   });
 });
 
-describe('compute() — apport plafonné au coût total (sur-financement)', () => {
-  const base = makeLoc({
-    prixAchat: 200000,
-    fraisNotaire: 15000,
-    travaux: 10000,
-    fraisAgence: 0,
-    fraisDossier: 0,
+describe('compute() — down payment capped at total cost (over-funding)', () => {
+  const base = makeRental({
+    purchasePrice: 200000,
+    notaryFees: 15000,
+    renovationCosts: 10000,
+    agencyFees: 0,
+    loanFees: 0,
   });
-  const ct = 200000 + 15000 + 10000; // 225000
+  const totalCost = 200000 + 15000 + 10000; // 225000
   const excess = 80000;
 
-  // Bien acheté comptant : une fois l'apport ≥ ct, le crédit est nul. Le reliquat
-  // d'apport n'appartient pas au rendement du bien : les métriques opérationnelles
-  // (TRI/VAN/MOIC, patNet, coc, bilans hors ETF) ne doivent PAS bouger.
-  it('le reliquat ne touche pas les métriques opérationnelles du bien', () => {
-    const atCt = compute({ ...base, apport: ct }, makeG());
-    const above = compute({ ...base, apport: ct + excess }, makeG());
+  // Cash purchase: once the down payment ≥ totalCost, the loan is zero. The
+  // remainder is not part of the property return: operational metrics
+  // (IRR/NPV/MOIC, netWorth, coc, non-ETF balances) must NOT move.
+  it('the remainder does not affect the property operational metrics', () => {
+    const atCost = compute({ ...base, downPayment: totalCost }, makeG());
+    const above = compute({ ...base, downPayment: totalCost + excess }, makeG());
 
-    expect(above.emp).toBe(0);
-    expect(atCt.emp).toBe(0);
-    expect(above.tri10).toBe(atCt.tri10);
-    expect(above.tri20).toBe(atCt.tri20);
-    expect(above.van).toBe(atCt.van);
-    expect(above.moic).toBe(atCt.moic);
-    expect(above.beRevente).toBe(atCt.beRevente);
-    above.flux.forEach((f, i) => {
-      expect(f.patNet).toBeCloseTo(atCt.flux[i].patNet, 6);
-      expect(f.coc).toBeCloseTo(atCt.flux[i].coc, 6);
-      expect(f.bilanRevente).toBeCloseTo(atCt.flux[i].bilanRevente, 6);
-      expect(f.bilanCash).toBeCloseTo(atCt.flux[i].bilanCash, 6);
+    expect(above.loanAmount).toBe(0);
+    expect(atCost.loanAmount).toBe(0);
+    expect(above.tri10).toBe(atCost.tri10);
+    expect(above.tri20).toBe(atCost.tri20);
+    expect(above.van).toBe(atCost.van);
+    expect(above.moic).toBe(atCost.moic);
+    expect(above.resaleBreakEven).toBe(atCost.resaleBreakEven);
+    above.flows.forEach((f, i) => {
+      expect(f.netWorth).toBeCloseTo(atCost.flows[i].netWorth, 6);
+      expect(f.coc).toBeCloseTo(atCost.flows[i].coc, 6);
+      expect(f.resaleBalance).toBeCloseTo(atCost.flows[i].resaleBalance, 6);
+      expect(f.cashBalance).toBeCloseTo(atCost.flows[i].cashBalance, 6);
     });
   });
 
-  // Toggle surplus→ETF actif : le reliquat est investi en ETF dès l'année 0 et
-  // compose au rendAlt. patTotal gagne le reliquat composé ; bilanTotal gagne ce
-  // même montant moins la mise supplémentaire (le reliquat est aussi un coût).
-  it('investit le reliquat en ETF quand investirSurplus est actif', () => {
-    const g = makeG({ investirSurplus: true, rendAlt: 6 });
-    const atCt = compute({ ...base, apport: ct }, g);
-    const above = compute({ ...base, apport: ct + excess }, g);
-    above.flux.forEach((f, i) => {
+  // Surplus→ETF toggle on: the remainder is invested in the ETF from year 0 and
+  // compounds at altReturn. totalWorth gains the compounded remainder; totalBalance
+  // gains that same amount minus the extra stake (the remainder is also a cost).
+  it('invests the remainder in the ETF when investSurplus is on', () => {
+    const g = makeG({ investSurplus: true, altReturn: 6 });
+    const atCost = compute({ ...base, downPayment: totalCost }, g);
+    const above = compute({ ...base, downPayment: totalCost + excess }, g);
+    above.flows.forEach((f, i) => {
       const compounded = excess * Math.pow(1.06, i + 1);
-      expect(f.patTotal).toBeCloseTo(atCt.flux[i].patTotal + compounded, 4);
-      expect(f.etfPoche).toBeCloseTo(atCt.flux[i].etfPoche + compounded, 4);
-      expect(f.bilanTotal).toBeCloseTo(atCt.flux[i].bilanTotal + compounded - excess, 4);
+      expect(f.totalWorth).toBeCloseTo(atCost.flows[i].totalWorth + compounded, 4);
+      expect(f.etfPocket).toBeCloseTo(atCost.flows[i].etfPocket + compounded, 4);
+      expect(f.totalBalance).toBeCloseTo(atCost.flows[i].totalBalance + compounded - excess, 4);
     });
   });
 
-  // Toggle désactivé : le reliquat reste du cash hors modèle → aucune courbe ne bouge.
-  it('ignore le reliquat quand investirSurplus est désactivé', () => {
-    const g = makeG({ investirSurplus: false });
-    const atCt = compute({ ...base, apport: ct }, g);
-    const above = compute({ ...base, apport: ct + excess }, g);
-    above.flux.forEach((f, i) => {
-      expect(f.patTotal).toBeCloseTo(atCt.flux[i].patTotal, 6);
-      expect(f.bilanTotal).toBeCloseTo(atCt.flux[i].bilanTotal, 6);
+  // Toggle off: the remainder stays as cash outside the model → no curve moves.
+  it('ignores the remainder when investSurplus is off', () => {
+    const g = makeG({ investSurplus: false });
+    const atCost = compute({ ...base, downPayment: totalCost }, g);
+    const above = compute({ ...base, downPayment: totalCost + excess }, g);
+    above.flows.forEach((f, i) => {
+      expect(f.totalWorth).toBeCloseTo(atCost.flows[i].totalWorth, 6);
+      expect(f.totalBalance).toBeCloseTo(atCost.flows[i].totalBalance, 6);
     });
   });
 });
 
-describe('compute() — report de déficit LMNP', () => {
-  it('déduit amortissements + reporte les déficits → impôt ≤ régime nu chaque année', () => {
-    const lmnp = compute(makeLoc(), makeG({ regime: 'lmnp' }));
-    const nu = compute(makeLoc(), makeG({ regime: 'nu' }));
-    // RI_lmnp = max(0, le−chg−ab−at−int−report) ≤ RI_nu = max(0, le−chg−int) à chaque année
-    lmnp.flux.forEach((f, i) => expect(f.imp).toBeLessThanOrEqual(nu.flux[i].imp + 1e-6));
-    // Amortissement par défaut : le revenu locatif est abrité dès l'année 1 (impôt nul)
-    expect(lmnp.flux[0].imp).toBe(0);
+describe('compute() — LMNP loss carry-over', () => {
+  it('deducts depreciation + carries losses → tax ≤ bare-ownership regime each year', () => {
+    const lmnp = compute(makeRental(), makeG({ regime: 'lmnp' }));
+    const nu = compute(makeRental(), makeG({ regime: 'nu' }));
+    // taxable_lmnp = max(0, rent−charges−dep−int−carry) ≤ taxable_nu = max(0, rent−charges−int) each year
+    lmnp.flows.forEach((f, i) => expect(f.tax).toBeLessThanOrEqual(nu.flows[i].tax + 1e-6));
+    // Default depreciation: rental income is shielded from year 1 (zero tax)
+    expect(lmnp.flows[0].tax).toBe(0);
   });
 
-  it('reporte un déficit sur les années profitables (sans amortissement, isole le report)', () => {
-    // ab = at = 0 → la seule différence LMNP vs nu est le report de déficit
-    const p = makeLoc({ amortBien: 0, amortTravaux: 0 });
+  it('carries a loss onto profitable years (no depreciation, isolates the carry-over)', () => {
+    // buildingDep = worksDep = 0 → the only LMNP-vs-nu difference is the loss carry-over
+    const p = makeRental({ propertyDepreciation: 0, renovationDepreciation: 0 });
     const lmnp = compute(p, makeG({ regime: 'lmnp' }));
     const nu = compute(p, makeG({ regime: 'nu' }));
-    const sum = r => r.flux.reduce((s, f) => s + f.imp, 0);
-    // Intérêts élevés en début de prêt → année(s) déficitaire(s) reportées → LMNP taxe moins que nu
+    const sum = r => r.flows.reduce((s, f) => s + f.tax, 0);
+    // High interest early in the loan → loss-making year(s) carried over → LMNP taxes less than nu
     expect(sum(lmnp)).toBeLessThan(sum(nu));
     expect(sum(nu)).toBeGreaterThan(0);
   });
 
-  it('en Micro-BIC le même bien est taxé dès l’année 1 (pas de déficit)', () => {
-    const r = compute(makeLoc(), makeG({ regime: 'microbic' }));
-    expect(r.flux[0].imp).toBeGreaterThan(0);
+  it('under Micro-BIC the same property is taxed from year 1 (no loss)', () => {
+    const r = compute(makeRental(), makeG({ regime: 'microbic' }));
+    expect(r.flows[0].tax).toBeGreaterThan(0);
   });
 });
 
-describe('compute() — exonération de plus-value (mode loc)', () => {
-  // iPV dérivé : reventeNet = pr − rest − fa − iPV ; fa = pr × fraisVente/100
-  const ipvAt = (r, p, yr) => {
-    const f = r.flux[yr - 1];
-    const fa = f.pr * (p.fraisVente / 100);
-    return f.pr - f.rest - fa - f.reventeNet;
+describe('compute() — capital-gains exemption (rental mode)', () => {
+  // capitalGainsTax derived: netResaleProceeds = resalePrice − remaining − sellingFee − tax;
+  // sellingFee = resalePrice × sellingFees/100
+  const cgtAt = (r, p, yr) => {
+    const f = r.flows[yr - 1];
+    const sellingFee = f.resalePrice * (p.sellingFees / 100);
+    return f.resalePrice - f.remainingCapital - sellingFee - f.netResaleProceeds;
   };
 
-  it('IR exonéré à 22 ans, PS+IR totalement exonérés à 30 ans', () => {
-    const p = makeLoc({ revalBien: 2 });
+  it('income tax exempt at 22 years, income + social tax fully exempt at 30 years', () => {
+    const p = makeRental({ propertyGrowth: 2 });
     const r = compute(p, makeG({ horizon: 30 }));
-    // 30 ans : abattement IR et PS = 100 % → iPV ≈ 0
-    expect(ipvAt(r, p, 30)).toBeCloseTo(0, 4);
-    // 22 ans : IR exonéré mais PS partiel → iPV strictement positif
-    expect(ipvAt(r, p, 22)).toBeGreaterThan(0);
-    // L'exonération IR fait chuter l'impôt entre 21 et 22 ans
-    expect(ipvAt(r, p, 22)).toBeLessThan(ipvAt(r, p, 21));
+    // 30 years: income-tax and social-tax allowances = 100 % → tax ≈ 0
+    expect(cgtAt(r, p, 30)).toBeCloseTo(0, 4);
+    // 22 years: income tax exempt but social tax partial → tax strictly positive
+    expect(cgtAt(r, p, 22)).toBeGreaterThan(0);
+    // The income-tax exemption drops the tax between years 21 and 22
+    expect(cgtAt(r, p, 22)).toBeLessThan(cgtAt(r, p, 21));
   });
 
-  it('mode RP : aucune imposition de plus-value (iPV = 0 partout)', () => {
-    const p = makeRp({ revalBien: 2 });
+  it('primary mode: no capital-gains tax (tax = 0 everywhere)', () => {
+    const p = makePrimary({ propertyGrowth: 2 });
     const r = compute(p, makeG({ horizon: 30 }));
-    for (const f of r.flux) {
-      const fa = f.pr * (p.fraisVente / 100);
-      expect(f.reventeNet).toBeCloseTo(f.pr - f.rest - fa, 4);
+    for (const f of r.flows) {
+      const sellingFee = f.resalePrice * (p.sellingFees / 100);
+      expect(f.netResaleProceeds).toBeCloseTo(f.resalePrice - f.remainingCapital - sellingFee, 4);
     }
   });
 });
 
-describe('compute() — invariants mode RP', () => {
-  it('cfN est toujours ≤ 0 (sorties réelles uniquement)', () => {
-    const r = compute(makeRp(), makeG());
-    for (const f of r.flux) expect(f.cfN).toBeLessThanOrEqual(0);
+describe('compute() — primary mode invariants', () => {
+  it('netCashFlow is always ≤ 0 (real outflows only)', () => {
+    const r = compute(makePrimary(), makeG());
+    for (const f of r.flows) expect(f.netCashFlow).toBeLessThanOrEqual(0);
   });
 
-  it('le (loyer économisé) = loyerPerso annualisé, hors cfN', () => {
-    const g = makeG({ loyerPerso: 900, revalLoyerPerso: 2 });
-    const r = compute(makeRp(), g);
-    expect(r.flux[0].le).toBeCloseTo(900 * 12, 6);
-    expect(r.flux[4].le).toBeCloseTo(900 * 12 * Math.pow(1.02, 4), 6);
+  it('effectiveRent (saved rent) = annualized personalRent, excluded from netCashFlow', () => {
+    const g = makeG({ personalRent: 900, personalRentGrowth: 2 });
+    const r = compute(makePrimary(), g);
+    expect(r.flows[0].effectiveRent).toBeCloseTo(900 * 12, 6);
+    expect(r.flows[4].effectiveRent).toBeCloseTo(900 * 12 * Math.pow(1.02, 4), 6);
   });
 });
 
-describe('computeEtfPur() — scénario de référence ETF', () => {
-  it('démarre à apportETF et capitalise au rendement alternatif', () => {
-    const g = makeG({ apportETF: 60000, rendAlt: 6, budgetMensuel: 0, loyerPerso: 0 });
-    const etf = computeEtfPur(g);
-    // surplus nul → croissance pure : cap[1] = 60000 × 1,06
+describe('computeEtfScenario() — ETF reference scenario', () => {
+  it('starts at etfDownPayment and compounds at the alternative return', () => {
+    const g = makeG({ etfDownPayment: 60000, altReturn: 6, monthlyBudget: 0, personalRent: 0 });
+    const etf = computeEtfScenario(g);
+    // zero surplus → pure growth: cap[1] = 60000 × 1.06
     expect(etf[0].cap).toBeCloseTo(60000 * 1.06, 4);
     expect(etf[1].cap).toBeCloseTo(60000 * Math.pow(1.06, 2), 4);
   });
 
-  it('capNet applique le PFU 30 % sur la plus-value uniquement', () => {
-    const g = makeG({ apportETF: 60000, rendAlt: 6, budgetMensuel: 0, loyerPerso: 0 });
-    const etf = computeEtfPur(g);
+  it('capNet applies the 30 % PFU on the capital gain only', () => {
+    const g = makeG({ etfDownPayment: 60000, altReturn: 6, monthlyBudget: 0, personalRent: 0 });
+    const etf = computeEtfScenario(g);
     const gain = etf[0].cap - 60000;
     expect(etf[0].capNet).toBeCloseTo(etf[0].cap - gain * 0.3, 4);
   });
 });
 
-describe('surplusAt() — surplus annuel de référence ETF (budget − loyer perso)', () => {
-  it('année 1 : budget − loyer perso, sans revalorisation', () => {
+describe('annualSurplus() — annual ETF reference surplus (budget − personal rent)', () => {
+  it('year 1: budget − personal rent, no revaluation', () => {
     // 2500×12 − 900×12 = 30000 − 10800 = 19200
-    expect(surplusAt(makeG(), 1)).toBeCloseTo(19200, 6);
+    expect(annualSurplus(makeG(), 1)).toBeCloseTo(19200, 6);
   });
 
-  it('revalorise budget et loyer perso indépendamment', () => {
-    const g = makeG({ revalBudget: 1, revalLoyerPerso: 2 });
+  it('revalues budget and personal rent independently', () => {
+    const g = makeG({ budgetGrowth: 1, personalRentGrowth: 2 });
     const expected = 2500 * 12 * Math.pow(1.01, 4) - 900 * 12 * Math.pow(1.02, 4);
-    expect(surplusAt(g, 5)).toBeCloseTo(expected, 6);
+    expect(annualSurplus(g, 5)).toBeCloseTo(expected, 6);
   });
 
-  it('clampe à 0 quand le loyer perso dépasse le budget', () => {
-    expect(surplusAt(makeG({ budgetMensuel: 500, loyerPerso: 900 }), 1)).toBe(0);
+  it('clamps to 0 when personal rent exceeds the budget', () => {
+    expect(annualSurplus(makeG({ monthlyBudget: 500, personalRent: 900 }), 1)).toBe(0);
   });
 });
 
-describe('computeEtfKpis() — KPIs ETF (caractérisation + invariants)', () => {
-  it('TRI = rendAlt et TRI réel = (1+rendAlt)/(1+inflation)−1', () => {
-    const g = makeG({ rendAlt: 6, inflation: 2 });
+describe('computeEtfKpis() — ETF KPIs (characterization + invariants)', () => {
+  it('IRR = altReturn and real IRR = (1+altReturn)/(1+inflation)−1', () => {
+    const g = makeG({ altReturn: 6, inflation: 2 });
     const { tri, triReal } = computeEtfKpis(g);
     expect(tri).toBeCloseTo(0.06, 12);
     expect(triReal).toBeCloseTo(1.06 / 1.02 - 1, 12);
   });
 
-  it('VAN = 0 quand tauxActu = rendAlt (invariant algébrique exact)', () => {
-    const g = makeG({ tauxActu: 6, rendAlt: 6 });
+  it('NPV = 0 when discountRate = altReturn (exact algebraic invariant)', () => {
+    const g = makeG({ discountRate: 6, altReturn: 6 });
     expect(computeEtfKpis(g).van).toBeCloseTo(0, 4);
   });
 
-  it('MOIC = (1+rendAlt)^horizon quand le surplus est nul', () => {
-    // loyerPerso ≥ budget → surplus 0 → cap[hz] = apportETF×(1+r)^hz → MOIC = (1+r)^hz
-    const g = makeG({ budgetMensuel: 500, loyerPerso: 900, rendAlt: 6, horizon: 20 });
+  it('MOIC = (1+altReturn)^horizon when surplus is zero', () => {
+    // personalRent ≥ budget → surplus 0 → cap[hz] = etfDownPayment×(1+r)^hz → MOIC = (1+r)^hz
+    const g = makeG({ monthlyBudget: 500, personalRent: 900, altReturn: 6, horizon: 20 });
     expect(computeEtfKpis(g).moic).toBeCloseTo(Math.pow(1.06, 20), 6);
   });
 
-  it('MOIC = null quand apportETF = 0 (pas de division par zéro)', () => {
-    expect(computeEtfKpis(makeG({ apportETF: 0 })).moic).toBeNull();
+  it('MOIC = null when etfDownPayment = 0 (no division by zero)', () => {
+    expect(computeEtfKpis(makeG({ etfDownPayment: 0 })).moic).toBeNull();
   });
 
-  it('horizon 30 : VAN et MOIC finis, surplus total positif', () => {
+  it('horizon 30: NPV and MOIC finite, total surplus positive', () => {
     const { van, moic, surplusTotal } = computeEtfKpis(makeG({ horizon: 30 }));
     expect(Number.isFinite(van)).toBe(true);
     expect(Number.isFinite(moic)).toBe(true);

@@ -6,7 +6,9 @@
     "import": "Import",
     "exportCsv": "CSV",
     "exportJson": "{ } JSON",
-    "exportYaml": "YAML"
+    "exportYaml": "YAML",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre"
   },
   "tabs": {
     "charts": "Graphiques",
@@ -22,6 +24,10 @@
     "fr": "FR",
     "en": "EN"
   },
+  "common": {
+    "real": "réel",
+    "nominal": "nominal"
+  },
   "global": {
     "title": "Global",
     "inflation": "Inflation",
@@ -33,17 +39,17 @@
       "nu": "Foncier nu"
     },
     "horizon": "Horizon",
-    "tauxActu": "Taux actualisation (VAN)",
-    "rendAlt": "Rdt placement alternatif (net)",
-    "loyerPerso": "Loyer actuel payé",
-    "revalLoyerPerso": "Reval. loyer",
-    "budgetMensuel": "Budget mensuel",
-    "revalBudget": "Reval. budget",
-    "revalCharges": "Reval. charges",
-    "investirSurplus": "Surplus→ETF",
-    "apportETF": "Apport ETF pur",
+    "discountRate": "Taux actualisation (VAN)",
+    "altReturn": "Rdt placement alternatif (net)",
+    "personalRent": "Loyer actuel payé",
+    "personalRentGrowth": "Reval. loyer",
+    "monthlyBudget": "Budget mensuel",
+    "budgetGrowth": "Reval. budget",
+    "chargesGrowth": "Reval. charges",
+    "investSurplus": "Surplus→ETF",
+    "etfDownPayment": "Apport ETF pur",
     "hypoTitle": "Hypothèses d'évolution actives",
-    "hypoSummary": "Inflation {{inflation}}% · Charges +{{revalCharges}}%/an · Budget +{{revalBudget}}%/an · Loyer perso +{{revalLoyerPerso}}%/an",
+    "hypoSummary": "Inflation {{inflation}}% · Charges +{{chargesGrowth}}%/an · Budget +{{budgetGrowth}}%/an · Loyer perso +{{personalRentGrowth}}%/an",
     "units": {
       "perYear": "%/an",
       "years": "ans",
@@ -53,67 +59,63 @@
     }
   },
   "sim": {
-    "loc": "Locatif",
-    "rp": "RP",
+    "rental": "Locatif",
+    "primary": "RP",
     "menu": "Actions sur cette simulation",
     "disable": "Désactiver",
     "copy": "Copier",
     "paste": "Coller",
     "hide": "masquer",
     "show": "afficher",
-    "disabled": "Désactivé"
+    "disabled": "Désactivé",
+    "collapseTitle": "Réduire — garde la simulation dans les graphiques",
+    "expandTitle": "Déplier le panneau"
   },
   "kpi": {
-    "rendBrut": "Rdt brut",
-    "rendNet": "Rdt net",
-    "mensualite": "Mensualité",
-    "cfMensuel": "CF réel/mois",
-    "effortMois": "Effort/mois",
-    "patrimTotal": "Patrim. tot. {{horizon}}a",
-    "vsEtfPur": "vs ETF pur",
-    "anN": "An {{n}}",
-    "gt30ans": "> 30 ans",
-    "pointMort": "Point mort"
+    "monthlyPayment": "Mensualité",
+    "monthlyCashFlow": "CF réel/mois",
+    "monthlyEffort": "Effort/mois",
+    "totalWorth": "Patrim. tot. {{horizon}}a"
   },
   "groups": {
     "Acquisition": "Acquisition",
-    "Financement": "Financement",
-    "Revente": "Revente",
-    "Revenus": "Revenus locatifs",
+    "Financing": "Financement",
+    "Sale": "Revente",
+    "Income": "Revenus locatifs",
     "Charges": "Charges",
-    "Fiscalité": "Fiscalité",
-    "Résidence principale": "Résidence principale"
+    "Taxation": "Fiscalité",
+    "Primary residence": "Résidence principale"
   },
   "fields": {
-    "prixAchat": { "label": "Prix d'achat" },
-    "fraisNotaire": { "label": "Frais de notaire" },
-    "travaux": { "label": "Travaux" },
-    "fraisAgence": { "label": "Frais d'agence achat" },
-    "fraisDossier": { "label": "Frais de dossier" },
-    "apport": { "label": "Apport personnel" },
-    "taux": { "label": "Taux intérêt" },
-    "duree": { "label": "Durée (ans)" },
-    "assurance": { "label": "Assurance emprunteur" },
-    "revalBien": { "label": "Reval. bien %/an" },
-    "fraisVente": { "label": "Frais agence vente" },
-    "loyer": { "label": "Loyer mensuel brut" },
-    "vacance": { "label": "Taux vacance" },
-    "taxeFonciere": { "label": "Taxe foncière (€/an)" },
-    "chargesCopro": { "label": "Charges copro (€/an)" },
-    "assurPNO": { "label": "Assurance PNO (€/an)" },
-    "fraisGestion": { "label": "Gestion locative" },
-    "provision": { "label": "Provision travaux (€/an)" },
-    "revalLoyer": { "label": "Reval. loyer %/an" },
-    "tmi": { "label": "TMI" },
-    "ps": { "label": "Prélèvements sociaux" },
-    "amortBien": { "label": "Amort. bien %/an" },
-    "amortTravaux": { "label": "Amort. travaux %/an" },
-    "impotPV": { "label": "Impôt plus-value" },
-    "psPV": { "label": "PS sur plus-value" },
-    "taxeFonciereRP": { "label": "Taxe foncière" },
-    "chargesCoproRP": { "label": "Charges copro (€/an)" },
-    "assurHab": { "label": "Assurance habitation (€/an)" },
-    "provisionRP": { "label": "Provision travaux (€/an)" }
+    "purchasePrice": { "label": "Prix d'achat" },
+    "notaryFees": { "label": "Frais de notaire" },
+    "renovationCosts": { "label": "Travaux" },
+    "agencyFees": { "label": "Frais d'agence achat" },
+    "loanFees": { "label": "Frais de dossier" },
+    "downPayment": { "label": "Apport personnel" },
+    "interestRate": { "label": "Taux intérêt" },
+    "loanTerm": { "label": "Durée (ans)" },
+    "insuranceRate": { "label": "Assurance emprunteur" },
+    "propertyGrowth": { "label": "Reval. bien %/an" },
+    "sellingFees": { "label": "Frais agence vente" },
+    "rent": { "label": "Loyer mensuel brut" },
+    "vacancyRate": { "label": "Taux vacance" },
+    "propertyTax": { "label": "Taxe foncière (€/an)" },
+    "condoFees": { "label": "Charges copro (€/an)" },
+    "landlordInsurance": { "label": "Assurance PNO (€/an)" },
+    "managementFees": { "label": "Gestion locative" },
+    "maintenanceReserve": { "label": "Provision travaux (€/an)" },
+    "rentGrowth": { "label": "Reval. loyer %/an" },
+    "marginalTaxRate": { "label": "TMI" },
+    "socialCharges": { "label": "Prélèvements sociaux" },
+    "propertyDepreciation": { "label": "Amort. bien %/an" },
+    "renovationDepreciation": { "label": "Amort. travaux %/an" },
+    "capitalGainsTax": { "label": "Impôt plus-value" },
+    "capitalGainsSocialCharges": { "label": "PS sur plus-value" },
+    "propertyTaxPrimary": { "label": "Taxe foncière" },
+    "condoFeesPrimary": { "label": "Charges copro (€/an)" },
+    "homeInsurance": { "label": "Assurance habitation (€/an)" },
+    "maintenanceReservePrimary": { "label": "Provision travaux (€/an)" }
   },
   "tooltips": {
     "inflation": {
@@ -129,212 +131,218 @@
       "title": "Régime fiscal locatif",
       "body": "<b>LMNP Réel</b> : amortissements déductibles (bien + travaux).<br><b>Micro-BIC</b> : abattement 50%.<br><b>Foncier nu réel</b> : charges réelles, sans amortissement."
     },
-    "tauxActu": {
+    "discountRate": {
       "title": "Taux d'actualisation (VAN)",
       "body": "Taux utilisé pour calculer la Valeur Actuelle Nette. Représente le coût d'opportunité du capital."
     },
-    "rendAlt": {
+    "altReturn": {
       "title": "Rendement ETF / placement alternatif (nominal, net d'impôts)",
       "body": "Rendement annuel nominal net d'impôts. À saisir après déduction de la fiscalité : ~8% brut ETF World → ~5-6% net après PFU 30%. Avec 2% d'inflation, 6% nominal = ~4% réel — le TRI réel est calculé automatiquement dans les KPIs."
     },
-    "budgetMensuel": {
+    "monthlyBudget": {
       "title": "Budget mensuel logement+investissement",
       "body": "Enveloppe mensuelle fixe. Le surplus non consommé par les coûts réels est automatiquement investi en ETF."
     },
-    "revalBudget": {
+    "budgetGrowth": {
       "title": "Revalorisation annuelle du budget %/an",
       "body": "Hausse annuelle du budget disponible (augmentations de salaire). Augmente le surplus investi en ETF chaque année. 0% = budget fixe."
     },
-    "revalCharges": {
+    "chargesGrowth": {
       "title": "Revalorisation des charges fixes %/an",
       "body": "Taux d'augmentation annuel de la taxe foncière, des charges de copropriété, des assurances et des provisions. Typiquement 2–3 %/an en France. Les frais de gestion (proportionnels au loyer) ne sont pas affectés.",
-      "code": "chg[yr] = (taxeFonciere + chargesCopro + assurPNO + provision) × (1 + revalCharges/100)^(yr−1)"
+      "code": "charges[yr] = (taxeFonciere + chargesCopro + assurPNO + provision) × (1 + chargesGrowth/100)^(yr−1)"
     },
-    "investirSurplus": {
+    "investSurplus": {
       "title": "Investir le surplus en ETF",
       "body": "Si activé : la différence entre le budget mensuel et les sorties réelles est investie en ETF. Le tiret = scénario ETF pur de référence."
     },
-    "apportETF": {
+    "etfDownPayment": {
       "title": "Apport ETF pur (référence)",
       "body": "Capital de départ du scénario ETF pur. Pas d'achat immo, l'apport + le surplus mensuel sont capitalisés en ETF."
     },
-    "prixAchat": {
+    "purchasePrice": {
       "title": "Prix d'achat net vendeur",
       "body": "Prix payé au vendeur, hors frais de notaire et d'agence."
     },
-    "fraisNotaire": {
+    "notaryFees": {
       "title": "Frais de notaire",
       "body": "7-8% dans l'ancien, 2-3% dans le neuf. <b>Auto : 8% × prix d'achat.</b>"
     },
-    "travaux": {
+    "renovationCosts": {
       "title": "Travaux de rénovation",
       "body": "En LMNP Réel, amortissables sur plusieurs années.",
       "code": "Amort. travaux = Travaux × Taux amort."
     },
-    "fraisAgence": {
+    "agencyFees": {
       "title": "Frais d'agence acheteur",
       "body": "Honoraires d'agence à charge de l'acheteur."
     },
-    "fraisDossier": {
+    "loanFees": {
       "title": "Frais de dossier & courtage",
       "body": "Frais bancaires liés à l'obtention du prêt (frais de dossier) et/ou honoraires de courtier. Intégrés dans le coût total d'acquisition et dans le montant emprunté.",
-      "code": "ct = prixAchat + fraisNotaire + travaux + fraisAgence + fraisDossier"
+      "code": "totalCost = prixAchat + fraisNotaire + travaux + fraisAgence + fraisDossier"
     },
-    "apport": {
+    "downPayment": {
       "title": "Apport personnel",
       "body": "Capital propre investi. Réduit le montant emprunté mais aussi le levier."
     },
-    "taux": {
+    "interestRate": {
       "title": "Taux d'intérêt nominal",
       "body": "Taux nominal du prêt. Mode auto : taux moyens France (MAJ 05/2026) — 7a 3,25% · 10a 3,30% · 15a 3,45% · 20a 3,55% · 25a 3,70%.",
       "code": "Mensualité = K×(τ/12)/(1−(1+τ/12)^−n)"
     },
-    "duree": {
+    "loanTerm": {
       "title": "Durée du prêt",
       "body": "Plus long = mensualité plus faible mais coût total plus élevé."
     },
-    "assurance": {
+    "insuranceRate": {
       "title": "Assurance emprunteur (ADI)",
       "body": "0.10-0.40%/an du capital selon profil.",
       "code": "Assurance mens. = Capital × taux / 12"
     },
-    "revalBien": {
+    "propertyGrowth": {
       "title": "Revalorisation du bien",
       "body": "Hypothèse de hausse annuelle. ~2-3%/an historique en France.",
       "code": "Valeur an N = Prix × (1+taux)^N"
     },
-    "fraisVente": {
+    "sellingFees": {
       "title": "Frais d'agence vente",
       "body": "3-7% du prix de vente. Négociable ou évitable en PAP."
     },
-    "loyer": {
+    "rent": {
       "title": "Loyer mensuel brut",
       "body": "Hors charges récupérables. Levier n°1 de la rentabilité.",
       "code": "Rdt brut = Loyer×12 / Coût total"
     },
-    "vacance": {
+    "vacancyRate": {
       "title": "Vacance locative",
       "body": "5-8% en zone tendue, 10-15% en zone rurale.",
       "code": "Loyer encaissé = Loyer brut × (1−vacance)"
     },
-    "taxeFonciere": {
+    "propertyTax": {
       "title": "Taxe foncière",
       "body": "Impôt local annuel. Varie fortement selon la commune. <b>Auto : 0,5% × prix d'achat.</b>"
     },
-    "chargesCopro": {
+    "condoFees": {
       "title": "Charges copro non récupérables",
       "body": "Restent à charge du propriétaire."
     },
-    "assurPNO": { "title": "Assurance PNO", "body": "Obligatoire en copropriété. 100-300€/an." },
-    "fraisGestion": {
+    "landlordInsurance": {
+      "title": "Assurance PNO",
+      "body": "Obligatoire en copropriété. 100-300€/an."
+    },
+    "managementFees": {
       "title": "Gestion locative",
       "body": "6-9% TTC des loyers encaissés si agence."
     },
-    "provision": {
+    "maintenanceReserve": {
       "title": "Provision travaux",
       "body": "Épargne de précaution. Règle : ~1% valeur/an. <b>Auto : 0,5% × prix d'achat.</b>"
     },
-    "revalLoyer": {
+    "rentGrowth": {
       "title": "Revalorisation loyer",
       "body": "Plafonnée à l'IRL. 1-4%/an selon inflation.",
       "code": "Loyer an N = Loyer × (1+taux)^(N−1)"
     },
-    "tmi": {
+    "marginalTaxRate": {
       "title": "TMI",
       "body": "Tranche marginale : 0%, 11%, 30%, 41% ou 45%.",
       "code": "Impôts = Rev. imposable × (TMI+PS)"
     },
-    "ps": {
+    "socialCharges": {
       "title": "Prélèvements sociaux",
       "body": "17.2% sur les revenus fonciers (CSG+CRDS+solidarité)."
     },
-    "amortBien": {
+    "propertyDepreciation": {
       "title": "Amortissement bien",
       "body": "LMNP Réel uniquement. Typique 25-40 ans → 2.5-4%/an."
     },
-    "amortTravaux": {
+    "renovationDepreciation": {
       "title": "Amortissement travaux",
       "body": "LMNP Réel. Typique 7-10 ans → 10-14%/an."
     },
-    "impotPV": {
+    "capitalGainsTax": {
       "title": "Impôt plus-value",
       "body": "19% IR + 17.2% PS = 36.2%. Abattements progressifs. RP exonérée."
     },
-    "psPV": { "title": "PS sur plus-value", "body": "17.2%. Exonération totale après 30 ans." },
-    "loyerPerso": {
+    "capitalGainsSocialCharges": {
+      "title": "PS sur plus-value",
+      "body": "17.2%. Exonération totale après 30 ans."
+    },
+    "personalRent": {
       "title": "Loyer actuel (que vous payez)",
       "body": "Le loyer mensuel que vous payez. En locatif : soustrait du CF. En RP : économie réalisée si vous achetez.",
       "code": "CF réel (loc) = CF locatif − Loyer perso\nÉconomie (RP) = Loyer perso − Mensualité"
     },
-    "revalLoyerPerso": {
+    "personalRentGrowth": {
       "title": "Revalorisation loyer marché %/an",
       "body": "Hausse annuelle de votre loyer. ~1-3%/an indexé IRL."
     },
-    "assurHab": {
+    "homeInsurance": {
       "title": "Assurance habitation",
       "body": "Assurance multirisque habitation propriétaire occupant. 200-500€/an."
     },
-    "chargesCoproRP": {
+    "condoFeesPrimary": {
       "title": "Charges copropriété RP",
       "body": "Totalité des charges (pas de distinction récupérable/non). 50-200€/mois."
     },
-    "taxeFonciereRP": {
+    "propertyTaxPrimary": {
       "title": "Taxe foncière RP",
       "body": "Même impôt que pour un locatif. Pas de taxe d'habitation depuis 2023 pour les RP. <b>Auto : 0,5% × prix d'achat.</b>"
     },
-    "provisionRP": {
+    "maintenanceReservePrimary": {
       "title": "Provision travaux RP",
       "body": "Budget annuel pour l'entretien. ~1% de la valeur du bien. <b>Auto : 0,5% × prix d'achat.</b>"
     },
-    "kpi.coutTotal": {
+    "kpi.totalCost": {
       "title": "Coût total d'acquisition",
       "body": "Prix d'achat + frais de notaire + travaux + frais d'agence. C'est la base de calcul des rendements.",
-      "code": "ct = prixAchat + fraisNotaire + travaux + fraisAgence"
+      "code": "totalCost = prixAchat + fraisNotaire + travaux + fraisAgence"
     },
-    "kpi.emprunte": {
+    "kpi.loanAmount": {
       "title": "Montant emprunté",
       "body": "Coût total − apport. Le levier financier amplifie les gains <em>et</em> les pertes.",
-      "code": "emp = max(0, ct − apport)"
+      "code": "emp = max(0, totalCost − apport)"
     },
-    "kpi.mensualiteAss": {
+    "kpi.monthlyPaymentIns": {
       "title": "Mensualité + assurance",
       "body": "Annuité constante + assurance emprunteur calculée sur le capital initial (fixe toute la durée).",
       "code": "mens = emp×(τ/12)/(1−(1+τ/12)^−n)"
     },
-    "kpi.coutCredit": {
+    "kpi.creditCost": {
       "title": "Coût total du crédit",
       "body": "Somme de tous les intérêts + toutes les primes d'assurance sur la durée du prêt."
     },
-    "kpi.rendBrut": {
+    "kpi.grossYield": {
       "title": "Rendement brut locatif",
       "body": "Indicateur statique calculé sur l'année 0, avant charges, impôts et crédit.",
       "code": "Rdt brut = Loyer×12 / Coût total acq."
     },
-    "kpi.rendNet": {
+    "kpi.netYield": {
       "title": "Rendement net locatif",
       "body": "Loyer effectif (après vacance) − charges annuelles, rapporté au coût total. Hors crédit et hors impôt.",
       "code": "Rdt net = (Loyer eff. − Charges) / Coût total"
     },
-    "kpi.cfMensuel": {
+    "kpi.monthlyCashFlow": {
       "title": "Cash-flow réel / mois",
       "body": "Flux net mensuel de l'année 1 : loyers encaissés − toutes les charges − mensualité − impôt − loyer perso. Négatif = effort de trésorerie.",
-      "code": "CF mensuel = cfN[an 1] / 12"
+      "code": "CF mensuel = netCashFlow[an 1] / 12"
     },
-    "kpi.effortRP": {
+    "kpi.monthlyEffort": {
       "title": "Effort mensuel",
       "body": "Surcoût mensuel de l'investissement par rapport à rester locataire. Positif = tu dépenses plus qu'aujourd'hui. Négatif = l'investissement est moins cher.",
-      "code": "Effort = −cfN[an 1]/12 − loyerPerso"
+      "code": "Effort = −netCashFlow[an 1]/12 − loyerPerso"
     },
-    "kpi.breakeven": {
+    "kpi.breakEven": {
       "title": "Breakeven cash-flow cumulé",
       "body": "Première année où les flux nets cumulés (opérationnels) repassent à zéro. Ne tient pas compte de la valorisation du bien."
     },
-    "kpi.tri": {
+    "kpi.irr": {
       "title": "TRI — Taux de Rendement Interne",
       "body": "Taux d'actualisation qui annule la VAN. Prend en compte le prix de revente, tous les flux nets et le loyer économisé/payé selon le mode.",
       "code": "NPV(TRI) = 0  [Newton-Raphson]"
     },
-    "kpi.van": {
+    "kpi.npv": {
       "title": "VAN — Valeur Actuelle Nette",
       "body": "Somme des flux futurs actualisés au taux d'opportunité. Positive = l'investissement crée de la valeur vs le placement alternatif.",
       "code": "VAN = −apport + Σ flux/(1+r)^t + revente/(1+r)^n"
@@ -347,56 +355,46 @@
     "kpi.coc": {
       "title": "Cash-on-cash return (an 1)",
       "body": "Rendement annuel du flux net opérationnel de l'année 1 rapporté à l'apport initial. Indicateur simple et immédiat : combien rapporte le bien en cash cette année par euro investi. Ne tient pas compte de la valeur de revente ni de l'actualisation. Colonne ETF : un ETF capitalisant ne distribue aucun cash, le seul décaissement réel de l'année est le loyer perso → −loyerPerso / apportETF (effort cash, négatif).",
-      "code": "coc = cfN[an 1] / apport × 100   (ETF : −loyerPerso×12 / apportETF × 100)"
+      "code": "coc = netCashFlow[an 1] / apport × 100   (ETF : −loyerPerso×12 / apportETF × 100)"
     },
-    "kpi.beRevente": {
+    "kpi.resaleBreakEven": {
       "title": "Break-even revente",
       "body": "Première année où revendre ne vous fait plus perdre d'argent, en valeur nominale et sur la base TRI/VAN (loyer économisé en RP / payé en LOC réintégré). Tient compte des frais d'achat et de vente. Ne tient pas compte du coût d'opportunité (un ETF peut faire mieux même si vous « ne perdez pas »).",
-      "code": "1ère année où reventeNet + Σ(cfN + loyerPerso) − apport ≥ 0"
+      "code": "1ère année où netResaleProceeds + Σ(netCashFlow + loyerPerso) − apport ≥ 0"
     },
-    "kpi.bilanRevente": {
+    "kpi.resaleBalance": {
       "title": "Bilan revente",
       "body": "Gain net en cash si vous vendez à cet horizon : produit de cession net + flux cumulés − apport initial. Mesure ce que vous avez gagné en argent réel, hors valorisation non réalisée.",
-      "code": "bilanRevente = reventeNet + cfC − apport"
+      "code": "resaleBalance = netResaleProceeds + cfC − apport"
     },
-    "kpi.bilanTotal": {
+    "kpi.totalBalance": {
       "title": "Bilan total revente",
       "body": "Gain net global si vous vendez : produit de cession net + poche ETF accumulée (surplus réinvestis) − apport initial. La métrique la plus complète pour comparer deux scénarios.",
-      "code": "bilanTotal = reventeNet + etfCap − apport"
+      "code": "totalBalance = netResaleProceeds + etfPocket − apport"
     },
-    "kpi.patNet": {
+    "kpi.netWorth": {
       "title": "Patrimoine immobilier net",
       "body": "Équité immobilière (valeur estimée − capital restant dû) + flux cumulés − apport initial.",
-      "code": "patNet = (vb − rest) + cfC − apport"
+      "code": "netWorth = (vb − rest) + cfC − apport"
     },
-    "kpi.patTotal": {
+    "kpi.totalWorth": {
       "title": "Patrimoine total",
       "body": "Équité immobilière + poche ETF constituée avec le surplus mensuel réinvesti. Comparé au scénario ETF pur pour évaluer le crossover.",
-      "code": "patTotal = (vb − rest) + etfCap"
+      "code": "totalWorth = (vb − rest) + etfPocket"
     },
-    "kpi.etfPur": {
-      "title": "ETF pur (scénario de référence)",
-      "body": "Scénario alternatif : apport ETF investi dès le départ + surplus mensuel (budget − loyer perso) capitalisés au rendement alternatif. Sans achat immobilier.",
-      "code": "cap[n] = cap[n−1]×(1+r) + surplus"
-    },
-    "kpi.avantageEtf": {
-      "title": "Avantage vs ETF pur",
-      "body": "Patrimoine total immo − ETF pur à l'horizon. Positif = l'immobilier surperforme le portefeuille ETF de référence.",
-      "code": "Avantage = patTotal − etfPurCap"
-    },
-    "kpi.crossover": {
-      "title": "Croisement vs ETF pur",
-      "body": "Première année où le patrimoine total immo (équité + ETF du surplus) dépasse l'ETF pur. Avant ce point, le scénario ETF est plus rentable."
-    },
-    "kpi.triReal": {
+    "kpi.irrReal": {
       "title": "TRI réel (ajusté inflation)",
       "body": "TRI nominal corrigé de l'inflation par la formule de Fisher. Mesure le rendement en euros constants, au-dessus de l'inflation.",
       "code": "TRI réel = (1 + TRI nominal) / (1 + inflation) − 1"
     },
-    "kpi.patReal": {
+    "kpi.wealthReal": {
       "title": "Patrimoine réel (euros constants)",
       "body": "Patrimoine nominal déflaté de l'inflation. Exprime la richesse en euros d'aujourd'hui : ce que vous pourrez acheter avec ce capital.",
       "code": "Patrim. réel = Patrim. nominal / (1 + inflation)^n"
+    },
+    "kpi.crossover": {
+      "title": "Croisement vs ETF pur",
+      "body": "Première année où le patrimoine total immo (équité + ETF du surplus) dépasse l'ETF pur. Avant ce point, le scénario ETF est plus rentable."
     }
   },
   "charts": {
@@ -418,25 +416,25 @@
       "desc": "Valeur de marché nominale selon le taux de revalorisation paramétré.",
       "realNote": "Valeurs nominales · gain réel ≈ revalorisation − {{inflation}}%/an inflation"
     },
-    "revente": {
+    "resale": {
       "title": "Bilan net selon l'année de revente",
       "desc": "Gain net si vous revendez cette année. RP exonérée d'impôt sur PV. Pointillés = ETF pur de référence."
     },
-    "reventeCash": {
+    "resaleCash": {
       "title": "Combien d'années pour ne pas perdre d'argent ?",
-      "desc": "Bilan en cash si vous revendez cette année, sur la même base que le TRI/VAN : revente nette + flux cumulés + loyer économisé (RP) ou − loyer payé (LOC) − apport. Le passage à zéro (marqueur vertical) = durée de détention minimale pour ne pas être perdant. Valeurs <b>nominales</b>, hors coût d'opportunité (vs ETF). <code>bilanCash = reventeNet + Σ(cfN + loyerPerso) − apport</code>"
+      "desc": "Bilan en cash si vous revendez cette année, sur la même base que le TRI/VAN : revente nette + flux cumulés + loyer économisé (RP) ou − loyer payé (LOC) − apport. Le passage à zéro (marqueur vertical) = durée de détention minimale pour ne pas être perdant. Valeurs <b>nominales</b>, hors coût d'opportunité (vs ETF). <code>cashBalance = netResaleProceeds + Σ(netCashFlow + loyerPerso) − apport</code>"
     },
-    "reventeDetail": "Détail par année clé",
-    "amort": {
+    "resaleDetail": "Détail par année clé",
+    "amortization": {
       "title": "Décomposition annuelle du prêt",
       "desc": "Au début la majorité part en intérêts, puis la part en capital augmente progressivement."
     },
-    "amortCap": {
+    "amortizationBalance": {
       "title": "Capital restant dû"
     }
   },
   "legend": {
-    "etfPur": "ETF pur — {{apport}}k€ apport",
+    "etfReference": "ETF pur — {{downPayment}}k€ apport",
     "hint": "Cliquer pour masquer/afficher"
   },
   "kpisTable": {
@@ -445,55 +443,53 @@
     "descReal": "Lignes grisées = valeurs en euros constants (ajustées par l'inflation {{inflation}} %).",
     "indicator": "Indicateur",
     "type": "Type",
-    "coutTotal": "Coût total acq.",
-    "emprunte": "Montant emprunté",
-    "mensualiteAss": "Mensualité + assurance",
-    "coutCredit": "Coût total crédit",
-    "rendBrut": "Rendement brut",
-    "rendNet": "Rendement net",
-    "cfMensuel": "CF réel/mois",
+    "catCosts": "Coûts & Financement",
+    "catYields": "Rendements & Cashflow",
+    "catReturns": "TRI / VAN / MOIC",
+    "catWealth": "Patrimoine",
+    "totalCost": "Coût total acq.",
+    "loanAmount": "Montant emprunté",
+    "monthlyPaymentIns": "Mensualité + assurance",
+    "creditCost": "Coût total crédit",
+    "grossYield": "Rendement brut",
+    "netYield": "Rendement net",
+    "monthlyCashFlow": "CF réel/mois",
     "coc": "Cash-on-cash (an 1)",
-    "effortRP": "Effort mensuel",
-    "breakeven": "Breakeven CF immo cumulé",
-    "tri10": "TRI 10a",
-    "tri10Real": "TRI 10a (réel)",
-    "tri15": "TRI 15a",
-    "tri15Real": "TRI 15a (réel)",
-    "tri20": "TRI 20a",
-    "tri20Real": "TRI 20a (réel)",
-    "van": "VAN ({{tauxActu}}%, {{horizon}}a)",
+    "monthlyEffort": "Effort mensuel",
+    "breakEven": "Breakeven CF immo cumulé",
+    "irr10": "TRI 10a",
+    "irr10Real": "TRI 10a (réel)",
+    "irr15": "TRI 15a",
+    "irr15Real": "TRI 15a (réel)",
+    "irr20": "TRI 20a",
+    "irr20Real": "TRI 20a (réel)",
+    "npv": "VAN ({{discountRate}}%, {{horizon}}a)",
     "moic": "MOIC {{horizon}}a",
-    "beRevente": "Break-even revente",
-    "bilanReventeHz": "Bilan revente {{horizon}}a",
-    "bilanTotalHz": "Bilan total revente {{horizon}}a",
-    "patNet": "Patrimoine immo net {{horizon}}a",
-    "patTotal": "Patrimoine total {{horizon}}a",
-    "patTotalReal": "Patrimoine réel {{horizon}}a",
-    "patTotal30": "Patrimoine total 30a",
-    "patTotal30Real": "Patrimoine réel 30a",
-    "etfPurHorizon": "ETF pur {{horizon}}a",
-    "etfPur30": "ETF pur 30a",
-    "avantageEtf": "Avantage vs ETF pur {{horizon}}a",
+    "resaleBreakEven": "Break-even revente",
+    "resaleBalanceHz": "Bilan revente {{horizon}}a",
+    "totalBalanceHz": "Bilan total revente {{horizon}}a",
+    "netWorth": "Patrimoine immo net {{horizon}}a",
+    "totalWorth": "Patrimoine total {{horizon}}a",
+    "totalWorthReal": "Patrimoine réel {{horizon}}a",
+    "totalWorth30": "Patrimoine total 30a",
+    "totalWorth30Real": "Patrimoine réel 30a",
     "crossover": "Croisement vs ETF pur",
-    "locatif": "Locatif",
-    "rp": "RP",
-    "anneeN": "An {{n}}",
-    "gt30ans": "> 30 ans",
-    "anneeN2": "Année {{n}}"
+    "yearN": "An {{n}}",
+    "gt30y": "> 30 ans"
   },
-  "revente": {
-    "revente": "Revente :",
-    "capitalRestant": "Capital restant :",
-    "etfPoche": "ETF poche :",
-    "bilanTotal": "Bilan total :",
-    "bilanImmo": "Bilan immo :",
+  "resale": {
+    "salePrice": "Revente :",
+    "etfPocket": "ETF poche :",
     "yr": "An {{n}}"
   },
-  "amort": {
-    "capital": "Capital",
-    "interets": "Intérêts",
-    "assurance": "Assurance",
-    "capitalRembourse": "Capital remboursé"
+  "amortization": {
+    "principal": "Capital",
+    "interest": "Intérêts",
+    "insurance": "Assurance",
+    "principalRepaid": "Capital remboursé"
+  },
+  "summary": {
+    "totalWorthCard": "Patrimoine total · {{hz}} ans"
   },
   "import": {
     "error": "Erreur importation :\n{{msg}}",
@@ -515,31 +511,31 @@
     "units": { "perMonth": " /mois", "years": "ans" },
     "groups": {
       "credit": "Crédit",
-      "rendement": "Rendement",
-      "capitalisation": "Capitalisation",
-      "fiscalite": "Fiscalité",
-      "plusvalue": "Plus-value",
-      "rentabilite": "Rentabilité (TRI/VAN/MOIC)"
+      "yield": "Rendement",
+      "compounding": "Capitalisation",
+      "taxation": "Fiscalité",
+      "capitalGains": "Plus-value",
+      "profitability": "Rentabilité (TRI/VAN/MOIC)"
     },
     "inputs": {
-      "emp": "Montant emprunté",
-      "ct": "Coût total d'acquisition",
+      "loanAmount": "Montant emprunté",
+      "totalCost": "Coût total d'acquisition",
       "charges": "Charges annuelles",
       "base": "Valeur initiale",
-      "le": "Loyer effectif (après vacance)",
-      "chg": "Charges déductibles",
-      "ab": "Amortissement du bien",
-      "at": "Amortissement des travaux",
-      "intAnnuel": "Intérêts annuels du crédit",
-      "rest": "Capital restant dû",
+      "rate": "Taux annuel",
+      "effectiveRent": "Loyer effectif (après vacance)",
+      "buildingDepreciation": "Amortissement du bien",
+      "worksDepreciation": "Amortissement des travaux",
+      "annualInterest": "Intérêts annuels du crédit",
+      "remaining": "Capital restant dû",
       "flows": "Flux de trésorerie (année 0 → 6)",
-      "tauxActu": "Taux d'actualisation",
-      "apportETF": "Apport ETF",
-      "rendAlt": "Rendement ETF",
-      "budgetMensuel": "Budget mensuel",
-      "loyerPerso": "Loyer personnel",
-      "revalBudget": "Revalorisation budget",
-      "revalLoyerPerso": "Revalorisation loyer",
+      "discountRate": "Taux d'actualisation",
+      "etfDownPayment": "Apport ETF",
+      "altReturn": "Rendement ETF",
+      "monthlyBudget": "Budget mensuel",
+      "personalRent": "Loyer personnel",
+      "budgetGrowth": "Revalorisation budget",
+      "personalRentGrowth": "Revalorisation loyer",
       "regime": "Régime fiscal"
     },
     "notes": {
@@ -553,68 +549,68 @@
       "value": "Valeur",
       "capGross": "Capital brut",
       "capNet": "Capital net (après PFU)",
-      "reventeNet": "Produit net de revente",
+      "netResaleProceeds": "Produit net de revente",
       "npvCurve": "VAN(taux)",
-      "abatIR": "Abattement IR",
-      "abatPS": "Abattement PS"
+      "allowanceIncomeTax": "Abattement IR",
+      "allowanceSocialTax": "Abattement PS"
     },
     "concepts": {
-      "mensualite": {
+      "monthlyPayment": {
         "title": "Mensualité du crédit",
         "body": "Annuité constante : une mensualité fixe qui rembourse le prêt sur toute sa durée. Un taux ou un montant plus élevé l'augmente ; une durée plus longue la baisse (mais coûte plus cher au total).",
         "code": "mensualité = emprunt × (r/12) / (1 − (1 + r/12)^−n)"
       },
-      "amortissement": {
+      "amortization": {
         "title": "Décomposition de l'amortissement",
         "body": "Chaque mensualité se partage entre les intérêts (sur le capital restant) et le capital. Au début c'est surtout des intérêts ; la part de capital croît année après année.",
         "code": "intérêts[m] = restant × r/12   ·   capital[m] = mensualité − intérêts[m]"
       },
-      "assurance": {
+      "insurance": {
         "title": "Assurance emprunteur",
         "body": "Assurance de prêt, calculée sur le capital initial (pratique des assurances groupe), donc constante sur toute la durée du crédit.",
         "code": "assurance mensuelle = emprunt × taux / 12"
       },
-      "coutCredit": {
+      "creditCost": {
         "title": "Coût total du crédit",
         "body": "Tout ce que le prêt coûte au-delà du capital emprunté : la somme des intérêts plus toutes les primes d'assurance sur la durée.",
         "code": "coût = Σ intérêts + assurance × n"
       },
-      "rendBrut": {
+      "grossYield": {
         "title": "Rendement brut",
         "body": "Loyer annuel divisé par le coût total d'acquisition, avant toute charge ou impôt. Un premier filtre rapide, calculé à l'année 0.",
         "code": "rendement brut = loyer × 12 / coût total"
       },
-      "rendNet": {
+      "netYield": {
         "title": "Rendement net",
         "body": "Loyer effectif (après vacance) moins les charges annuelles, sur le coût total. Hors service de la dette et impôt.",
         "code": "rendement net = (loyer × (1 − vacance) × 12 − charges) / coût total"
       },
-      "revalorisation": {
+      "compounding": {
         "title": "Revalorisation composée",
         "body": "Comment une valeur croît lorsqu'elle se capitalise à un taux annuel fixe. Le même helper du moteur pilote la revalorisation du bien, l'indexation des loyers et la croissance du budget.",
         "code": "valeur[n] = base × (1 + taux)^n"
       },
-      "etfPur": {
+      "etfScenario": {
         "title": "Scénario ETF pur",
         "body": "L'alternative de référence : investir l'apport au départ, puis ajouter chaque année le surplus mensuel (budget − loyer perso), le tout capitalisé au rendement ETF. Le capital net applique le PFU de 30 % sur la plus-value.",
         "code": "cap[n] = cap[n−1] × (1 + r) + surplus"
       },
-      "impotLoc": {
+      "rentalTax": {
         "title": "Impôt sur les revenus locatifs",
         "body": "L'impôt locatif dépend du régime. LMNP Réel déduit intérêts et amortissements ; Micro-BIC applique un abattement forfaitaire de 50 % ; Foncier nu déduit les charges réelles et les intérêts. Changez de régime pour comparer.",
         "code": "impôt = revenu imposable × (TMI + prélèvements sociaux)"
       },
-      "abattements": {
+      "allowances": {
         "title": "Abattements sur la plus-value",
         "body": "Les abattements pour durée de détention réduisent la plus-value imposable au fil du temps. Exonération totale d'IR après 22 ans, de prélèvements sociaux après 30 ans. Locatif uniquement — la résidence principale est toujours exonérée.",
         "code": "exonéré IR ≥ 22 ans · exonéré PS ≥ 30 ans"
       },
-      "revente": {
+      "resale": {
         "title": "Produit net de revente par année",
         "body": "Ce que vous encaissez réellement en vendant l'année N : prix de revente (travaux inclus) moins capital restant, frais de vente et impôt sur la plus-value. Les abattements ci-dessus aplatissent l'impôt au fil des années.",
         "code": "net = prix − capital restant − frais − impôt PV"
       },
-      "triVanMoic": {
+      "irrNpvMoic": {
         "title": "TRI · VAN · MOIC",
         "body": "Éditez les flux de trésorerie (l'année 0 est votre mise initiale). La courbe est la VAN à chaque taux d'actualisation — là où elle croise zéro se trouve le TRI. La VAN lit la courbe à votre taux ; le MOIC est le multiple simple de l'argent récupéré sur l'argent investi.",
         "code": "VAN(TRI) = 0   ·   MOIC = Σ entrées / sortie"

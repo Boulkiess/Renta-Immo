@@ -2,31 +2,31 @@ import { describe, it, expect } from 'vitest';
 import { mkDef, simCopyPayload } from './definitions.js';
 
 describe('simCopyPayload', () => {
-  it('exclut l’identité/état d’affichage et conserve mode + params + autoFields', () => {
-    const p = { ...mkDef('loc'), label: 'Sim A', enabled: false, collapsed: true };
+  it('excludes identity/view state and keeps mode + params + autoFields', () => {
+    const p = { ...mkDef('rental'), label: 'Sim A', enabled: false, collapsed: true };
     const payload = simCopyPayload(p);
 
-    // identité / état d'affichage retirés
+    // identity / view state removed
     expect(payload).not.toHaveProperty('label');
     expect(payload).not.toHaveProperty('enabled');
     expect(payload).not.toHaveProperty('collapsed');
 
-    // mode + paramètres financiers conservés
-    expect(payload.mode).toBe('loc');
-    expect(payload.prixAchat).toBe(p.prixAchat);
-    expect(payload.taux).toBe(p.taux);
+    // mode + financial parameters kept
+    expect(payload.mode).toBe('rental');
+    expect(payload.purchasePrice).toBe(p.purchasePrice);
+    expect(payload.interestRate).toBe(p.interestRate);
     expect(payload.autoFields).toEqual(p.autoFields);
   });
 
-  it('clone autoFields — muter le payload ne touche pas la source', () => {
-    const p = mkDef('loc');
+  it('clones autoFields — mutating the payload does not touch the source', () => {
+    const p = mkDef('rental');
     const payload = simCopyPayload(p);
-    payload.autoFields.push('prixAchat');
-    expect(p.autoFields).not.toContain('prixAchat');
+    payload.autoFields.push('purchasePrice');
+    expect(p.autoFields).not.toContain('purchasePrice');
   });
 
-  it('tolère un sim sans autoFields', () => {
-    const { autoFields: _drop, ...noAuto } = mkDef('rp');
+  it('tolerates a sim without autoFields', () => {
+    const { autoFields: _drop, ...noAuto } = mkDef('primary');
     const payload = simCopyPayload(noAuto);
     expect(payload.autoFields).toEqual([]);
   });

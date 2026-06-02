@@ -9,14 +9,14 @@ import { Wrap, TableWrap, TableTitle, TableDesc } from './KpisTab.styles.js';
 
 export default function KpisTab() {
   const { t } = useTranslation();
-  const { sims, RES, etfPurGlobal, crossovers, G } = useApp();
+  const { sims, RES, etfScenarioGlobal, crossovers, G } = useApp();
 
   const hz = G.horizon;
   const infl = G.inflation / 100;
   const activeKeys = KEYS.filter(k => sims[k].enabled);
   const etfKpis = computeEtfKpis(G);
 
-  const sections = buildSections(t, { G, RES, sims, etfPurGlobal, etfKpis, crossovers });
+  const sections = buildSections(t, { G, RES, sims, etfScenarioGlobal, etfKpis, crossovers });
 
   return (
     <Wrap>

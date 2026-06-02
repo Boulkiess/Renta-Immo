@@ -134,7 +134,7 @@ export function attachHover(canvas) {
         bi = i;
       }
     });
-    let h = `<div style="font-weight:700;margin-bottom:5px;color:var(--muted,#64748b);font-size:10px">Année ${m.xLabels[bi]}</div>`;
+    let h = `<div style="font-weight:700;margin-bottom:5px;color:var(--muted,#64748b);font-size:10px">Year ${m.xLabels[bi]}</div>`;
     m.datasets
       .filter(d => !d.hide)
       .forEach(d => {

@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Codebase translated to 100% English (identifiers included).** All French was
+  removed from code, comments, JSDoc, test descriptions and the export/import
+  format — including the **domain identifiers themselves**. The 43 data-model
+  keys (`prixAchat`→`purchasePrice`, `loyer`→`rent`, `apport`→`downPayment`, …),
+  the engine output keys (`flux`→`flows`, `reventeNet`→`netResaleProceeds`,
+  `patNet`→`netWorth`, `bilanCash`→`cashBalance`, …), the function names
+  (`revalorise`→`compound`, `surplusAt`→`annualSurplus`, `impLoc`→`rentalTax`,
+  `computeEtfPur`→`computeEtfScenario`, `abattementIR/PS`→`allowanceIncomeTax/SocialTax`)
+  and the mode enum values (`'loc'`→`'rental'`, `'rp'`→`'primary'`) were renamed
+  across the engine (JS + TS), state, io, components, tests and i18n keys. The
+  **French UI locale (`fr.json`) keeps its French values** — only its keys were
+  renamed in lockstep with `en.json`. No behavior change: the ground-truth
+  numeric assertions in `compute.test.js` pass unchanged and the engine-ts parity
+  test still proves TS == JS; golden/io snapshots were regenerated (keys changed,
+  values did not). **No back-compat**: `localStorage` was bumped to
+  `immorenta_state_v2` so stale French-keyed state is ignored, and old exported
+  JSON/CSV/YAML files no longer re-import. 139 tests green, production build OK.
+
 ### Added
 
 - **Variante TypeScript du moteur (`@immo-renta/engine-ts`, POC parallèle)** : nouveau package `packages/engine-ts/` — port 1:1 du moteur en TypeScript natif (interfaces `Globals`/`SimParams`/`FluxYear`/`ComputeResult`… dans `src/types.ts`, `strict: true`, compilé en `dist/` `.js` + `.d.ts` + sourcemaps via `tsc`). Coexiste avec le package JS sans toucher à l'app (qui consomme toujours `@immo-renta/engine`). Démontre l'arbitrage TS : ergonomie d'écriture (vrais types inline) **contre** étape de build obligatoire (le JS publie son `src/`, le TS doit compiler `dist/`). Un **test de parité** (`__tests__/parity.test.ts`, 18 cas) importe les deux moteurs et prouve l'égalité stricte des sorties (`compute`, `computeEtfPur`, `computeEtfKpis`, helpers) sur une matrice loc/rp × régimes × horizons → le port n'est pas une approximation. Outillage : workspace `packages/engine-ts`, typecheck chaîné dans `npm run check`, ESLint ignore les `.ts` (validés par `tsc`, pas de `typescript-eslint` installé), Vitest inclut les `*.test.ts`. `dist/` gitignoré.

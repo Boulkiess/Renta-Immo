@@ -44,7 +44,7 @@ export default function FullPanel({ simKey }) {
           <LabelInput value={p.label} onChange={e => updateSim(simKey, 'label', e.target.value)} />
           <IconBtn
             onClick={() => updateSim(simKey, 'collapsed', true)}
-            title="Réduire — garde la simulation dans les graphiques"
+            title={t('sim.collapseTitle')}
           >
             <CollapseIcon expanded />
           </IconBtn>
@@ -61,18 +61,18 @@ export default function FullPanel({ simKey }) {
 
         <ModeRow>
           <ModeBtn
-            $active={p.mode === 'loc'}
+            $active={p.mode === 'rental'}
             $col={col}
-            onClick={() => updateSimBulk(simKey, { mode: 'loc' })}
+            onClick={() => updateSimBulk(simKey, { mode: 'rental' })}
           >
-            {t('sim.loc')}
+            {t('sim.rental')}
           </ModeBtn>
           <ModeBtn
-            $active={p.mode === 'rp'}
+            $active={p.mode === 'primary'}
             $col={col}
-            onClick={() => updateSimBulk(simKey, { mode: 'rp' })}
+            onClick={() => updateSimBulk(simKey, { mode: 'primary' })}
           >
-            {t('sim.rp')}
+            {t('sim.primary')}
           </ModeBtn>
         </ModeRow>
 
@@ -80,8 +80,8 @@ export default function FullPanel({ simKey }) {
           <HeaderKpis
             r={r}
             col={col}
-            loyerPerso={G.loyerPerso}
-            budgetMensuel={G.budgetMensuel}
+            personalRent={G.personalRent}
+            monthlyBudget={G.monthlyBudget}
             horizon={G.horizon}
           />
         )}

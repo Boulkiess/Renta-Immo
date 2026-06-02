@@ -2,7 +2,7 @@ import { useRef } from 'react';
 
 const PIXELS_PER_STEP = 6;
 
-/** Nombre de décimales d'un pas (ex. 0.05 → 2). */
+/** Number of decimals of a step (e.g. 0.05 → 2). */
 export const stepDecimals = st => {
   const s = st.toString();
   const i = s.indexOf('.');
@@ -10,9 +10,9 @@ export const stepDecimals = st => {
 };
 
 /**
- * Math pure du glissement : applique un déplacement vertical à une valeur.
- * `raw` accumule (non clampé) ; `clamped` est la valeur émise (bornée, arrondie).
- * Shift ⇒ pas ×10. Extrait pour être testable sans DOM (cf. D7).
+ * Pure drag math: applies a vertical movement to a value.
+ * `raw` accumulates (unclamped); `clamped` is the emitted value (bounded, rounded).
+ * Shift ⇒ step ×10. Extracted to be testable without the DOM (cf. D7).
  */
 export function nextDragValue(currentVal, movementY, step, shiftKey, min, max, dec) {
   const mult = shiftKey ? 10 : 1;
@@ -22,9 +22,9 @@ export function nextDragValue(currentVal, movementY, step, shiftKey, min, max, d
 }
 
 /**
- * Logique de glissement vertical (pointer-lock) pour ajuster une valeur numérique.
- * Mutualise le code dupliqué entre FieldGroup et GlobalStrip.
- * Retourne `{ onMouseDown }` à brancher sur l'élément déclencheur (ex. l'unité).
+ * Vertical-drag (pointer-lock) logic to adjust a numeric value.
+ * Shares the code that was duplicated between FieldGroup and GlobalStrip.
+ * Returns `{ onMouseDown }` to wire onto the trigger element (e.g. the unit).
  */
 export function useDraggableValue({ val, min, max, step, onChange }) {
   const dragRef = useRef(null);

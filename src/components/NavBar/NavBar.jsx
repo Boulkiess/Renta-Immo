@@ -209,13 +209,13 @@ const UploadIcon = () => (
 
 export default function NavBar({ currentThemeName, onToggleTheme, onOpenDoc }) {
   const { t, i18n } = useTranslation();
-  const { G, sims, RES, etfPurGlobal, updateG, updateSimBulk } = useApp();
+  const { G, sims, RES, etfScenarioGlobal, updateG, updateSimBulk } = useApp();
   const [expOpen, setExpOpen] = useState(false);
   const fileRef = useRef(null);
 
   function onExport(fmt) {
     setExpOpen(false);
-    doExport(fmt, buildExportData(G, sims, RES, etfPurGlobal));
+    doExport(fmt, buildExportData(G, sims, RES, etfScenarioGlobal));
   }
 
   function onImportFile(e) {
@@ -253,7 +253,7 @@ export default function NavBar({ currentThemeName, onToggleTheme, onOpenDoc }) {
 
         <ThemeBtn
           onClick={onToggleTheme}
-          title={currentThemeName === 'dark' ? 'Mode clair' : 'Mode sombre'}
+          title={currentThemeName === 'dark' ? t('nav.lightMode') : t('nav.darkMode')}
         >
           {currentThemeName === 'dark' ? '☀' : '☾'}
         </ThemeBtn>
