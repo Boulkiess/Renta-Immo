@@ -1,5 +1,11 @@
 # Changelog
 
+> Note: entries before the "100% English migration" describe changes made when
+> the engine used French identifiers (`prixAchat`, `cfN`, `reventeNet`, `loc`/`rp`,
+> …). Those names are kept verbatim in historical entries for accuracy; the
+> current code uses the English names (`purchasePrice`, `netCashFlow`,
+> `netResaleProceeds`, `rental`/`primary`, …).
+
 ## [Unreleased]
 
 ### Changed
@@ -21,233 +27,226 @@
   values did not). **No back-compat**: `localStorage` was bumped to
   `immorenta_state_v2` so stale French-keyed state is ignored, and old exported
   JSON/CSV/YAML files no longer re-import. 139 tests green, production build OK.
+- Markdown docs (`CLAUDE.md`, `TODO.md`, `CHANGELOG.md`) translated to English.
 
 ### Added
 
-- **Variante TypeScript du moteur (`@immo-renta/engine-ts`, POC parallèle)** : nouveau package `packages/engine-ts/` — port 1:1 du moteur en TypeScript natif (interfaces `Globals`/`SimParams`/`FluxYear`/`ComputeResult`… dans `src/types.ts`, `strict: true`, compilé en `dist/` `.js` + `.d.ts` + sourcemaps via `tsc`). Coexiste avec le package JS sans toucher à l'app (qui consomme toujours `@immo-renta/engine`). Démontre l'arbitrage TS : ergonomie d'écriture (vrais types inline) **contre** étape de build obligatoire (le JS publie son `src/`, le TS doit compiler `dist/`). Un **test de parité** (`__tests__/parity.test.ts`, 18 cas) importe les deux moteurs et prouve l'égalité stricte des sorties (`compute`, `computeEtfPur`, `computeEtfKpis`, helpers) sur une matrice loc/rp × régimes × horizons → le port n'est pas une approximation. Outillage : workspace `packages/engine-ts`, typecheck chaîné dans `npm run check`, ESLint ignore les `.ts` (validés par `tsc`, pas de `typescript-eslint` installé), Vitest inclut les `*.test.ts`. `dist/` gitignoré.
-- **Types `.d.ts` du moteur (Phase 4, sans publication)** : `packages/engine/tsconfig.json` (`checkJs` + `emitDeclarationOnly`) génère les déclarations TypeScript du package depuis les JSDoc → `dist/*.d.ts` (gitignoré, construit à la demande via `npm run build:types -w @immo-renta/engine`, et sur `prepack`). Ajout de `@typedef Globals` (g) et `SimParams` (p) + annotations sur toute l'API publique de `compute.js` → la surface exportée est désormais **typée** (`compute(p: SimParams, g: Globals)`, `impLoc(… regime: 'lmnp'|'microbic'|'nu')`, etc.) ; `Globals`/`SimParams` sont exportés dans le `.d.ts`. Le typecheck du moteur est délégué au package (`npm run typecheck` racine chaîne `tsc --noEmit && npm run typecheck -w @immo-renta/engine`) ; les fichiers `__tests__` sont exclus du typecheck racine (symétrie avec le package, tests toujours exécutés par Vitest). `package.json` du package : champs `types`/`exports.types`, `files` += `dist`. Commentaires uniquement côté moteur → golden-master **byte-identique**, 121 tests verts. Pas de publication npm.
-- **Extraction du moteur en package npm (Phase 3)** : le moteur financier pur vit désormais dans `packages/engine/` (`@immo-renta/engine`, **zéro dépendance runtime**), activé via **npm workspaces** (app à la racine). `compute.js` + le barrel `index.js` + leurs tests (`compute.test.js`, `golden.test.js`, `fixtures.js`, snapshots) déplacés par `git mv` (historique préservé). L'app importe le moteur via `@immo-renta/engine` (résolu par symlink workspace en build/dev/test, et par `paths` tsconfig au typecheck). Restent dans `src/engine/` les helpers app-side (`charts.js` canvas, `utils.js` formatters, `io.js` sérialisation) — hors périmètre package. Snapshots golden **byte-identiques** (zéro régénération). Vérifié de bout en bout : `npm ci` recrée le symlink, `npm run build`/`check` verts (121 tests), déploiement GitHub Pages inchangé. `vite.config`/`tsconfig`/scripts lint étendus à `packages/`.
-- **Découplage des tests moteur (Phase 2 d'extraction)** : `engine/__tests__/compute.test.js` et `golden.test.js` ne dépendent plus de `state/definitions.js` (`mkDef`). Nouvelle fixture autonome `engine/__tests__/fixtures.js` (`makeG`, `mkParams`) qui reproduit les champs financiers lus par `compute()` — les snapshots golden restent **byte-identiques** (zéro régénération). Les deux suites importent désormais le moteur via le barrel `engine/index.js`. Dernier lien `engine → state` coupé pour le périmètre package : seuls `io.js`/`io.test.js` (sérialisation, hors périmètre) restent volontairement couplés au state. Le moteur (`compute.js` + tests) est maintenant déplaçable tel quel en package autonome.
-- **Frontière de package du moteur (Phase 1 d'extraction)** : nouveau barrel `engine/index.js` qui expose la **surface publique** du moteur financier (`compute`, `computeEtfPur`, `computeEtfKpis`, `crossoverYear` + helpers purs `irr`, `revalorise`, `surplusAt`, `abattementIR/PS`, `impLoc`, `buildAmortization`, `computeResale`, `calcTRI/VAN/Moic`). Tous les consommateurs app (`AppContext`, `KpisTab`, `DocPanel/concepts`) importent désormais depuis `engine/index.js` au lieu de `engine/compute.js` en direct. `compute.js` est le seul module derrière la frontière — `utils.js` (formatters), `charts.js` (canvas) et `io.js` (sérialisation couplée au state) restent hors périmètre. Aucune logique modifiée : golden-master et suite complète inchangés (121 tests verts). Prépare une extraction ultérieure en package npm autonome (`@immo-renta/engine`, zéro dépendance runtime).
-
-- **Documentation interactive (DocPanel)** : nouveau bouton `?` dans la NavBar ouvrant une surface plein écran (overlay, `Échap`/clic-dehors pour fermer) où chaque concept financier est une carte — titre, explication, formule et **widget interactif** (sliders/select/flux → valeur ou graphe live). 100 % client-side, déterministe, zéro clé/serveur : l'app reste strictement statique. Pivot d'une demande initiale de « chatbot » (incompatible avec la contrainte serverless à cause de la clé API). **Single source of truth** : chaque adaptateur appelle les helpers purs déjà exportés du moteur (`mensualité` via l'annuité, `buildAmortization`, `impLoc`, `abattementIR/PS`, `computeResale`, `computeEtfPur`, `irr`, `revalorise`) — la doc et l'app ne peuvent pas diverger. Registre de concepts data-driven (`components/DocPanel/concepts.js`) rendu par un unique `ConceptCard` générique ; charts montés en lazy (IntersectionObserver) ; cartes amorçables depuis n'importe laquelle des 3 simulations live via un sélecteur de chips A/B/C (« charger les valeurs de : », coloré par sim) qui re-amorce toutes les cartes. `revalorise` est désormais exporté depuis `engine/compute.js`. Nouveau namespace i18n `doc.*` (fr/en). Adaptateurs purs couverts par `components/DocPanel/__tests__/concepts.test.js` (intégrité du registre, valeurs connues, modes de défaillance IRR/MOIC → sentinelles, pas de fuite NaN).
-- **Colonne ETF : Cash-on-cash (an 1)** désormais renseignée dans KpisTab (section Rendements & Cashflow), auparavant `—`. Convention « effort loyer perso » : un ETF capitalisant ne distribue aucun cash, donc le seul décaissement réel de l'année 1 est le loyer perso → `etfVal = −(loyerPerso×12) / apportETF × 100` (négatif, miroir du `cfN` immo qui inclut `loyerPerso`). Tooltip `kpi.coc` enrichi (fr/en) pour documenter la colonne ETF.
-- **Menu contextuel (kebab ⋮) sur chaque panneau de simulation** : remplace le switch d'activation par un menu à 3 actions — **Désactiver**, **Copier**, **Coller**. « Coller » n'est actif que si une copie a déjà été faite. Nouveau composant générique réutilisable `components/common/Menu.jsx` (`Menu` + `MenuItem`, gère ouverture/fermeture, clic-extérieur et `Échap`), icône `KebabIcon` dans `SimPanel/icons.jsx`, clés i18n `sim.{menu,disable,copy,paste}` (fr/en, clé orpheline `sim.enable` retirée).
-- **Copier-coller une simulation (A → B)** : presse-papier **en mémoire** (non persisté, réinitialisé au rechargement) dans `AppContext` via `copySim`/`pasteSim` + état `clipboard`. Le coller écrase `mode` + tous les paramètres financiers + `autoFields` de la cible mais **conserve** son `label`, `enabled` et `collapsed` (B reste B). Helper pur `simCopyPayload(p)` dans `state/definitions.js` (exclut l'identité, clone `autoFields`). Couvert par des tests unitaires (helper), jsdom (`Menu`) et d'intégration (copier A → coller B).
-- **Switch global Nominal / Réel** : nouveau toggle `displayReal` dans le GlobalStrip (à côté de l'inflation). En mode « réel », les courbes de l'onglet Comparaison (CF cumul, patrimoine, CF annuel, valeur bien) et de l'onglet Revente (bilan revente, bilan cash) sont déflatées par l'inflation (`valeur / (1+inflation/100)^année`) — euros constants. Dans les tableaux KPI et les cartes résumé, l'emphase (couleur ↔ gris) bascule entre les lignes nominales et réelles selon le mode. Le moteur reste strictement nominal (aucun impact golden-master). Clés i18n `global.displayReal` + tooltip `displayReal` (fr/en) ; helper pur `deflate()` dans `engine/utils.js`. No-op si inflation = 0.
-- **Onglet Revente — second graphe « Combien d'années pour ne pas perdre d'argent ? »** : trace `bilanCash = reventeNet + Σ(cfN + loyerPersoAnn) − apport`, sur la même base de flux que TRI/VAN/MOIC (loyer perso neutralisé en LOC, loyer économisé crédité en RP). Le passage à zéro = durée de détention minimale pour ne pas être perdant (nominal, hors coût d'opportunité). Annotation verticale par sim à l'année de break-even. Clés i18n `charts.reventeCash.{title,desc}` (fr/en).
-- **`engine/compute.js`** : nouveau champ `flux[].bilanCash` et KPI `beRevente` (1ère année où `bilanCash ≥ 0`). Exposé comme ligne **Break-even revente** dans KpisTab (section Patrimoine) avec tooltip `kpi.beRevente`.
-- **Filet de tests composants (jsdom)** : harness `src/test-utils/renderWithProviders.jsx` (providers réels theme + i18n + AppContext, seed via localStorage) + `kpiNormalize.js`. Tests jsdom sur `KpisTab`, `SimPanel` (3 branches), `GlobalStrip`, `FieldGroup` (toggle auto, slider, flèches shift×10). Env `jsdom` par fichier via docblock `// @vitest-environment jsdom`, env moteur restant `node`. Suite passée de 40 à 91 tests.
-- `engine/compute.js` : `computeEtfKpis(g)` (TRI/VAN/MOIC ETF) et `surplusAt(g, yr)` (surplus annuel de référence ETF) extraits et exportés — testés (caractérisation paramétrée + golden-master). La math ETF quitte `KpisTab` pour le moteur.
-- `engine/compute.js` : îlots purs exportés `buildAmortization`, `computeResale`, `calcTRI`, `calcVAN`, `calcMoic` — `compute()` devient un orchestrateur mince autour de la boucle 30 ans.
-- `components/common/useDraggableValue.js` : `nextDragValue()` pur (math clamp/shift×10) extrait et testé sans DOM.
-- Filet de tests **Vitest** sur le moteur financier : assertions vérité-terrain (`irr`, abattements art. 150 VC CGI, `impLoc` 3 régimes, annuité, report LMNP, exonération PV) + golden-master figeant `compute`/`computeEtfPur` et `buildExportData` (`src/engine/__tests__/`). Scripts `npm run test` / `npm run test:watch`, intégrés à `npm run check` et au job `quality` de la CI.
-- `src/components/common/useDraggableValue.js` : hook mutualisant la logique de glissement (pointer-lock) auparavant dupliquée entre `FieldGroup` et `GlobalStrip`.
-- `TODO.md` : suivi des refactors différés (découpe des god-functions/composants, charts.js, io.js).
+- **TypeScript engine variant (`@immo-renta/engine-ts`, parallel POC)**: new `packages/engine-ts/` package — a 1:1 port of the engine in native TypeScript (interfaces `Globals`/`SimParams`/`FlowYear`/`ComputeResult`… in `src/types.ts`, `strict: true`, compiled to `dist/` `.js` + `.d.ts` + sourcemaps via `tsc`). Coexists with the JS package without touching the app (which still consumes `@immo-renta/engine`). Demonstrates the TS trade-off: authoring ergonomics (real inline types) **versus** a mandatory build step (JS ships its `src/`, TS must compile `dist/`). A **parity test** (`__tests__/parity.test.ts`, 18 cases) imports both engines and proves strict output equality (`compute`, `computeEtfScenario`, `computeEtfKpis`, helpers) across a rental/primary × regimes × horizons matrix → the port is not an approximation. Tooling: `packages/engine-ts` workspace, typecheck chained in `npm run check`, ESLint ignores `.ts` (validated by `tsc`, no `typescript-eslint` installed), Vitest includes `*.test.ts`. `dist/` gitignored.
+- **Engine `.d.ts` types (Phase 4, no publish)**: `packages/engine/tsconfig.json` (`checkJs` + `emitDeclarationOnly`) generates the package's TypeScript declarations from the JSDoc → `dist/*.d.ts` (gitignored, built on demand via `npm run build:types -w @immo-renta/engine`, and on `prepack`). Added `@typedef Globals` (g) and `SimParams` (p) + annotations on the whole public API of `compute.js` → the exported surface is now **typed** (`compute(p: SimParams, g: Globals)`, etc.); `Globals`/`SimParams` are exported in the `.d.ts`. The engine typecheck is delegated to the package; `__tests__` files are excluded from the root typecheck (symmetry with the package, tests still run by Vitest). Engine comments only → golden-master **byte-identical**, 121 tests green. No npm publish.
+- **Engine extracted into an npm package (Phase 3)**: the pure financial engine now lives in `packages/engine/` (`@immo-renta/engine`, **zero runtime dependencies**), activated via **npm workspaces** (app at root). `compute.js` + the `index.js` barrel + their tests (`compute.test.js`, `golden.test.js`, `fixtures.js`, snapshots) moved via `git mv` (history preserved). The app imports the engine via `@immo-renta/engine` (resolved by the workspace symlink at build/dev/test, and by a tsconfig `paths` mapping at typecheck). The app-side helpers stay in `src/engine/` (`charts.js` canvas, `utils.js` formatters, `io.js` serialization) — out of package scope. Golden snapshots **byte-identical** (no regeneration). Verified end to end: `npm ci` recreates the symlink, `npm run build`/`check` green (121 tests), GitHub Pages deploy unchanged. `vite.config`/`tsconfig`/lint scripts extended to `packages/`.
+- **Engine tests decoupled (extraction Phase 2)**: `engine/__tests__/compute.test.js` and `golden.test.js` no longer depend on `state/definitions.js` (`mkDef`). New self-contained fixture `engine/__tests__/fixtures.js` (`makeG`, `mkParams`) reproducing the financial fields read by `compute()` — golden snapshots stay **byte-identical** (no regeneration). Both suites now import the engine via the `engine/index.js` barrel. Last `engine → state` link cut for the package scope: only `io.js`/`io.test.js` (serialization, out of scope) stay intentionally coupled to state. The engine (`compute.js` + tests) is now movable as-is into a standalone package.
+- **Engine package boundary (extraction Phase 1)**: new `engine/index.js` barrel that exposes the **public surface** of the financial engine (`compute`, `computeEtfPur`, `computeEtfKpis`, `crossoverYear` + pure helpers `irr`, `revalorise`, `surplusAt`, `abattementIR/PS`, `impLoc`, `buildAmortization`, `computeResale`, `calcTRI/VAN/Moic`). All app consumers (`AppContext`, `KpisTab`, `DocPanel/concepts`) now import from `engine/index.js` instead of `engine/compute.js` directly. `compute.js` is the only module behind the boundary — `utils.js` (formatters), `charts.js` (canvas) and `io.js` (state-coupled serialization) stay out of scope. No logic changed: golden-master and the full suite unchanged (121 tests green). Prepares a later extraction into a standalone npm package (`@immo-renta/engine`, zero runtime deps).
+- **Interactive documentation (DocPanel)**: new `?` button in the NavBar opening a full-screen surface (overlay, `Esc`/click-outside to close) where each financial concept is a card — title, explanation, formula and **interactive widget** (sliders/select/flows → value or live chart). 100% client-side, deterministic, zero key/server: the app stays strictly static. Pivot from an initial "chatbot" request (incompatible with the serverless constraint because of the API key). **Single source of truth**: each adapter calls the pure engine helpers already exported (`monthly payment` via the annuity, `buildAmortization`, `impLoc`, `abattementIR/PS`, `computeResale`, `computeEtfPur`, `irr`, `revalorise`) — the doc and the app cannot diverge. Data-driven concept registry (`components/DocPanel/concepts.js`) rendered by a single generic `ConceptCard`; charts mounted lazily (IntersectionObserver); cards seedable from any of the 3 live simulations via an A/B/C chip selector ("load values from:", sim-colored) that re-seeds every card. `revalorise` is now exported from `engine/compute.js`. New `doc.*` i18n namespace (fr/en). Pure adapters covered by `components/DocPanel/__tests__/concepts.test.js` (registry integrity, known values, IRR/MOIC failure modes → sentinels, no NaN leaks).
+- **ETF column: Cash-on-cash (yr 1)** now filled in KpisTab (Yields & Cash-flow section), previously `—`. "Personal-rent effort" convention: a capitalizing ETF distributes no cash, so the only real year-1 outflow is the personal rent → `etfVal = −(loyerPerso×12) / apportETF × 100` (negative, mirroring the immo `cfN` which includes `loyerPerso`). `kpi.coc` tooltip enriched (fr/en) to document the ETF column.
+- **Context menu (kebab ⋮) on each simulation panel**: replaces the activation switch with a 3-action menu — **Disable**, **Copy**, **Paste**. "Paste" is enabled only if a copy has been made. New reusable generic component `components/common/Menu.jsx` (`Menu` + `MenuItem`, handles open/close, click-outside and `Esc`), `KebabIcon` in `SimPanel/icons.jsx`, i18n keys `sim.{menu,disable,copy,paste}` (fr/en, orphan key `sim.enable` removed).
+- **Copy-paste a simulation (A → B)**: **in-memory** clipboard (not persisted, reset on reload) in `AppContext` via `copySim`/`pasteSim` + `clipboard` state. Pasting overwrites `mode` + all financial parameters + `autoFields` of the target but **keeps** its `label`, `enabled` and `collapsed` (B stays B). Pure helper `simCopyPayload(p)` in `state/definitions.js` (excludes identity, clones `autoFields`). Covered by unit (helper), jsdom (`Menu`) and integration (copy A → paste B) tests.
+- **Global Nominal / Real switch**: new `displayReal` toggle in the GlobalStrip (next to inflation). In "real" mode, the Comparison-tab curves (cumulative CF, wealth, annual CF, property value) and the Sale-tab curves (resale balance, cash balance) are deflated by inflation (`value / (1+inflation/100)^year`) — constant euros. In the KPI tables and summary cards, the emphasis (color ↔ grey) switches between the nominal and real rows depending on the mode. The engine stays strictly nominal (no golden-master impact). i18n keys `global.displayReal` + tooltip `displayReal` (fr/en); pure helper `deflate()` in `engine/utils.js`. No-op when inflation = 0.
+- **Sale tab — second chart "How many years before you stop losing money?"**: plots `bilanCash = reventeNet + Σ(cfN + loyerPersoAnn) − apport`, on the same flow basis as IRR/NPV/MOIC (personal rent neutralized in rental, saved rent credited in primary). The zero-crossing = minimum holding period to avoid a loss (nominal, excluding opportunity cost). Vertical annotation per sim at the break-even year. i18n keys `charts.reventeCash.{title,desc}` (fr/en).
+- **`engine/compute.js`**: new field `flux[].bilanCash` and KPI `beRevente` (first year where `bilanCash ≥ 0`). Exposed as a **Resale break-even** row in KpisTab (Wealth section) with the `kpi.beRevente` tooltip.
+- **Component test net (jsdom)**: `src/test-utils/renderWithProviders.jsx` harness (real theme + i18n + AppContext providers, seed via localStorage) + `kpiNormalize.js`. jsdom tests on `KpisTab`, `SimPanel` (3 branches), `GlobalStrip`, `FieldGroup` (auto toggle, slider, shift×10 arrows). `jsdom` env per file via the `// @vitest-environment jsdom` docblock, engine env staying `node`. Suite grew from 40 to 91 tests.
+- `engine/compute.js`: `computeEtfKpis(g)` (ETF IRR/NPV/MOIC) and `surplusAt(g, yr)` (annual ETF reference surplus) extracted and exported — tested (parameterized characterization + golden-master). The ETF math leaves `KpisTab` for the engine.
+- `engine/compute.js`: pure islands exported `buildAmortization`, `computeResale`, `calcTRI`, `calcVAN`, `calcMoic` — `compute()` becomes a thin orchestrator around the 30-year loop.
+- `components/common/useDraggableValue.js`: pure `nextDragValue()` (clamp/shift×10 math) extracted and tested without the DOM.
+- **Vitest** test net on the financial engine: ground-truth assertions (`irr`, art. 150 VC CGI allowances, `impLoc` 3 regimes, annuity, LMNP carry-over, capital-gains exemption) + golden-master freezing `compute`/`computeEtfPur` and `buildExportData` (`src/engine/__tests__/`). Scripts `npm run test` / `npm run test:watch`, integrated into `npm run check` and the `quality` CI job.
+- `src/components/common/useDraggableValue.js`: hook factoring the drag logic (pointer-lock) previously duplicated between `FieldGroup` and `GlobalStrip`.
+- `TODO.md`: tracking of deferred refactors (splitting the god-functions/components, charts.js, io.js).
 
 ### Changed
 
-- **Graphe « Valeur du bien dans le temps »** : l'axe Y est désormais ancré à 0 (origine visible) au lieu de s'auto-caler sur le minimum des données. Nouvelle option `baseZero` sur `drawLine` (`engine/charts.js`), appliquée uniquement à ce graphe ; les trois autres courbes de l'onglet Comparaison conservent l'auto-scaling.
-- **Découpe des god-components** (comportement strictement inchangé — golden-master + filet jsdom verts) :
-  - `ChartArea/KpisTab.jsx` (541 l.) → dossier `KpisTab/` : `index.jsx` (orchestration), `kpiSections.js` (données pures, `t` injecté), `KpiTable.jsx`, `KpiRow.jsx`, `SummaryCards.jsx`, `kpiFormat.js`, `KpisTab.styles.js`.
-  - `SimPanel/SimPanel.jsx` (421 l.) → dispatcher mince + `DisabledPanel`/`CollapsedPanel`/`FullPanel`/`HeaderKpis`, styles dans `SimPanel.styles.js`, icônes SVG partagées dans `icons.jsx`. Suppression de la copie locale de `fmtE` (import depuis `engine/utils`).
-  - `GlobalStrip.jsx` (405 l.) et `FieldGroup.jsx` (301 l.) : styled-components externalisés dans `*.styles.js`.
-- `engine/compute.js` : helpers purs (`irr`, `abattementIR`, `abattementPS`, `impLoc`) désormais exportés (testables) ; extraction d'un helper `revalorise()` et de constantes fiscales nommées (`PFU_RATE`, `MICROBIC_ABATTEMENT`, barème d'abattement) — comportement strictement inchangé (golden-master identique).
+- **"Property value over time" chart**: the Y axis is now anchored to 0 (visible origin) instead of auto-scaling to the data minimum. New `baseZero` option on `drawLine` (`engine/charts.js`), applied only to this chart; the other three Comparison-tab curves keep auto-scaling.
+- **Splitting the god-components** (behavior strictly unchanged — golden-master + jsdom net green):
+  - `ChartArea/KpisTab.jsx` (541 l.) → `KpisTab/` folder: `index.jsx` (orchestration), `kpiSections.js` (pure data, `t` injected), `KpiTable.jsx`, `KpiRow.jsx`, `SummaryCards.jsx`, `kpiFormat.js`, `KpisTab.styles.js`.
+  - `SimPanel/SimPanel.jsx` (421 l.) → thin dispatcher + `DisabledPanel`/`CollapsedPanel`/`FullPanel`/`HeaderKpis`, styles in `SimPanel.styles.js`, shared SVG icons in `icons.jsx`. Removed the local copy of `fmtE` (import from `engine/utils`).
+  - `GlobalStrip.jsx` (405 l.) and `FieldGroup.jsx` (301 l.): styled-components externalized to `*.styles.js`.
+- `engine/compute.js`: pure helpers (`irr`, `abattementIR`, `abattementPS`, `impLoc`) now exported (testable); extraction of a `revalorise()` helper and named tax constants (`PFU_RATE`, `MICROBIC_ABATTEMENT`, allowance schedule) — behavior strictly unchanged (golden-master identical).
 
 ### Fixed
 
-- **Harness de tests jsdom : rendus accumulés entre cas** — `src/test-utils/setup.js` n'appelait pas `cleanup()` de Testing Library en `afterEach`, laissant les arbres React montés s'empiler dans `document.body` (les requêtes `screen.*` pouvaient alors matcher plusieurs occurrences). `cleanup()` est désormais exécuté avant le vidage de `localStorage`, gardé à l'environnement jsdom (no-op en node).
-- **Apport sur-financé modifiait les graphes/KPI** : lorsqu'un apport dépassait le coût total d'acquisition (`ct`), le crédit était déjà nul (`emp = 0`) mais le surplus d'apport continuait de dégrader TRI/VAN/MOIC, `coc`, `patNet` et les bilans (qui soustraient l'apport au dénominateur/numérateur). Le capital réellement immobilisé dans le bien est désormais plafonné via `apportInvesti = min(apport, ct)` dans `engine/compute.js` : les métriques **opérationnelles** ne bougent plus au-delà de l'achat comptant. Le **reliquat** (`apport − ct`) est investi dans la poche ETF (`etfSeed`, compose au `rendAlt` dès l'année 0) **si le toggle surplus→ETF est actif** — il alimente alors `patTotal` et `bilanTotal` (mise de départ = `apportTotal = apportInvesti + etfSeed`) ; sinon il reste du cash hors modèle et rien ne bouge. Aucun impact golden-master (les fixtures utilisent `apport < ct` → `etfSeed = 0`). Régression couverte par 3 nouveaux tests.
-- **Traduction `revente.yr` en anglais dans le fichier français** : la clé valait `"Yr {{n}}"` en fr, affichant « Yr 9 » dans la table de détail et l'annotation du graphe Revente. Corrigée en `"An {{n}}"`.
-- **`fraisDossier` sans traduction** : le champ "Frais de dossier" s'affichait avec la clé brute `fraisDossier` dans le formulaire. Labels et tooltips ajoutés en français et anglais.
-- **`revalCharges` orphelin** : le paramètre de revalorisation des charges (2 %/an par défaut) influençait les calculs sans être visible ni modifiable. Un champ dédié est maintenant présent dans le GlobalStrip entre "Reval. budget" et "Surplus→ETF".
-- **Tooltips `bilanRevente` et `bilanTotal` incorrects** : les deux nouvelles lignes du tableau comparatif pointaient vers les tooltips de `patNet`/`patTotal`. Nouveaux tooltips dédiés avec la bonne formule.
+- **jsdom test harness: renders accumulating between cases** — `src/test-utils/setup.js` did not call Testing Library's `cleanup()` in `afterEach`, leaving mounted React trees stacking up in `document.body` (so `screen.*` queries could match multiple occurrences). `cleanup()` now runs before clearing `localStorage`, guarded to the jsdom environment (no-op in node).
+- **Over-funded down payment altered the charts/KPIs**: when a down payment exceeded the total acquisition cost (`ct`), the loan was already zero (`emp = 0`) but the excess down payment kept degrading IRR/NPV/MOIC, `coc`, `patNet` and the balances (which subtract the down payment). The capital actually tied up in the property is now capped via `apportInvesti = min(apport, ct)` in `engine/compute.js`: the **operational** metrics no longer move past the cash purchase. The **remainder** (`apport − ct`) is invested in the ETF pocket (`etfSeed`, compounds at `rendAlt` from year 0) **if the surplus→ETF toggle is on** — it then feeds `patTotal` and `bilanTotal` (starting stake = `apportTotal = apportInvesti + etfSeed`); otherwise it stays as cash outside the model and nothing moves. No golden-master impact (the fixtures use `apport < ct` → `etfSeed = 0`). Regression covered by 3 new tests.
+- **`revente.yr` translated to English in the French file**: the key was `"Yr {{n}}"` in fr, showing "Yr 9" in the detail table and the Sale chart annotation. Fixed to `"An {{n}}"`.
+- **`fraisDossier` without translation**: the "File fees" field showed the raw key `fraisDossier` in the form. Labels and tooltips added in French and English.
+- **Orphan `revalCharges`**: the charges-revaluation parameter (2 %/yr by default) influenced the calculations without being visible or editable. A dedicated field is now present in the GlobalStrip between "Budget growth" and "Surplus→ETF".
+- **Incorrect `bilanRevente` and `bilanTotal` tooltips**: the two new comparison-table rows pointed to the `patNet`/`patTotal` tooltips. New dedicated tooltips with the right formula.
 
 ### Added
 
-- **GlobalStrip — hypothèses actives** : bandeau de synthèse en lecture seule affiché à droite du GlobalStrip résumant les taux d'évolution appliqués (inflation, charges, budget, loyer perso). Rend visibles les hypothèses que l'utilisateur n'aurait pas encore ajustées.
-- **KpisTab — Cash-on-cash return (an 1)** : nouvelle ligne dans la section Rendements affichant `cfN[1] / apport × 100`. Indicateur immédiat du rendement courant, complémentaire au TRI.
-- **KpisTab — Note métriques réelles** : lorsque l'inflation est > 0, une note explicative s'affiche sous la description du tableau pour clarifier que les lignes grisées sont en euros constants.
-- **Graphique Patrimoine — ligne de croisement** : une ligne verticale fine (couleur de la simulation) marque l'année de croisement vs ETF pur sur le graphique Patrimoine, avec le label "an N". Visible uniquement si le crossover a lieu avant la 30e année.
-- **SimPanel — sections Revenus/Charges** : la section "Exploitation" du mode Locatif est divisée en deux sections distinctes — "Revenus locatifs" (loyer, vacance, revalLoyer) et "Charges" (taxe foncière, copro, assurances, gestion, provision) — pour améliorer la lisibilité.
+- **GlobalStrip — active assumptions**: read-only summary band shown to the right of the GlobalStrip summarizing the applied growth rates (inflation, charges, budget, personal rent). Makes visible the assumptions the user may not have adjusted yet.
+- **KpisTab — Cash-on-cash return (yr 1)**: new row in the Yields section showing `cfN[1] / apport × 100`. Immediate indicator of the current return, complementary to IRR.
+- **KpisTab — Real-metrics note**: when inflation is > 0, an explanatory note appears under the table description to clarify that the greyed rows are in constant euros.
+- **Wealth chart — crossover line**: a thin vertical line (simulation color) marks the crossover year vs pure ETF on the Wealth chart, with the "yr N" label. Visible only if the crossover happens before year 30.
+- **SimPanel — Income/Charges sections**: the "Operating" section of Rental mode is split into two distinct sections — "Rental income" (rent, vacancy, revalLoyer) and "Charges" (property tax, condo, insurance, management, reserve) — to improve readability.
 
 ### Fixed
 
-- **Abattements progressifs sur la plus-value immobilière** : l'impôt PV est désormais calculé avec les abattements légaux (art. 150 VC CGI). IR : 6 %/an de la 6e à la 21e année → exonération totale à partir de la 22e. PS : 1,65 %/an de la 6e à la 21e, 1,6 % à la 22e, 9 %/an de la 23e à la 30e → exonération totale après 30 ans. Auparavant, le taux plein (19 % + 17,2 %) était appliqué quelle que soit la durée de détention, surestimant massivement l'impôt pour les longues détentions.
-- **Déduction des intérêts d'emprunt** : les intérêts annuels du prêt (`intAnnuel`) sont désormais déduits du revenu imposable en LMNP réel (`le − chg − ab − at − intAnnuel`) et en Foncier nu (`le − chg − intAnnuel`), conformément au droit fiscal français. L'impôt était auparavant surestimé de €2 000–4 000/an en début de prêt.
-- **Report d'amortissement LMNP** : le déficit LMNP (amortissements excédant le revenu imposable) est désormais reporté aux années suivantes via la variable `amortReport`. Les années déficitaires produisent `imp = 0` et le solde non utilisé réduit l'imposition des années futures. Auparavant, l'excédent était perdu.
-- **Cohérence string régime** : la valeur enum correcte du régime Foncier nu est `'nu'` (et non `'foncier'` comme incorrectement documenté dans CLAUDE.md). Le code était déjà correct ; seule la documentation est corrigée.
-- **Guard `calcVAN()` horizon > 30** : `calcVAN()` retourne désormais `null` pour `horizon > 30` ou `< 1`, cohérent avec `calcTRI()`.
+- **Progressive allowances on the real-estate capital gain**: the capital-gains tax is now computed with the legal allowances (art. 150 VC CGI). Income tax: 6 %/yr from year 6 to 21 → full exemption from year 22. Social tax: 1.65 %/yr from year 6 to 21, 1.6 % at year 22, 9 %/yr from year 23 to 30 → full exemption after 30 years. Previously, the full rate (19 % + 17.2 %) was applied regardless of the holding period, massively overestimating the tax for long holdings.
+- **Loan interest deduction**: the annual loan interest (`intAnnuel`) is now deducted from the taxable income under LMNP real (`le − chg − ab − at − intAnnuel`) and bare ownership (`le − chg − intAnnuel`), in line with French tax law. The tax was previously overestimated by €2,000–4,000/yr early in the loan.
+- **LMNP depreciation carry-over**: the LMNP loss (depreciation exceeding the taxable income) is now carried to later years via the `amortReport` variable. Loss-making years produce `imp = 0` and the unused balance reduces future taxation. Previously, the surplus was lost.
+- **Regime string consistency**: the correct enum value for the bare-ownership regime is `'nu'` (not `'foncier'` as incorrectly documented in CLAUDE.md). The code was already correct; only the documentation is fixed.
+- **`calcVAN()` guard horizon > 30**: `calcVAN()` now returns `null` for `horizon > 30` or `< 1`, consistent with `calcTRI()`.
 
 ### Added
 
-- **Revalorisation annuelle des charges fixes** (`revalCharges`, défaut 2 %/an) : nouveau paramètre global modélisant la hausse annuelle de la taxe foncière, des charges de copropriété, des assurances et des provisions. Le facteur `(1 + revalCharges/100)^(yr−1)` est appliqué à toutes les charges fixes (LOC et RP) ; les frais de gestion (proportionnels au loyer) restent inchangés.
-- **Frais de dossier et courtage crédit** (`fraisDossier`, défaut 0 €) : nouveau paramètre de simulation (section Acquisition) intégré dans `ct` (coût total) et donc dans `emp`. Modélise les frais bancaires ou de courtier liés à l'obtention du prêt.
-- **Cash-on-cash return** : `coc` ajouté à chaque objet `flux[yr]` — rendement annuel du flux net sur l'apport initial (`cfN / apport × 100`). Disponible pour export et affichage futur.
-- **Bilan revente et bilan total dans le tableau comparatif** : les métriques `bilanRevente` (`reventeNet + cfC − apport`) et `bilanTotal` (`reventeNet + etfCap − apport`) sont désormais affichées dans la section Patrimoine du tableau KPIs à l'horizon choisi.
+- **Annual revaluation of fixed charges** (`revalCharges`, default 2 %/yr): new global parameter modeling the annual increase of property tax, co-ownership charges, insurance and reserves. The factor `(1 + revalCharges/100)^(yr−1)` is applied to all fixed charges (rental and primary); the management fees (proportional to rent) stay unchanged.
+- **File & broker fees** (`fraisDossier`, default 0 €): new simulation parameter (Acquisition section) included in `ct` (total cost) and therefore in `emp`. Models the bank or broker fees tied to obtaining the loan.
+- **Cash-on-cash return**: `coc` added to each `flux[yr]` object — annual return of the net flow on the initial down payment (`cfN / apport × 100`). Available for export and future display.
+- **Resale balance and total balance in the comparison table**: the `bilanRevente` (`reventeNet + cfC − apport`) and `bilanTotal` (`reventeNet + etfCap − apport`) metrics are now shown in the Wealth section of the KPIs table at the chosen horizon.
 
 ### Changed
 
-- **KpisTab — masquer les lignes "Patrimoine total à 30 ans" quand l'horizon = 30** : les lignes `patTotal30` et `patTotal30Real` ne s'affichent plus lorsque l'horizon choisi est déjà 30 ans, car elles font alors doublon avec les lignes "à horizon".
-- **SimPanel & GlobalStrip — icône `?` avant les labels** : le bouton d'aide `?` est déplacé avant le label de chaque paramètre (simulations et barre globale), au lieu d'après.
-
-- **Comparaison — colonne ETF pur** : le tableau de l'onglet Comparaison remplace les lignes ETF (`ETF pur à Xans`, `ETF pur 30a`, `Avantage vs ETF`) par une colonne **ETF pur** à droite des colonnes simulation, aligné sur le modèle de l'onglet Revente. La colonne est renseignée pour toutes les sections : rendements (`rendAlt` en %), CF mensuel (`−loyerPerso`), effort (`0 €`), TRI 10/15/20 et réels (`rendAlt` exact par construction Fisher), VAN et MOIC (calculés via les flux `[−apportETF, −surplus₁…]`), patrimoine total nominal et réel. Les labels `Rendement brut (loc.)` / `Rendement net (loc.)` sont raccourcis en `Rendement brut` / `Rendement net`.
-
-- **CLAUDE.md** : suppression des sections dupliquées en fin de fichier (`Code Exploration Policy`, `Session-Aware Routing`, `Model-Driven Tool Tiering`) — déjà incluses via `@AGENTS.md` en tête de fichier.
+- **KpisTab — hide the "Total wealth at 30 years" rows when horizon = 30**: the `patTotal30` and `patTotal30Real` rows no longer show when the chosen horizon is already 30 years, since they then duplicate the "at horizon" rows.
+- **SimPanel & GlobalStrip — `?` icon before the labels**: the `?` help button is moved before each parameter's label (simulations and global bar), instead of after.
+- **Comparison — pure ETF column**: the Comparison-tab table replaces the ETF rows (`Pure ETF at Xy`, `Pure ETF 30y`, `Advantage vs ETF`) with a **Pure ETF** column to the right of the simulation columns, aligned with the Sale tab's model. The column is filled for every section: yields (`rendAlt` in %), monthly CF (`−loyerPerso`), effort (`0 €`), IRR 10/15/20 and real (`rendAlt` exact by Fisher construction), NPV and MOIC (computed via the flows `[−apportETF, −surplus₁…]`), nominal and real total wealth. The `Gross yield (rental)` / `Net yield (rental)` labels are shortened to `Gross yield` / `Net yield`.
+- **CLAUDE.md**: removed the duplicated sections at the end of the file (`Code Exploration Policy`, `Session-Aware Routing`, `Model-Driven Tool Tiering`) — already included via `@AGENTS.md` at the top of the file.
 
 ### Added
 
-- **Revalorisation annuelle du budget** : nouveau paramètre global `revalBudget` (%/an, défaut 0%) dans la GlobalStrip, juste après `budgetMensuel`. Modélise les hausses de salaire annuelles : le budget disponible croît chaque année en `(1 + revalBudget/100)^(yr−1)`, augmentant le surplus investi en ETF au fil du temps. Impacte `computeEtfPur()`, `compute()` (surplusAnn) et le calcul VAN/MOIC ETF dans KpisTab.
-
-- **Métriques réelles (ajustées inflation)** : le paramètre Inflation est désormais utilisé pour afficher des indicateurs en euros constants. Dans les KPIs : 3 lignes TRI réel (10/15/20a) via Fisher `(1+TRI)/(1+inflation)−1`, atténuées sous chaque TRI nominal ; 2 lignes Patrimoine réel déflatées par `(1+inflation)^n` ; cards de bas de page avec "réel : Xk€". Dans le graphique Patrimoine : ligne tiretée gris clair = ETF pur en euros constants. Notes `ChartNote` italiques sous les graphiques Patrimoine et Valeur du bien précisant les valeurs nominales. Tooltips : `inflation` (rôle pour les métriques réelles), `rendAlt` (clarifié nominal net d'impôts), `kpi.triReal` et `kpi.patReal` avec formules.
-
-- **Drag-to-scrub sur les unités** : survoler l'unité (€, %, ans…) d'un paramètre change le curseur en double flèche verticale. Maintenir le clic et glisser haut/bas ajuste la valeur par pas (6 px par pas, Shift × 10). Fonctionne sur tous les paramètres de simulation (FieldGroup) et les paramètres globaux (GlobalStrip). Le curseur disparaît pendant le drag via Pointer Lock et réapparaît exactement à sa position d'origine au relâchement.
+- **Annual budget revaluation**: new global parameter `revalBudget` (%/yr, default 0%) in the GlobalStrip, right after `budgetMensuel`. Models annual salary raises: the available budget grows each year by `(1 + revalBudget/100)^(yr−1)`, increasing the surplus invested in ETF over time. Impacts `computeEtfPur()`, `compute()` (surplusAnn) and the ETF NPV/MOIC calculation in KpisTab.
+- **Real metrics (inflation-adjusted)**: the Inflation parameter is now used to display constant-euro indicators. In the KPIs: 3 real IRR rows (10/15/20y) via Fisher `(1+IRR)/(1+inflation)−1`, dimmed under each nominal IRR; 2 real wealth rows deflated by `(1+inflation)^n`; footer cards with "real: Xk€". In the Wealth chart: light-grey dashed line = pure ETF in constant euros. Italic `ChartNote` notes under the Wealth and Property-value charts noting the nominal values. Tooltips: `inflation` (role for real metrics), `rendAlt` (clarified nominal after-tax), `kpi.triReal` and `kpi.patReal` with formulas.
+- **Drag-to-scrub on the units**: hovering a parameter's unit (€, %, yrs…) turns the cursor into a vertical double arrow. Holding the click and dragging up/down adjusts the value by step (6 px per step, Shift × 10). Works on all simulation parameters (FieldGroup) and global parameters (GlobalStrip). The cursor disappears during the drag via Pointer Lock and reappears exactly at its original position on release.
 
 ### Added
 
-- **Tableau comparatif — tooltips** : un bouton `?` apparaît avant chaque label de ligne dans le tableau comparatif (onglet KPIs). Cliquer ouvre un popover expliquant la formule ou la définition de l'indicateur (TRI, VAN, MOIC, rendements, cashflow, patrimoine, ETF pur, crossover…). 17 nouvelles clés `tooltips.kpi.*` ajoutées en FR et EN.
+- **Comparison table — tooltips**: a `?` button appears before each row label in the comparison table (KPIs tab). Clicking opens a popover explaining the formula or the definition of the indicator (IRR, NPV, MOIC, yields, cashflow, wealth, pure ETF, crossover…). 17 new `tooltips.kpi.*` keys added in FR and EN.
 
 ### Changed
 
-- **Onglet Revente — tableau** : la valeur ETF pur (net) est désormais affichée dans une colonne dédiée plutôt qu'en sous-ligne dans chaque cellule de simulation.
+- **Sale tab — table**: the pure ETF value (net) is now shown in a dedicated column rather than as a sub-line in each simulation cell.
 
 ### Added
 
-- **Persistance thème et langue** : le thème (dark/light) et la langue (fr/en) sont désormais sauvegardés dans `localStorage` (`immorenta_theme`, `immorenta_lang`) et restaurés automatiquement au rechargement de la page.
+- **Theme and language persistence**: the theme (dark/light) and language (fr/en) are now saved to `localStorage` (`immorenta_theme`, `immorenta_lang`) and automatically restored on page reload.
 
 ### Added
 
-- **Onglet Amortissement — série "Capital remboursé"** : nouvelle courbe sur l'axe droit montrant le capital cumulativement remboursé (montant croissant, symétrique du capital restant dû). `drawBarsWithLine` accepte désormais un tableau de datasets ligne, chaque entrée portant une propriété `dashed` pour contrôler le style individuellement.
+- **Amortization tab — "Capital repaid" series**: new curve on the right axis showing the cumulatively repaid capital (increasing amount, symmetric to the outstanding capital). `drawBarsWithLine` now accepts an array of line datasets, each carrying a `dashed` property to control the style individually.
 
 ### Changed
 
-- **Onglet Amortissement — couleurs** : schéma de couleurs entièrement revu. Barres : intérêts `#e2cbcb`, assurance `#a30eff`. Courbes axe droit : capital restant dû `#ff0000` (continu), capital remboursé `#ffff00` (continu). Labels axe droit passés en couleur neutre (`mutedColor`). Couleurs centralisées dans la constante `AMORT_COLORS`.
-
-- **Onglet Amortissement** : fusion des deux graphiques (décomposition annuelle et capital restant dû) en un seul graphique à double ordonnée. L'axe gauche donne l'échelle des barres empilées (capital / intérêts / assurance) ; l'axe droit donne l'échelle de la courbe pointillée du capital restant dû. Les deux séries partagent désormais le même horizon temporel (durée du prêt), ce qui rend la lecture plus naturelle.
+- **Amortization tab — colors**: color scheme fully reworked. Bars: interest `#e2cbcb`, insurance `#a30eff`. Right-axis curves: outstanding capital `#ff0000` (solid), repaid capital `#ffff00` (solid). Right-axis labels switched to a neutral color (`mutedColor`). Colors centralized in the `AMORT_COLORS` constant.
+- **Amortization tab**: merged the two charts (annual breakdown and outstanding capital) into a single dual-axis chart. The left axis gives the scale of the stacked bars (capital / interest / insurance); the right axis gives the scale of the dashed outstanding-capital curve. Both series now share the same time horizon (loan term), making it more natural to read.
 
 ### Added
 
-- **Setup clean code** : pipeline de qualité complète ajoutée au projet.
-  - **Prettier 3** : formatage automatique avec `.prettierrc` (singleQuote, printWidth 100, trailingComma es5). Script `npm run format` (réécriture) et `npm run format:check` (CI).
-  - **ESLint 9** (flat config) : linting React-aware avec `eslint-plugin-react`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, intégré avec `eslint-config-prettier`. Scripts `npm run lint` et `npm run lint:fix`.
-  - **TypeScript checkJs** : vérification de types sur `src/engine/` et `src/state/` sans migration vers `.ts`. Script `npm run typecheck`.
-  - **Husky + lint-staged** : hook pre-commit qui reformate et lint automatiquement les fichiers stagés.
-  - **`npm run check`** : pipeline complète (format:check + lint + typecheck) à lancer avant chaque PR.
-  - **CI GitHub Actions** : nouveau job `quality` (format:check + lint + typecheck) bloquant le job `build` en cas d'échec.
-  - **`.editorconfig`** : règles d'indentation et de fin de ligne pour tous les éditeurs.
-  - **`src/types/styled.d.ts`** : augmentation de `DefaultTheme` avec la forme réelle du thème.
+- **Clean-code setup**: full quality pipeline added to the project.
+  - **Prettier 3**: automatic formatting with `.prettierrc` (singleQuote, printWidth 100, trailingComma es5). `npm run format` (rewrite) and `npm run format:check` (CI) scripts.
+  - **ESLint 9** (flat config): React-aware linting with `eslint-plugin-react`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, integrated with `eslint-config-prettier`. `npm run lint` and `npm run lint:fix` scripts.
+  - **TypeScript checkJs**: type checking on `src/engine/` and `src/state/` without migrating to `.ts`. `npm run typecheck` script.
+  - **Husky + lint-staged**: pre-commit hook that auto-reformats and lints the staged files.
+  - **`npm run check`**: full pipeline (format:check + lint + typecheck) to run before every PR.
+  - **GitHub Actions CI**: new `quality` job (format:check + lint + typecheck) blocking the `build` job on failure.
+  - **`.editorconfig`**: indentation and end-of-line rules for all editors.
+  - **`src/types/styled.d.ts`**: augmentation of `DefaultTheme` with the real theme shape.
 
 ### Changed
 
-- **Refonte UI complète — design "Claude"** : redesign visuel de l'ensemble de l'interface.
-  - **Typographie** : DM Sans remplacé par Hanken Grotesk (corps) + Space Mono (valeurs numériques) ; token `theme.mono` et CSS var `--mono` ajoutés.
-  - **Couleurs** : valeurs numériques passent de l'ambre (#fbbf24) au violet (#a78bfa) en dark, (#7c3aed) en light ; navbar toujours dark navy (`#0e1c36`) quelle que soit le thème.
-  - **NavBar** : icône de marque carrée, badge violet "BETA" en monospace, sélecteur de langue segmenté (pill), boutons d'action primary/outline avec contour.
-  - **GlobalStrip** : fond `#0c1830`, icône engrenage, ligne de champs en `overflow-x: auto`, séparateurs fins, valeurs en monospace violet.
-  - **SimPanel** : panneaux à largeur fixe 220px ; deux nouveaux états — strip réduit (46px) avec label vertical + KPI pivotés, et strip désactivé à fond hachuré. Bordure colorée en haut (`border-top`) à la place du bas.
-  - **ChartArea** : la barre d'onglets quitte la NavBar et s'intègre dans la zone graphique sous forme de groupe pill avec icônes SVG (Graphiques, Comparaison, Revente, Amortissement).
-  - **KpisTab** : cartes de synthèse en bas de tableau (TRI, patrimoine, VAN par simulation) avec bordure colorée ; cellules de données en monospace, mise en valeur de la meilleure simulation par fond teinté et inset-shadow.
-  - **Legend** : hint de clic supprimé ; fond `theme.surface` ajouté.
-  - **Layout** : `SimsPane` n'a plus de largeur fixe à 690px — s'adapte aux panneaux actifs. Retrait des lignes alternées sur les `<tr>` pairs.
+- **Full UI overhaul — "Claude" design**: visual redesign of the whole interface.
+  - **Typography**: DM Sans replaced by Hanken Grotesk (body) + Space Mono (numeric values); `theme.mono` token and `--mono` CSS var added.
+  - **Colors**: numeric values move from amber (#fbbf24) to purple (#a78bfa) in dark, (#7c3aed) in light; navbar always dark navy (`#0e1c36`) regardless of theme.
+  - **NavBar**: square brand icon, purple "BETA" badge in monospace, segmented language selector (pill), primary/outline action buttons with outline.
+  - **GlobalStrip**: `#0c1830` background, gear icon, fields row in `overflow-x: auto`, thin separators, monospace purple values.
+  - **SimPanel**: fixed-width 220px panels; two new states — collapsed strip (46px) with vertical label + rotated KPIs, and disabled strip with hatched background. Colored top border (`border-top`) instead of bottom.
+  - **ChartArea**: the tab bar leaves the NavBar and integrates into the chart area as a pill group with SVG icons (Charts, Comparison, Sale, Amortization).
+  - **KpisTab**: summary cards at the bottom of the table (IRR, wealth, NPV per simulation) with colored border; data cells in monospace, best simulation highlighted with a tinted background and inset shadow.
+  - **Legend**: click hint removed; `theme.surface` background added.
+  - **Layout**: `SimsPane` no longer has a fixed 690px width — adapts to the active panels. Removed the alternating rows on even `<tr>`.
 
 ### Fixed
 
-- **Moteur — VAN/TRI incorrects en modes LOC et RP** : deux corrections symétriques sur les flux `irrFlows[]` utilisés par `calcTRI` et `calcVAN`.
-  - **LOC** : `calcVAN` utilisait `flux[t-1].cfN` directement, qui inclut `−loyerPersoAnn`. Le loyer personnel (coût subi indépendamment de l'investissement) était compté comme charge, rendant la VAN très négative. Correction : `calcVAN` réutilise désormais `irrFlows[]` comme `calcTRI`.
-  - **RP** : `irrFlows[]` ne comptabilisait pas le loyer économisé (`loyerPersoAnn`) comme bénéfice. Le TRI et la VAN mesuraient les sorties brutes sans tenir compte que l'investissement fait cesser le paiement du loyer. Correction : `loyerPersoAnn` est ajouté dans `irrFlows[]` pour RP, symétriquement au traitement LOC. Les deux modes mesurent désormais le rendement pur de l'investissement sur une base comparable.
-  - **MOIC** : même cause — calculé depuis `bilanRevente` qui accumule le `cfN` brut. Corrigé pour utiliser `irrFlows[]` (même base que TRI/VAN) : `MOIC = (reventeNet + Σ irrFlows[1..horizon]) / apport`.
-
-- **KpisTab — TRI affiché N/C pour toutes les simulations locatives** : le moteur IRR incluait `loyerPersoAnn` comme dépense dans les flux de trésorerie locatifs, rendant le NPV systématiquement négatif et l'IRR incalculable. Le TRI mesure désormais le rendement pur de l'investissement (sans loyer personnel) pour le mode `loc` — `loyerPersoAnn` est exclu des flux IRR (réintégré dans `cfN` avant push). Le mode `rp` est inchangé. CLAUDE.md mis à jour.
-- **KpisTab — CF mensuel affiché uniquement pour les sims locatives** : suppression du filtre `mode === 'loc'` sur la ligne "CF mensuel simplifié" — la valeur est désormais affichée pour tous les modes.
-- **KpisTab — Effort mensuel affiché uniquement pour les sims RP** : suppression du filtre `mode === 'rp'` sur la ligne "Effort mensuel" — la valeur est désormais affichée pour tous les modes.
-- **KpisTab — Labels "(loc.)" et "(RP)" supprimés** : les labels "CF mensuel net (loc.)" et "Effort mensuel (RP)" renommés en "CF mensuel net simplifié" et "Effort mensuel simplifié" (fr/en) maintenant que les deux lignes s'affichent pour tous les modes.
-
-- **Affichage des décimales dans les inputs numériques** : les champs à pas décimal (ex : assurance 0,01 → affiche `0.25` et non `0.25`) conservent désormais le bon nombre de décimales en toutes circonstances. L'input passe de `type="number"` (qui supprime les zéros finaux) à `type="text" inputMode="decimal"` avec un composant `NumInput` dédié gérant un état local `localStr` : `null` en mode repos (affichage `toFixed(dec)`), chaîne libre pendant la saisie. Les touches ↑/↓ (Shift × 10) incrémentent/décrémentent selon `field.st`, clampées entre `field.mn` et `field.mx`.
+- **Engine — incorrect NPV/IRR in rental and primary modes**: two symmetric fixes on the `irrFlows[]` flows used by `calcTRI` and `calcVAN`.
+  - **rental**: `calcVAN` used `flux[t-1].cfN` directly, which includes `−loyerPersoAnn`. The personal rent (a sunk cost incurred regardless of the investment) was counted as an expense, making the NPV very negative. Fix: `calcVAN` now reuses `irrFlows[]` like `calcTRI`.
+  - **primary**: `irrFlows[]` did not count the saved rent (`loyerPersoAnn`) as a benefit. The IRR and NPV measured the gross outflows without accounting for the fact that the investment stops the rent payment. Fix: `loyerPersoAnn` is added to `irrFlows[]` for primary, symmetric to the rental treatment. Both modes now measure the pure return of the investment on a comparable basis.
+  - **MOIC**: same cause — computed from `bilanRevente` which accumulates the gross `cfN`. Fixed to use `irrFlows[]` (same basis as IRR/NPV): `MOIC = (reventeNet + Σ irrFlows[1..horizon]) / apport`.
+- **KpisTab — IRR shown N/C for all rental simulations**: the IRR engine included `loyerPersoAnn` as an expense in the rental cash flows, making the NPV systematically negative and the IRR uncomputable. The IRR now measures the pure return of the investment (without personal rent) for `loc` mode — `loyerPersoAnn` is excluded from the IRR flows (reintegrated into `cfN` before push). `rp` mode is unchanged. CLAUDE.md updated.
+- **KpisTab — monthly CF shown only for rental sims**: removed the `mode === 'loc'` filter on the "simplified monthly CF" row — the value is now shown for all modes.
+- **KpisTab — monthly effort shown only for primary sims**: removed the `mode === 'rp'` filter on the "monthly effort" row — the value is now shown for all modes.
+- **KpisTab — "(rental)" and "(primary)" labels removed**: the "Net monthly CF (rental)" and "Monthly effort (primary)" labels renamed to "Simplified net monthly CF" and "Simplified monthly effort" (fr/en) now that both rows show for all modes.
+- **Decimal display in numeric inputs**: fields with a decimal step (e.g. insurance 0.01) now keep the right number of decimals in all circumstances. The input moves from `type="number"` (which drops trailing zeros) to `type="text" inputMode="decimal"` with a dedicated `NumInput` component managing a local `localStr` state: `null` at rest (showing `toFixed(dec)`), free string while typing. The ↑/↓ keys (Shift × 10) increment/decrement by `field.st`, clamped between `field.mn` and `field.mx`.
 
 ### Added
 
-- **Mode auto pour les paramètres dérivés** : 6 champs du SimPanel peuvent être calculés automatiquement — frais de notaire (8% du prix d'achat), taux d'intérêt (courbe taux moyens France 05/2026 interpolée selon la durée : 7a 3,25% · 10a 3,30% · 15a 3,45% · 20a 3,55% · 25a 3,70%), provision travaux, taxe foncière, et leurs équivalents RP (0,5%/an du prix d'achat). Un badge "A" apparaît à côté de chaque champ auto-capable. Cliquer sur le badge bascule entre auto et manuel ; modifier le slider/input désactive aussi l'auto. L'état de chaque champ est stocké dans `autoFields[]` par simulation. Les calculs restent dans une fonction pure `resolveAutoFields()` sans modifier le moteur financier `compute()`. Les tooltips (ⓘ) de chaque champ auto-capable affichent la formule utilisée.
+- **Auto mode for derived parameters**: 6 SimPanel fields can be auto-computed — notary fees (8% of the purchase price), interest rate (France average-rate curve 05/2026 interpolated by duration: 7y 3.25% · 10y 3.30% · 15y 3.45% · 20y 3.55% · 25y 3.70%), works reserve, property tax, and their primary equivalents (0.5%/yr of the purchase price). An "A" badge appears next to each auto-capable field. Clicking the badge toggles between auto and manual; editing the slider/input also disables auto. Each field's state is stored in `autoFields[]` per simulation. The calculations stay in a pure `resolveAutoFields()` function without modifying the `compute()` financial engine. The (ⓘ) tooltips of each auto-capable field show the formula used.
 
 ### Changed
 
-- **Couleur "Intérêts" dans le graphe Décomposition du prêt** : le segment intérêts passe de l'orange ambre (`#f59e0b`) au jaune vif (`#ffe600`) pour le distinguer de la couleur de la simulation B.
+- **"Interest" color in the loan breakdown chart**: the interest segment moves from amber orange (`#f59e0b`) to bright yellow (`#ffe600`) to distinguish it from simulation B's color.
 
 ### Fixed
 
-- **Champ horizon — saisie libre** : l'input "Horizon" dans la barre globale se met à jour en temps réel dès que la valeur est valide (1–30 ans). Quand le champ est vide ou en cours de frappe, la simulation conserve la dernière valeur valide. Le focus n'est plus nécessaire pour valider.
+- **Horizon field — free input**: the "Horizon" input in the global bar updates in real time as soon as the value is valid (1–30 years). When the field is empty or being typed, the simulation keeps the last valid value. Focus is no longer needed to validate.
 
 ### Changed
 
-- **Alerte budget sur le chip CF** : le chip "CF réel/mois" affiche un contour rouge lorsque le décaissement mensuel (`−cfN/12`) dépasse le budget mensuel (`budgetMensuel`). La comparaison utilise `Math.round()` pour éviter les faux positifs par arrondi flottant lors d'une égalité apparente.
+- **Budget alert on the CF chip**: the "Real CF/mo" chip shows a red outline when the monthly outflow (`−cfN/12`) exceeds the monthly budget (`budgetMensuel`). The comparison uses `Math.round()` to avoid false positives from floating-point rounding on an apparent equality.
 
 ### Added
 
-- **Persistance de l'état dans le navigateur** : l'état complet (simulations A/B/C, globaux, onglet actif, groupes ouverts) est sauvegardé dans `localStorage` à la fermeture/refresh de la page et restauré automatiquement au chargement suivant. Les nouvelles clés ajoutées dans le code récupèrent leur valeur par défaut si absentes du JSON sauvegardé.
+- **State persistence in the browser**: the full state (simulations A/B/C, globals, active tab, open groups) is saved to `localStorage` on page close/refresh and automatically restored on the next load. New keys added in the code fall back to their default value if absent from the saved JSON.
 
 ### Changed
 
-- **Refonte KPI chips SimPanel** : 4 indicateurs unifiés LOC/RP (Mensualité, CF réel/mois, Effort/mois, Patrimoine à terme) remplacent les indicateurs mode-spécifiques (rendBrut/rendNet, crossover ETF, effort différentiel). CF réel/mois = `cfN/12` (an 1, toutes charges incluses). Effort/mois = `−cfN/12 − loyerPerso` (surcoût mensuel vs. situation actuelle).
+- **SimPanel KPI chips overhaul**: 4 unified rental/primary indicators (Monthly payment, Real CF/mo, Effort/mo, Wealth at term) replace the mode-specific indicators (rendBrut/rendNet, ETF crossover, differential effort). Real CF/mo = `cfN/12` (yr 1, all charges included). Effort/mo = `−cfN/12 − loyerPerso` (monthly extra cost vs. the current situation).
 
 ### Fixed
 
-- **Fiscalité ETF à la revente** : le scénario ETF pur dans ReventeTab affiche désormais la valeur nette après PFU 30% sur la plus-value (PFU CTO simplifié). `computeEtfPur` retourne `capNet = cap − gain × 0,30` en plus du `cap` brut. Les autres vues (ChartsTab patrimoine, KpisTab, crossover) continuent d'utiliser le brut pour cohérence avec `patTotal` immobilier.
+- **ETF taxation at resale**: the pure ETF scenario in ReventeTab now shows the net value after 30% PFU on the capital gain (simplified CTO PFU). `computeEtfPur` returns `capNet = cap − gain × 0.30` in addition to the gross `cap`. The other views (ChartsTab wealth, KpisTab, crossover) keep using the gross for consistency with real-estate `patTotal`.
 
 ### Fixed
 
-- **Hover sur les graphiques restauré** : la fonction `attachHover` n'avait pas été portée lors de la migration vers React. Tooltip flottant réimplémenté dans `CanvasChart`, avec labels de séries dans tous les composants graphiques (`ChartsTab`, `ReventeTab`, `AmortTab`).
-- **Bilan revente corrigé** : le graphique et le tableau "Bilan net selon la revente" utilisent désormais `bilanTotal` (qui inclut l'ETF poche accumulée avec le surplus mensuel composé) au lieu de `bilanRevente` (qui ne comptabilisait que les flux bruts non composés). La courbe ETF pur de référence reste inchangée en valeur absolue.
+- **Chart hover restored**: the `attachHover` function had not been ported during the React migration. Floating tooltip reimplemented in `CanvasChart`, with series labels in all chart components (`ChartsTab`, `ReventeTab`, `AmortTab`).
+- **Resale balance fixed**: the "Net balance by resale" chart and table now use `bilanTotal` (which includes the ETF pocket accumulated with the compounded monthly surplus) instead of `bilanRevente` (which only counted the gross uncompounded flows). The pure ETF reference curve stays unchanged in absolute value.
 
 ## [1.3.1] — 2026-05-28
 
 ### Fixed
 
-- **Mode RP — cash flow corrigé** : le loyer non dépensé (`loyerPerso`) n'est plus compté comme un flux positif dans `src/engine/compute.js`. Le `cfN` en mode RP reflète désormais uniquement les sorties réelles (charges + mensualité + assurance emprunteur). Corrige l'IRR, le bilan revente et le cash-flow cumulé pour tous les scénarios — notamment quand `loyerPerso > mensualité`.
+- **Primary mode — cash flow fixed**: the rent not spent (`loyerPerso`) is no longer counted as a positive flow in `src/engine/compute.js`. The `cfN` in primary mode now reflects only the real outflows (charges + monthly payment + borrower insurance). Fixes the IRR, the resale balance and the cumulative cash flow for all scenarios — notably when `loyerPerso > monthly payment`.
 
 ### Removed
 
-- Suppression des fichiers legacy devenus inutilisés après la migration React : `js/` (anciens modules vanilla JS), `style.css` (remplacé par styled-components), `immo_renta.html` (ancien fichier mono-page de référence).
+- Removed the legacy files that became unused after the React migration: `js/` (old vanilla JS modules), `style.css` (replaced by styled-components), `immo_renta.html` (old single-page reference file).
 
 ## [1.3.0] — 2026-05-28
 
 ### Added
 
-- **Layout responsive** : colonnes de simulation empilées sur mobile, graphiques redimensionnés.
+- **Responsive layout**: simulation columns stacked on mobile, charts resized.
 
 ### Fixed
 
-- Régressions UI introduites lors de la migration Vite (styles, espacements, comportement des sliders).
+- UI regressions introduced during the Vite migration (styles, spacing, slider behavior).
 
 ## [1.2.0] — 2026-05
 
 ### Changed
 
-- **Migration vers Vite** : l'application est désormais construite avec Vite (`npm run dev / build / preview`). Déploiement automatique sur GitHub Pages via GitHub Actions.
-- **Modularisation du code** : l'application mono-fichier `immo_renta.html` a été découpée en modules ES :
-  - `js/main.js` — point d'entrée, exposition `window`
-  - `js/state.js` — état partagé (`G`, `sims`, `COL`, `KEYS`, définitions des groupes)
-  - `js/compute.js` — moteur financier (`compute()`, `recomputeETFPur()`, `crossoverYear()`, IRR)
-  - `js/charts.js` — rendus canvas (`drawLine()`, `drawBars()`, `attachHover()`)
+- **Migration to Vite**: the application is now built with Vite (`npm run dev / build / preview`). Automatic deployment to GitHub Pages via GitHub Actions.
+- **Code modularization**: the single-file `immo_renta.html` application was split into ES modules:
+  - `js/main.js` — entry point, `window` exposure
+  - `js/state.js` — shared state (`G`, `sims`, `COL`, `KEYS`, group definitions)
+  - `js/compute.js` — financial engine (`compute()`, `recomputeETFPur()`, `crossoverYear()`, IRR)
+  - `js/charts.js` — canvas renderers (`drawLine()`, `drawBars()`, `attachHover()`)
   - `js/render.js` — interface (`renderPanel()`, `rebuildShell()`, `redraw()`, export/import)
-  - `js/utils.js` — formateurs (`fmtE()`, `fmtK()`, `fmtP()`, `fmtTRI()`)
+  - `js/utils.js` — formatters (`fmtE()`, `fmtK()`, `fmtP()`, `fmtTRI()`)
 
 ## [1.1.0] — 2026-04
 
 ### Added
 
-- **Courbe ETF pur toujours affichée** sur le graphique Patrimoine total, même si aucune simulation n'est en mode locatif.
-- **ETF poche inclus dans le bilan revente** : le patrimoine total (équité immobilière + ETF du surplus) est intégré au calcul `bilanTotal`.
-- **ETF pur externalisé** : `recomputeETFPur()` remplit un tableau global `etfPurGlobal[]` calculé une seule fois par cycle de rendu, indépendamment de `compute()`.
-- **Budget mensuel + surplus ETF** (`budgetMensuel`, `investirSurplus`, `apportETF`) : paramètres globaux permettant de normaliser la comparaison RP vs locatif sur une même enveloppe mensuelle. Le surplus (budget − sorties réelles) est réinvesti en ETF dans chaque scénario.
-- **Revalorisation du loyer personnel** (`revalLoyerPerso`) : le loyer actuel payé par l'investisseur est revalorisé chaque année dans le scénario ETF pur.
+- **Pure ETF curve always shown** on the Total-wealth chart, even if no simulation is in rental mode.
+- **ETF pocket included in the resale balance**: the total wealth (property equity + ETF from the surplus) is integrated into the `bilanTotal` calculation.
+- **Pure ETF externalized**: `recomputeETFPur()` fills a global `etfPurGlobal[]` array computed once per render cycle, independently of `compute()`.
+- **Monthly budget + ETF surplus** (`budgetMensuel`, `investirSurplus`, `apportETF`): global parameters to normalize the primary-vs-rental comparison on the same monthly envelope. The surplus (budget − real outflows) is reinvested in ETF in each scenario.
+- **Personal rent revaluation** (`revalLoyerPerso`): the current rent paid by the investor is revalued each year in the pure ETF scenario.
 
 ### Changed
 
-- Les calculs locatifs intègrent désormais le loyer personnel (`loyerPerso`) et la revalorisation du loyer de marché (`revalLoyer`) dans le `cfN` annuel.
+- The rental calculations now integrate the personal rent (`loyerPerso`) and the market-rent revaluation (`revalLoyer`) into the annual `cfN`.
 
 ## [1.0.0] — 2026-03
 
 ### Added
 
-- **Export** des données de simulation en CSV, JSON et YAML.
-- **Import** des données de simulation depuis CSV, JSON et YAML.
-- Application initiale : outil d'analyse d'investissement immobilier locatif (mode `loc`) et résidence principale (mode `rp`) avec 3 simulations concurrentes (A, B, C), graphiques canvas, calcul IRR/TRI, tableau de bord KPIs.
+- **Export** of simulation data to CSV, JSON and YAML.
+- **Import** of simulation data from CSV, JSON and YAML.
+- Initial application: rental (`loc` mode) and primary-residence (`rp` mode) real-estate investment analysis tool with 3 concurrent simulations (A, B, C), canvas charts, IRR computation, KPIs dashboard.
