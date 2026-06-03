@@ -95,6 +95,14 @@ export function buildSections(t, { G, RES, sims, etfScenarioGlobal, etfKpis, cro
           etfVal: -G.personalRent,
         },
         {
+          label: t('kpisTable.cumulativeCashFlowHz', { horizon: hz }),
+          fmt: k => fmtE(RES[k].flows[hz - 1]?.cumulativeCashFlow),
+          better: 'max',
+          neg: true,
+          tooltipKey: 'kpi.cumulativeCashFlow',
+          etfVal: null,
+        },
+        {
           label: t('kpisTable.coc'),
           fmt: k => (RES[k].flows[0]?.coc != null ? fmtP(RES[k].flows[0].coc) : '—'),
           better: 'max',

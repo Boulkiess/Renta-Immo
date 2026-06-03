@@ -10,6 +10,12 @@
 
 ### Added
 
+- **Cumulative cash flow at horizon (KpisTab)** — new row in the **Yields & Cashflow**
+  section (right after "CF réel/mois", `kpisTable.cumulativeCashFlowHz`) showing `flows[horizon-1].cumulativeCashFlow`,
+  the operational "flows" component of `resaleBalance`. Helps explain why **Net sale profit
+  (Bilan revente)** can look very negative: in rental mode the cumulative cash flow subtracts
+  the personal rent every year. New `kpi.cumulativeCashFlow` tooltip (fr/en). No engine change.
+
 - **Loan guarantee fees & broker fees** — two new acquisition fields (`guaranteeFees`,
   `brokerFees`) for rental/primary modes, shown in the **Acquisition** group next to
   `loanFees`. Both fold into `totalCost` (and thus `loanAmount`, the monthly payment, and

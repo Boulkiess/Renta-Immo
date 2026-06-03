@@ -419,6 +419,11 @@
       "body": "First year where reselling no longer makes you lose money, in nominal terms and on the IRR/NPV basis (saved rent for primary / paid rent for rental reintegrated). Accounts for purchase and sale fees. Ignores opportunity cost (an ETF may do better even if you 'don't lose').",
       "code": "first year where netResaleProceeds + Σ(netCashFlow + rent) − downPmt ≥ 0"
     },
+    "kpi.cumulativeCashFlow": {
+      "title": "Cumulative cash flow",
+      "body": "Sum of the annual net cash flows up to the horizon, excluding resale. In rental mode the personal rent paid is counted as an outflow; in primary mode it is charges + loan payments. This is the \"flows\" component of the Net sale profit (which adds net sale proceeds minus the down payment).",
+      "code": "cumulCF = Σ netCashFlow[1..horizon]"
+    },
     "kpi.resaleBalance": {
       "title": "Net sale profit",
       "body": "Cash gain if you sell at this horizon: net sale proceeds + cumulative cash flows − initial down payment. Measures what you actually pocketed in cash.",
@@ -523,6 +528,7 @@
     "npv": "NPV ({{discountRate}}%, {{horizon}}y)",
     "moic": "MOIC {{horizon}}y",
     "resaleBreakEven": "Resale break-even",
+    "cumulativeCashFlowHz": "Cumulative cash flow {{horizon}}y",
     "resaleBalanceHz": "Net sale profit {{horizon}}y",
     "totalBalanceHz": "Total sale profit {{horizon}}y",
     "netWorth": "Net property wealth {{horizon}}y",

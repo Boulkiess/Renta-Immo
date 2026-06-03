@@ -419,6 +419,11 @@
       "body": "Première année où revendre ne vous fait plus perdre d'argent, en valeur nominale et sur la base TRI/VAN (loyer économisé en RP / payé en LOC réintégré). Tient compte des frais d'achat et de vente. Ne tient pas compte du coût d'opportunité (un ETF peut faire mieux même si vous « ne perdez pas »).",
       "code": "1ère année où netResaleProceeds + Σ(netCashFlow + loyerPerso) − apport ≥ 0"
     },
+    "kpi.cumulativeCashFlow": {
+      "title": "Cash-flow cumulé",
+      "body": "Somme des flux de trésorerie nets annuels jusqu'à l'horizon, hors revente. En LOC, le loyer personnel payé est compté comme une sortie ; en RP, ce sont les charges + mensualités. C'est le composant « flux » du Bilan revente (auquel s'ajoute le produit de cession net moins l'apport).",
+      "code": "cfC = Σ netCashFlow[1..horizon]"
+    },
     "kpi.resaleBalance": {
       "title": "Bilan revente",
       "body": "Gain net en cash si vous vendez à cet horizon : produit de cession net + flux cumulés − apport initial. Mesure ce que vous avez gagné en argent réel, hors valorisation non réalisée.",
@@ -523,6 +528,7 @@
     "npv": "VAN ({{discountRate}}%, {{horizon}}a)",
     "moic": "MOIC {{horizon}}a",
     "resaleBreakEven": "Break-even revente",
+    "cumulativeCashFlowHz": "Cash-flow cumulé {{horizon}}a",
     "resaleBalanceHz": "Bilan revente {{horizon}}a",
     "totalBalanceHz": "Bilan total revente {{horizon}}a",
     "netWorth": "Patrimoine immo net {{horizon}}a",
