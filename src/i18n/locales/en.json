@@ -103,7 +103,9 @@
     "notaryFees": { "label": "Notary fees" },
     "renovationCosts": { "label": "Renovation works" },
     "agencyFees": { "label": "Buyer's agent fees" },
-    "loanFees": { "label": "File & broker fees" },
+    "loanFees": { "label": "File fees" },
+    "guaranteeFees": { "label": "Loan guarantee fees" },
+    "brokerFees": { "label": "Broker fees" },
     "downPayment": { "label": "Down payment" },
     "interestRate": { "label": "Interest rate" },
     "loanTerm": { "label": "Duration (yrs)" },
@@ -225,9 +227,17 @@
       "body": "Agent commission paid by the buyer."
     },
     "loanFees": {
-      "title": "File & broker fees",
-      "body": "Bank origination fees and/or mortgage broker commission. Included in total acquisition cost and borrowed amount.",
-      "code": "totalCost = purchasePrice + notaryFees + works + agencyFees + loanFees"
+      "title": "File fees",
+      "body": "Bank origination (file) fees for obtaining the loan. Included in total acquisition cost and borrowed amount.",
+      "code": "totalCost = purchasePrice + notaryFees + works + agencyFees + loanFees + guaranteeFees + brokerFees"
+    },
+    "guaranteeFees": {
+      "title": "Loan guarantee fees",
+      "body": "Lender-required guarantee (Crédit Logement-style caution or mortgage/PPD). Included in total cost and borrowed amount. <b>Auto: 1.2% of the estimated loan amount.</b>"
+    },
+    "brokerFees": {
+      "title": "Broker fees",
+      "body": "Mortgage broker commission for arranging the loan. Included in total cost and borrowed amount. <b>Auto: 1% of the estimated loan amount.</b>"
     },
     "downPayment": {
       "title": "Down payment",

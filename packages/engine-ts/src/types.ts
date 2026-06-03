@@ -29,6 +29,8 @@ export interface SimParams {
   renovationCosts: number;
   agencyFees: number;
   loanFees?: number;
+  guaranteeFees?: number;
+  brokerFees?: number;
   downPayment: number;
   interestRate: number;
   loanTerm: number;

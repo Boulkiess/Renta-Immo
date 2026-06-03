@@ -264,7 +264,13 @@ export function compute(p: SimParams, g: Globals): ComputeResult {
   const isViager = p.mode === 'viager';
   const totalCost = isViager
     ? (p.bouquet ?? 0) + p.notaryFees
-    : p.purchasePrice + p.notaryFees + p.renovationCosts + p.agencyFees + (p.loanFees ?? 0);
+    : p.purchasePrice +
+      p.notaryFees +
+      p.renovationCosts +
+      p.agencyFees +
+      (p.loanFees ?? 0) +
+      (p.guaranteeFees ?? 0) +
+      (p.brokerFees ?? 0);
   const loanAmount = Math.max(0, totalCost - p.downPayment);
   const investedDownPayment = Math.min(p.downPayment, totalCost);
   const etfSeed = g.investSurplus ? Math.max(0, p.downPayment - totalCost) : 0;

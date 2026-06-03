@@ -19,6 +19,8 @@ export const DEFAULT_G = {
 
 export const AUTOABLE_FIELDS = new Set([
   'notaryFees',
+  'guaranteeFees',
+  'brokerFees',
   'interestRate',
   'maintenanceReserve',
   'maintenanceReservePrimary',
@@ -59,9 +61,24 @@ function interpRate(loanTerm) {
 
 export function computeAutoValue(p, fieldKey) {
   const base = p.purchasePrice ?? 0;
+  // Loan amount estimated *excluding* the guarantee/broker fees themselves, to avoid
+  // circularity (both live in totalCost, which drives the real loanAmount).
+  const estLoan = Math.max(
+    0,
+    base +
+      (p.notaryFees ?? 0) +
+      (p.renovationCosts ?? 0) +
+      (p.agencyFees ?? 0) +
+      (p.loanFees ?? 0) -
+      (p.downPayment ?? 0)
+  );
   switch (fieldKey) {
     case 'notaryFees':
       return base > 0 ? Math.round(base * 0.08) : 0;
+    case 'guaranteeFees':
+      return Math.round(estLoan * 0.012);
+    case 'brokerFees':
+      return Math.round(estLoan * 0.01);
     case 'interestRate':
       return (p.loanTerm ?? 0) > 0 ? +interpRate(p.loanTerm).toFixed(2) : 0;
     case 'maintenanceReserve':
@@ -98,6 +115,8 @@ export function mkDef(mode) {
     renovationCosts: 15000,
     agencyFees: 0,
     loanFees: 0,
+    guaranteeFees: 0,
+    brokerFees: 0,
     downPayment: 50000,
     interestRate: 3.85,
     loanTerm: 20,
@@ -134,10 +153,24 @@ export function mkDef(mode) {
     ownerChargesGrowth: 2,
     autoFields:
       mode === 'rental'
-        ? ['notaryFees', 'interestRate', 'maintenanceReserve', 'propertyTax']
+        ? [
+            'notaryFees',
+            'guaranteeFees',
+            'brokerFees',
+            'interestRate',
+            'maintenanceReserve',
+            'propertyTax',
+          ]
         : mode === 'viager'
           ? [] // viager has no purchasePrice-derived auto fields (notaryFees auto would zero out)
-          : ['notaryFees', 'interestRate', 'maintenanceReservePrimary', 'propertyTaxPrimary'],
+          : [
+              'notaryFees',
+              'guaranteeFees',
+              'brokerFees',
+              'interestRate',
+              'maintenanceReservePrimary',
+              'propertyTaxPrimary',
+            ],
   };
 }
 
@@ -191,6 +224,8 @@ export const GRP_COMMON = [
       { k: 'renovationCosts', tp: 'e', mn: 0, mx: 400000, st: 1000 },
       { k: 'agencyFees', tp: 'e', mn: 0, mx: 40000, st: 500 },
       { k: 'loanFees', tp: 'e', mn: 0, mx: 10000, st: 100 },
+      { k: 'guaranteeFees', tp: 'e', mn: 0, mx: 30000, st: 100 },
+      { k: 'brokerFees', tp: 'e', mn: 0, mx: 20000, st: 100 },
       { k: 'downPayment', tp: 'e', mn: 0, mx: 500000, st: 1000 },
     ],
   },

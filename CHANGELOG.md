@@ -10,6 +10,16 @@
 
 ### Added
 
+- **Loan guarantee fees & broker fees** — two new acquisition fields (`guaranteeFees`,
+  `brokerFees`) for rental/primary modes, shown in the **Acquisition** group next to
+  `loanFees`. Both fold into `totalCost` (and thus `loanAmount`, the monthly payment, and
+  all downstream KPIs) exactly like `loanFees`. Each supports the existing **Auto** mode
+  (enabled by default, toggleable via the "A" badge): `guaranteeFees` Auto = 1.2% and
+  `brokerFees` Auto = 1% of the estimated loan amount (acquisition cost excluding these two
+  fees, minus the down payment). Viager mode is unaffected (these fields are not part of its
+  Acquisition group). The `loanFees` label/tooltip was narrowed from "File & broker fees" to
+  "File fees" to avoid overlap with the new broker field. Mirrored in the engine-ts variant.
+
 - **Viager (life annuity) investment mode** — a third simulation mode (`'viager'`)
   alongside `rental`/`primary`, modeling **viager occupé** (the seller occupies, so no
   rental income; the property is bought for a **bouquet** + lifetime **rente**). New

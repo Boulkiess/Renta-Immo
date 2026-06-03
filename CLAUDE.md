@@ -155,20 +155,22 @@ no LLM, no API key, no backend).
 
 ### Per simulation (`p`) — Common to `rental` and `primary`
 
-| Key               | Type                                | Default   | Description                                            |
-| ----------------- | ----------------------------------- | --------- | ------------------------------------------------------ |
-| `mode`            | `'rental' \| 'primary' \| 'viager'` | —         | Simulation mode                                        |
-| `purchasePrice`   | €                                   | `250 000` | Property purchase price                                |
-| `notaryFees`      | €                                   | `20 000`  | Notary fees                                            |
-| `renovationCosts` | €                                   | `15 000`  | Renovation works amount                                |
-| `agencyFees`      | €                                   | `0`       | Buyer's agent fees                                     |
-| `loanFees`        | €                                   | `0`       | File & broker fees (included in `totalCost`)           |
-| `downPayment`     | €                                   | `50 000`  | Personal down payment                                  |
-| `interestRate`    | %                                   | `3.85`    | Annual loan interest rate                              |
-| `loanTerm`        | years (5–30)                        | `20`      | Loan duration                                          |
-| `insuranceRate`   | %                                   | `0.25`    | Annual borrower insurance rate (on borrowed capital)   |
-| `propertyGrowth`  | %                                   | `2.0`     | Annual property appreciation                           |
-| `sellingFees`     | %                                   | `4`       | Selling fees (agent, diagnostics…) on the resale price |
+| Key               | Type                                | Default   | Description                                                                            |
+| ----------------- | ----------------------------------- | --------- | -------------------------------------------------------------------------------------- |
+| `mode`            | `'rental' \| 'primary' \| 'viager'` | —         | Simulation mode                                                                        |
+| `purchasePrice`   | €                                   | `250 000` | Property purchase price                                                                |
+| `notaryFees`      | €                                   | `20 000`  | Notary fees                                                                            |
+| `renovationCosts` | €                                   | `15 000`  | Renovation works amount                                                                |
+| `agencyFees`      | €                                   | `0`       | Buyer's agent fees                                                                     |
+| `loanFees`        | €                                   | `0`       | File fees (included in `totalCost`)                                                    |
+| `guaranteeFees`   | €                                   | `0`       | Loan guarantee fees (caution/hypothèque) — in `totalCost`. Autoable: 1.2% of est. loan |
+| `brokerFees`      | €                                   | `0`       | Broker fees — in `totalCost`. Autoable: 1% of est. loan                                |
+| `downPayment`     | €                                   | `50 000`  | Personal down payment                                                                  |
+| `interestRate`    | %                                   | `3.85`    | Annual loan interest rate                                                              |
+| `loanTerm`        | years (5–30)                        | `20`      | Loan duration                                                                          |
+| `insuranceRate`   | %                                   | `0.25`    | Annual borrower insurance rate (on borrowed capital)                                   |
+| `propertyGrowth`  | %                                   | `2.0`     | Annual property appreciation                                                           |
+| `sellingFees`     | %                                   | `4`       | Selling fees (agent, diagnostics…) on the resale price                                 |
 
 ### Per simulation (`p`) — `rental` mode only
 
@@ -245,7 +247,7 @@ All formulas below are implemented in `packages/engine/src/compute.js`. ✅ = ve
 ### Cost and loan
 
 ```
-totalCost          = purchasePrice + notaryFees + renovationCosts + agencyFees + loanFees   ✅ total acquisition cost
+totalCost          = purchasePrice + notaryFees + renovationCosts + agencyFees + loanFees + guaranteeFees + brokerFees   ✅ total acquisition cost (viager: bouquet + notaryFees)
 loanAmount         = max(0, totalCost − downPayment)                                         ✅ borrowed amount
 investedDownPayment = min(downPayment, totalCost)                                            ✅ capital tied up in the property
 etfSeed            = investSurplus ? max(0, downPayment − totalCost) : 0                      ✅ remainder invested in ETF

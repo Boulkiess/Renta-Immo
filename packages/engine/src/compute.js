@@ -28,6 +28,8 @@
  * @property {number} renovationCosts
  * @property {number} agencyFees
  * @property {number} [loanFees]
+ * @property {number} [guaranteeFees]
+ * @property {number} [brokerFees]
  * @property {number} downPayment
  * @property {number} interestRate
  * @property {number} loanTerm
@@ -401,7 +403,13 @@ export function compute(p, g) {
   // décote-amortized occupied value drives resale, not the loan. See CLAUDE.md.
   const totalCost = isViager
     ? p.bouquet + p.notaryFees
-    : p.purchasePrice + p.notaryFees + p.renovationCosts + p.agencyFees + (p.loanFees ?? 0);
+    : p.purchasePrice +
+      p.notaryFees +
+      p.renovationCosts +
+      p.agencyFees +
+      (p.loanFees ?? 0) +
+      (p.guaranteeFees ?? 0) +
+      (p.brokerFees ?? 0);
   const loanAmount = Math.max(0, totalCost - p.downPayment);
   // Capital actually tied up in the property: capped at the total cost. A down
   // payment that exceeds `totalCost` (over-funded cash purchase) leaves a cash

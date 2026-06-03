@@ -104,6 +104,8 @@
     "renovationCosts": { "label": "Travaux" },
     "agencyFees": { "label": "Frais d'agence achat" },
     "loanFees": { "label": "Frais de dossier" },
+    "guaranteeFees": { "label": "Frais de garantie" },
+    "brokerFees": { "label": "Frais de courtage" },
     "downPayment": { "label": "Apport personnel" },
     "interestRate": { "label": "Taux intérêt" },
     "loanTerm": { "label": "Durée (ans)" },
@@ -225,9 +227,17 @@
       "body": "Honoraires d'agence à charge de l'acheteur."
     },
     "loanFees": {
-      "title": "Frais de dossier & courtage",
-      "body": "Frais bancaires liés à l'obtention du prêt (frais de dossier) et/ou honoraires de courtier. Intégrés dans le coût total d'acquisition et dans le montant emprunté.",
-      "code": "totalCost = prixAchat + fraisNotaire + travaux + fraisAgence + fraisDossier"
+      "title": "Frais de dossier",
+      "body": "Frais bancaires liés à l'obtention du prêt. Intégrés dans le coût total d'acquisition et dans le montant emprunté.",
+      "code": "totalCost = prixAchat + fraisNotaire + travaux + fraisAgence + fraisDossier + fraisGarantie + fraisCourtage"
+    },
+    "guaranteeFees": {
+      "title": "Frais de garantie du prêt",
+      "body": "Garantie exigée par la banque (caution type Crédit Logement ou hypothèque/PPD). Intégrés au coût total et au montant emprunté. <b>Auto : 1,2 % du montant emprunté estimé.</b>"
+    },
+    "brokerFees": {
+      "title": "Frais de courtage",
+      "body": "Honoraires du courtier ayant négocié le prêt. Intégrés au coût total et au montant emprunté. <b>Auto : 1 % du montant emprunté estimé.</b>"
     },
     "downPayment": {
       "title": "Apport personnel",
