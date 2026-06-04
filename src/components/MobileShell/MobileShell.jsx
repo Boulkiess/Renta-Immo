@@ -16,15 +16,15 @@ import Sheet from './Sheet.jsx';
  * chart and per-sim / global-settings editors, which open as bottom sheets.
  * Reuses the same ChartArea, FullPanel, and GlobalStrip as the desktop layout.
  */
-/* position:fixed + inset:0 pins the shell to the viewport and takes it out of
-   document flow, so the body can never scroll and lift the bottom nav off the
-   bottom edge (iOS Safari grows the body past the visible area at the top of the
-   page otherwise). Only the inner content / sheets scroll. */
+/* height:100dvh tracks the *visible* viewport (it shrinks/grows as the iOS Safari
+   toolbars show/hide), keeping the bottom nav at the visible bottom. The body
+   itself is locked (see GlobalStyles mobile rules) so it can never scroll and lift
+   the whole shell off the bottom edge. Only the inner content / sheets scroll. */
 const Wrap = styled.div`
-  position: fixed;
-  inset: 0;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   overscroll-behavior: none;
 `;

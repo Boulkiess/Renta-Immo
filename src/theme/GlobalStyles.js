@@ -31,6 +31,19 @@ export const GlobalStyles = createGlobalStyle`
     min-height: 100vh;
   }
 
+  /* Mobile: lock the page so the body never scrolls — only the inner content and
+     sheets do. Without this, iOS Safari grows the body past the visible area at the
+     top of the page and the whole mobile shell (bottom nav included) scrolls up and
+     detaches from the bottom edge. The shell itself uses 100dvh (cf. MobileShell). */
+  @media (max-width: 767px) {
+    html, body {
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+  }
+
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button { opacity: 1; height: 16px; cursor: pointer; }
   input[type=number] { -moz-appearance: textfield; }
