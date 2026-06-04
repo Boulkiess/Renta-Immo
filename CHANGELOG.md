@@ -10,6 +10,13 @@
 
 ### Fixed
 
+- **Mobile: bottom nav detached from the bottom edge on scroll** — the shell used
+  `height: 100dvh`, which at the top of the page (iOS Safari toolbars expanded) is taller
+  than the visible area, so the body became scrollable and the whole shell — bottom nav
+  included — scrolled up off the bottom. The shell is now `position: fixed; inset: 0`
+  (`overscroll-behavior: none`), taking it out of document flow so the body can't scroll;
+  only the inner content/sheets scroll, keeping the nav pinned to the bottom.
+
 - **Mobile: KPI section headers slid off-screen** — when scrolling the comparison table
   horizontally, the section-header rows (COÛTS & FINANCEMENT, etc.) slid away with the
   table and their labels were cut off. The section cell spans every column so it can't be
