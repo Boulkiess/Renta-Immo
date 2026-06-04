@@ -31,6 +31,13 @@ const Header = styled.header`
   padding: 14px 20px;
   border-bottom: 1px solid ${({ theme }) => theme.border};
   flex-shrink: 0;
+  /* Mobile: title + seed chips + close overflow a phone width on one row, which
+     pushed the close button off-screen. Wrap the actions onto their own row. */
+  @media (max-width: 767px) {
+    flex-wrap: wrap;
+    padding: 12px 14px;
+    gap: 8px;
+  }
 `;
 const HTitle = styled.h2`
   margin: 0;
@@ -42,6 +49,10 @@ const HActions = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  /* Own row on mobile; chips share the width and the close button stays visible. */
+  @media (max-width: 767px) {
+    width: 100%;
+  }
 `;
 const Btn = styled.button`
   background: transparent;
@@ -63,6 +74,11 @@ const CloseBtn = styled(Btn)`
   padding: 6px 0;
   font-size: 16px;
   line-height: 1;
+  flex-shrink: 0;
+  @media (max-width: 767px) {
+    width: 40px;
+    height: 40px;
+  }
 `;
 const SeedLabel = styled.span`
   font-size: 11px;
@@ -88,6 +104,13 @@ const SeedChip = styled.button`
   &:hover {
     color: ${({ $color }) => $color};
     border-color: ${({ $color }) => $color};
+  }
+  /* Share the row so all three chips + the close button fit a phone width. */
+  @media (max-width: 767px) {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+    padding: 8px 6px;
   }
 `;
 const Layout = styled.div`

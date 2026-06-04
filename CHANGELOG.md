@@ -8,6 +8,15 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **Mobile: DocPanel close button unreachable** — on a phone the interactive-documentation
+  header (title + 3 seed chips + close ✕) overflowed the viewport on a single non-wrapping
+  row, pushing the ✕ off-screen so the overlay could not be closed (Esc/backdrop still
+  worked, but there is no Esc on a phone). The header now wraps below 768px: the seed chips
+  share their own row and shrink (ellipsis), and the close button stays pinned and visible
+  (enlarged to a 40px touch target). `DocPanel.jsx` only.
+
 ### Added
 
 - **Mobile/smartphone layout — Phase 1 (adaptive shell)** — the app now switches to a
