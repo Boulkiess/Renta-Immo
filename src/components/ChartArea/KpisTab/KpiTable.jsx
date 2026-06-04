@@ -1,6 +1,6 @@
 import { COL } from '../../../state/definitions.js';
 import KpiRow from './KpiRow.jsx';
-import { SectionCell, TableScroll, Table, IndicatorTh } from './KpisTab.styles.js';
+import { SectionCell, SectionLabel, TableScroll, Table, IndicatorTh } from './KpisTab.styles.js';
 
 const headTh = {
   textAlign: 'right',
@@ -47,7 +47,9 @@ export default function KpiTable({ sections, sims, activeKeys, indicatorLabel })
         <tbody>
           {sections.map(sec => [
             <tr key={sec.cat}>
-              <SectionCell colSpan={activeKeys.length + 2}>{sec.cat}</SectionCell>
+              <SectionCell colSpan={activeKeys.length + 2}>
+                <SectionLabel>{sec.cat}</SectionLabel>
+              </SectionCell>
             </tr>,
             ...sec.rows.map(row => <KpiRow key={row.label} row={row} activeKeys={activeKeys} />),
           ])}

@@ -10,6 +10,12 @@
 
 ### Fixed
 
+- **Mobile: KPI section headers slid off-screen** — when scrolling the comparison table
+  horizontally, the section-header rows (COÛTS & FINANCEMENT, etc.) slid away with the
+  table and their labels were cut off. The section cell spans every column so it can't be
+  pinned on its own; the label text is now wrapped in a sticky inner span
+  (`SectionLabel`) that stays pinned left during horizontal scroll. Desktop unchanged.
+
 - **Mobile: KPIs tab right-side gutter** — the three total-worth summary cards
   (`SummaryCards`/`Cards`) sat side-by-side with large non-shrinking mono values, so the
   row was wider than the phone and forced a horizontal gutter on the whole Comparaison tab.

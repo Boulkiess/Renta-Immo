@@ -66,7 +66,20 @@ export const SectionCell = styled.td`
   background: ${({ theme }) => theme.border};
   text-transform: uppercase;
   letter-spacing: 0.8px;
+  /* Padding lives on the inner label so it can be pinned independently. */
+  padding: 0;
+`;
+
+/* The section label. The cell spans every column (so it can't stick on its own),
+   so on mobile we pin the label text instead — it stays visible while the data
+   columns scroll horizontally. Padding here reproduces the desktop bar spacing. */
+export const SectionLabel = styled.span`
+  display: inline-block;
   padding: 4px 10px;
+  @media (max-width: 767px) {
+    position: sticky;
+    left: 0;
+  }
 `;
 
 export const DataCell = styled.td`
