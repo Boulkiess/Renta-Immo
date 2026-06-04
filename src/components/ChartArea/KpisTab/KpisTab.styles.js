@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 export const Wrap = styled.div`
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -100,10 +101,16 @@ export const Cards = styled.div`
   display: flex;
   gap: 10px;
   padding: 12px;
+  /* Mobile: the large mono values don't shrink, so 3 side-by-side cards overflow
+     the viewport and added a right gutter to the whole tab. Stack them. */
+  @media (max-width: 767px) {
+    flex-direction: column;
+  }
 `;
 
 export const Card = styled.div`
   flex: 1;
+  min-width: 0;
   border: 1px solid ${({ theme }) => theme.border};
   border-radius: 8px;
   border-top: 3px solid ${({ $col }) => $col};

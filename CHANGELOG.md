@@ -10,6 +10,12 @@
 
 ### Fixed
 
+- **Mobile: KPIs tab right-side gutter** — the three total-worth summary cards
+  (`SummaryCards`/`Cards`) sat side-by-side with large non-shrinking mono values, so the
+  row was wider than the phone and forced a horizontal gutter on the whole Comparaison tab.
+  The cards now stack vertically below 768px (`Card` also gets `min-width: 0`), and the tab
+  `Wrap` is `overflow-x: hidden` as a guard (the table keeps its own scroll container).
+
 - **Mobile: DocPanel close button unreachable** — on a phone the interactive-documentation
   header (title + 3 seed chips + close ✕) overflowed the viewport on a single non-wrapping
   row, pushing the ✕ off-screen so the overlay could not be closed (Esc/backdrop still
