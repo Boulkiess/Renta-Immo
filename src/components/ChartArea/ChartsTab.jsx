@@ -15,6 +15,14 @@ const Grid = styled.div`
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  /* Mobile: a single full-width column that scrolls vertically — four tiny
+     quadrants are unreadable on a phone. Each chart gets a usable height. */
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-auto-rows: minmax(240px, auto);
+    overflow-y: auto;
+  }
 `;
 
 const Card = styled.div`

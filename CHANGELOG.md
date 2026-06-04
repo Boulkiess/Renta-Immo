@@ -10,6 +10,22 @@
 
 ### Added
 
+- **Mobile/smartphone layout — Phase 1 (adaptive shell)** — the app now switches to a
+  dedicated mobile shell below the `tablet` breakpoint (768px), on the same React +
+  styled-components stack (no new framework, single codebase). New `bp` breakpoint tokens
+  and a `MOBILE_QUERY` constant in `theme/themes.js`; new `useMediaQuery`/`useIsMobile` hook
+  (`components/common/useMediaQuery.js`) drives the desktop↔mobile branch in `App.jsx`.
+  New `components/MobileShell/` (`MobileShell`, `BottomNav`, `Sheet`): a full-width chart
+  area with a bottom tab bar (Chart · A · B · C · Settings); sim panels and global settings
+  open as bottom sheets, reusing the existing `ChartArea`, `FullPanel`, and `GlobalStrip`.
+  `NavBar` gained a `compact` variant (brand + overflow menu) for the mobile header.
+  Canvas charts (`engine/charts.js`) now use responsive left/right gutters, axis font sizes,
+  and x-label density (`chartMetrics`/`labelStep`), and `attachHover` was rewritten on
+  Pointer Events so tooltips work via touch (tap-and-scrub) as well as mouse. `ChartArea`'s
+  tablet reflow media query was scoped to 768–960px so the mobile shell gets a flex-filling
+  chart. New i18n keys `nav.menu`, `mobile.settings`, `mobile.settingsTitle` (fr/en).
+  Desktop layout unchanged. (Phases 2–3: touch-friendly inputs + responsive tables.)
+
 - **Cumulative cash flow at horizon (KpisTab)** — new row in the **Yields & Cashflow**
   section (right after "CF réel/mois", `kpisTable.cumulativeCashFlowHz`) showing `flows[horizon-1].cumulativeCashFlow`,
   the operational "flows" component of `resaleBalance`. Helps explain why **Net sale profit

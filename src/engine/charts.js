@@ -1,5 +1,23 @@
 import { fmtK } from './utils.js';
 
+/**
+ * Responsive chart paddings + axis font size. Narrow canvases (mobile) get a
+ * tighter left gutter and smaller axis labels so the plot area stays usable.
+ * `rMax` is the right gutter on wide screens (large for the dual-axis chart).
+ */
+function chartMetrics(W, { rMax = 14, rMin = 12 } = {}) {
+  const l = Math.round(Math.min(60, Math.max(34, W * 0.16)));
+  const r = Math.round(Math.min(rMax, Math.max(rMin, W * (rMax / 600))));
+  const fs = W < 420 ? 9 : 10;
+  return { l, r, t: 12, b: 26, fs };
+}
+
+/** X-axis label step: keep ~40px between drawn labels. */
+function labelStep(n, cW) {
+  const maxLabels = Math.max(4, Math.floor(cW / 40));
+  return Math.max(1, Math.ceil(n / maxLabels));
+}
+
 export function drawLine(canvas, datasets, xLabels, annotations = [], opts = {}) {
   if (!canvas) return;
   const W = canvas.offsetWidth || 600,
@@ -9,7 +27,7 @@ export function drawLine(canvas, datasets, xLabels, annotations = [], opts = {})
   canvas.height = H * dpr;
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
-  const p = { l: 60, r: 14, t: 12, b: 26 },
+  const p = chartMetrics(W),
     cW = W - p.l - p.r,
     cH = H - p.t - p.b;
   const all = datasets
@@ -46,11 +64,11 @@ export function drawLine(canvas, datasets, xLabels, annotations = [], opts = {})
     ctx.lineTo(W - p.r, y);
     ctx.stroke();
     ctx.fillStyle = mutedColor;
-    ctx.font = "10px 'DM Sans',sans-serif";
+    ctx.font = `${p.fs}px 'DM Sans',sans-serif`;
     ctx.textAlign = 'right';
     ctx.fillText(fmtK(mx - (i / 5) * (mx - mn)), p.l - 4, y + 3.5);
   }
-  const step = Math.max(1, Math.ceil(xLabels.length / 10));
+  const step = labelStep(xLabels.length, cW);
   ctx.fillStyle = mutedColor;
   ctx.textAlign = 'center';
   xLabels.forEach((l, i) => {
@@ -99,7 +117,7 @@ export function drawLine(canvas, datasets, xLabels, annotations = [], opts = {})
     ctx.setLineDash([]);
     if (label) {
       ctx.fillStyle = color;
-      ctx.font = "9px 'DM Sans',sans-serif";
+      ctx.font = `${Math.max(8, p.fs - 1)}px 'DM Sans',sans-serif`;
       ctx.textAlign = 'left';
       ctx.fillText(label, xPx + 3, p.t + 10);
     }
@@ -112,19 +130,28 @@ export function attachHover(canvas) {
   if (!canvas || canvas._hov) return;
   canvas._hov = true;
   canvas.style.cursor = 'crosshair';
+  // Vertical pan still scrolls the page on touch; horizontal scrubbing drives
+  // the tooltip instead of scrolling (Pointer Events unify mouse + touch).
+  canvas.style.touchAction = 'pan-y';
   const tip = document.createElement('div');
   tip.style.cssText =
     "position:fixed;background:var(--s2,#0d1b2a);color:var(--text,#e2e8f0);padding:8px 10px;border-radius:6px;font:11px 'DM Sans',sans-serif;pointer-events:none;display:none;z-index:9999;min-width:120px;box-shadow:0 4px 14px rgba(0,0,0,.5);border:1px solid var(--border,#1e293b);";
   document.body.appendChild(tip);
   canvas._tip = tip;
-  canvas.addEventListener('mousemove', e => {
+
+  let hideTimer = null;
+  const hide = () => {
+    tip.style.display = 'none';
+  };
+
+  const showAt = (clientX, clientY) => {
     const m = canvas._meta;
     if (!m) {
-      tip.style.display = 'none';
+      hide();
       return;
     }
     const rect = canvas.getBoundingClientRect(),
-      cx = e.clientX - rect.left;
+      cx = clientX - rect.left;
     let bi = 0,
       bd = 1e9;
     m.xLabels.forEach((_, i) => {
@@ -144,15 +171,41 @@ export function attachHover(canvas) {
       });
     tip.innerHTML = h;
     tip.style.display = 'block';
-    let tx = e.clientX + 14,
-      ty = e.clientY - 10;
-    if (tx + tip.offsetWidth > innerWidth - 8) tx = e.clientX - tip.offsetWidth - 10;
+    let tx = clientX + 14,
+      ty = clientY - 10;
+    if (tx + tip.offsetWidth > innerWidth - 8) tx = clientX - tip.offsetWidth - 10;
     if (ty + tip.offsetHeight > innerHeight - 8) ty = innerHeight - tip.offsetHeight - 8;
+    if (ty < 8) ty = 8;
     tip.style.left = tx + 'px';
     tip.style.top = ty + 'px';
+  };
+
+  let down = false;
+  canvas.addEventListener('pointerdown', e => {
+    down = true;
+    if (hideTimer) {
+      clearTimeout(hideTimer);
+      hideTimer = null;
+    }
+    showAt(e.clientX, e.clientY);
   });
-  canvas.addEventListener('mouseleave', () => {
-    tip.style.display = 'none';
+  canvas.addEventListener('pointermove', e => {
+    // Mouse: hover anytime. Touch/pen: only while pressed (scrubbing).
+    if (e.pointerType !== 'mouse' && !down) return;
+    showAt(e.clientX, e.clientY);
+  });
+  const release = e => {
+    down = false;
+    // Touch: keep the readout up briefly so it can be read after lifting.
+    if (e && e.pointerType !== 'mouse') {
+      hideTimer = setTimeout(hide, 1500);
+    }
+  };
+  canvas.addEventListener('pointerup', release);
+  canvas.addEventListener('pointercancel', release);
+  // Mouse leaving the canvas dismisses immediately.
+  canvas.addEventListener('pointerleave', e => {
+    if (e.pointerType === 'mouse') hide();
   });
 }
 
@@ -165,7 +218,7 @@ export function drawBars(canvas, datasets, xLabels, stacked) {
   canvas.height = H * dpr;
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
-  const p = { l: 60, r: 14, t: 12, b: 26 },
+  const p = chartMetrics(W),
     cW = W - p.l - p.r,
     cH = H - p.t - p.b,
     n = xLabels.length,
@@ -201,11 +254,11 @@ export function drawBars(canvas, datasets, xLabels, stacked) {
     ctx.lineTo(W - p.r, y);
     ctx.stroke();
     ctx.fillStyle = mutedColor;
-    ctx.font = "10px 'DM Sans',sans-serif";
+    ctx.font = `${p.fs}px 'DM Sans',sans-serif`;
     ctx.textAlign = 'right';
     ctx.fillText(fmtK(mx - (i / 5) * rng), p.l - 4, y + 3.5);
   }
-  const step = Math.max(1, Math.ceil(n / 8));
+  const step = labelStep(n, cW);
   ctx.fillStyle = mutedColor;
   ctx.textAlign = 'center';
   xLabels.forEach((l, i) => {
@@ -268,7 +321,7 @@ export function drawBarsWithLine(canvas, barDatasets, lineDatasets, xLabels) {
   canvas.height = H * dpr;
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
-  const p = { l: 60, r: 56, t: 12, b: 26 },
+  const p = chartMetrics(W, { rMax: 56, rMin: 34 }),
     cW = W - p.l - p.r,
     cH = H - p.t - p.b,
     n = xLabels.length,
@@ -298,13 +351,13 @@ export function drawBarsWithLine(canvas, barDatasets, lineDatasets, xLabels) {
     ctx.lineTo(W - p.r, y);
     ctx.stroke();
     ctx.fillStyle = mutedColor;
-    ctx.font = "10px 'DM Sans',sans-serif";
+    ctx.font = `${p.fs}px 'DM Sans',sans-serif`;
     ctx.textAlign = 'right';
     ctx.fillText(fmtK(mxBar * (1 - i / 5)), p.l - 4, y + 3.5);
     ctx.textAlign = 'left';
     ctx.fillText(fmtK(mxLine * (1 - i / 5)), W - p.r + 4, y + 3.5);
   }
-  const step = Math.max(1, Math.ceil(n / 8));
+  const step = labelStep(n, cW);
   ctx.fillStyle = mutedColor;
   ctx.textAlign = 'center';
   xLabels.forEach((l, i) => {

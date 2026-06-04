@@ -8,7 +8,12 @@
     "exportJson": "{ } JSON",
     "exportYaml": "YAML",
     "lightMode": "Light mode",
-    "darkMode": "Dark mode"
+    "darkMode": "Dark mode",
+    "menu": "Menu"
+  },
+  "mobile": {
+    "settings": "Settings",
+    "settingsTitle": "Global settings"
   },
   "tabs": {
     "charts": "Charts",

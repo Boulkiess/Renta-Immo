@@ -4,11 +4,13 @@ import { GlobalStyles } from './theme/GlobalStyles.js';
 import { darkTheme, lightTheme } from './theme/themes.js';
 import { AppProvider } from './state/AppContext.jsx';
 import { PopoverHost } from './components/common/Popover.jsx';
+import { useIsMobile } from './components/common/useMediaQuery.js';
 import NavBar from './components/NavBar/NavBar.jsx';
 import GlobalStrip from './components/GlobalStrip/GlobalStrip.jsx';
 import SimPanel from './components/SimPanel/SimPanel.jsx';
 import ChartArea from './components/ChartArea/ChartArea.jsx';
 import DocPanel from './components/DocPanel/DocPanel.jsx';
+import MobileShell from './components/MobileShell/MobileShell.jsx';
 
 const AppWrap = styled.div`
   display: flex;
@@ -52,6 +54,7 @@ export default function App() {
     localStorage.getItem('immorenta_theme') === 'light' ? lightTheme : darkTheme
   );
   const [docOpen, setDocOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   function toggleTheme() {
     setTheme(t => {
@@ -65,22 +68,30 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <GlobalStyles />
       <AppProvider>
-        <AppWrap>
-          <NavBar
+        {isMobile ? (
+          <MobileShell
             currentThemeName={theme.name}
             onToggleTheme={toggleTheme}
             onOpenDoc={() => setDocOpen(true)}
           />
-          <GlobalStrip />
-          <Main>
-            <SimsPane>
-              <SimPanel simKey="A" />
-              <SimPanel simKey="B" />
-              <SimPanel simKey="C" />
-            </SimsPane>
-            <ChartArea />
-          </Main>
-        </AppWrap>
+        ) : (
+          <AppWrap>
+            <NavBar
+              currentThemeName={theme.name}
+              onToggleTheme={toggleTheme}
+              onOpenDoc={() => setDocOpen(true)}
+            />
+            <GlobalStrip />
+            <Main>
+              <SimsPane>
+                <SimPanel simKey="A" />
+                <SimPanel simKey="B" />
+                <SimPanel simKey="C" />
+              </SimsPane>
+              <ChartArea />
+            </Main>
+          </AppWrap>
+        )}
         {docOpen && <DocPanel onClose={() => setDocOpen(false)} />}
         <PopoverHost />
       </AppProvider>

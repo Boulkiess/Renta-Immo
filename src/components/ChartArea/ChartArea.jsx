@@ -14,7 +14,9 @@ const Area = styled.div`
   min-width: 0;
   overflow: hidden;
   background: ${({ theme }) => theme.bg};
-  @media (max-width: 960px) {
+  /* Tablet desktop-reflow band only. Below 768px the mobile shell owns the
+     layout and wants ChartArea to flex-fill, so the base styles apply there. */
+  @media (min-width: 768px) and (max-width: 960px) {
     flex: none;
     overflow: visible;
   }
@@ -27,6 +29,12 @@ const TabBar = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.border};
   background: ${({ theme }) => theme.surface};
   flex-shrink: 0;
+  /* Mobile: the four labelled tabs are wider than a phone — scroll them
+     horizontally instead of clipping (Amortissement would be unreachable). */
+  @media (max-width: 767px) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 `;
 
 const TabGroup = styled.div`

@@ -100,6 +100,16 @@ const ExpWrap = styled.div`
   position: relative;
   flex-shrink: 0;
 `;
+const MenuBackdrop = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+`;
+const MenuDivider = styled.div`
+  height: 1px;
+  margin: 4px 6px;
+  background: rgba(255, 255, 255, 0.1);
+`;
 const ExpMenu = styled.div`
   position: absolute;
   right: 0;
@@ -207,14 +217,31 @@ const UploadIcon = () => (
   </svg>
 );
 
-export default function NavBar({ currentThemeName, onToggleTheme, onOpenDoc }) {
+const MenuIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+);
+
+export default function NavBar({ currentThemeName, onToggleTheme, onOpenDoc, compact = false }) {
   const { t, i18n } = useTranslation();
   const { G, sims, RES, etfScenarioGlobal, updateG, updateSimBulk } = useApp();
   const [expOpen, setExpOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const fileRef = useRef(null);
 
   function onExport(fmt) {
     setExpOpen(false);
+    setMenuOpen(false);
     doExport(fmt, buildExportData(G, sims, RES, etfScenarioGlobal));
   }
 
@@ -223,6 +250,100 @@ export default function NavBar({ currentThemeName, onToggleTheme, onOpenDoc }) {
     if (!file) return;
     handleImport(file, { updateG, updateSimBulk });
     e.target.value = '';
+  }
+
+  function setLang(lng) {
+    i18n.changeLanguage(lng);
+    localStorage.setItem('immorenta_lang', lng);
+  }
+
+  const fileInput = (
+    <input
+      ref={fileRef}
+      type="file"
+      accept=".json,.yaml,.yml,.csv"
+      style={{ display: 'none' }}
+      onChange={onImportFile}
+    />
+  );
+
+  if (compact) {
+    return (
+      <Nav>
+        <Brand>
+          <BrandIcon>
+            <HouseIcon />
+          </BrandIcon>
+          <span>{t('nav.brand')}</span>
+        </Brand>
+        <Actions>
+          <ExpWrap>
+            <ThemeBtn
+              onClick={() => setMenuOpen(v => !v)}
+              title={t('nav.menu')}
+              aria-label={t('nav.menu')}
+            >
+              <MenuIcon />
+            </ThemeBtn>
+            {menuOpen && (
+              <>
+                <MenuBackdrop onClick={() => setMenuOpen(false)} />
+                <ExpMenu style={{ minWidth: 168, zIndex: 300 }}>
+                  <ExpOpt
+                    onClick={() => {
+                      onToggleTheme();
+                      setMenuOpen(false);
+                    }}
+                  >
+                    {currentThemeName === 'dark'
+                      ? `☀ ${t('nav.lightMode')}`
+                      : `☾ ${t('nav.darkMode')}`}
+                  </ExpOpt>
+                  <ExpOpt
+                    onClick={() => {
+                      onOpenDoc();
+                      setMenuOpen(false);
+                    }}
+                  >
+                    ? {t('doc.open')}
+                  </ExpOpt>
+                  <MenuDivider />
+                  {['fr', 'en'].map(lng => (
+                    <ExpOpt
+                      key={lng}
+                      onClick={() => {
+                        setLang(lng);
+                        setMenuOpen(false);
+                      }}
+                    >
+                      {i18n.language === lng ? '✓ ' : '  '}
+                      {t(`lang.${lng}`)}
+                    </ExpOpt>
+                  ))}
+                  <MenuDivider />
+                  {['csv', 'json', 'yaml'].map(fmt => (
+                    <ExpOpt key={fmt} onClick={() => onExport(fmt)}>
+                      {t('nav.export')}{' '}
+                      {t(`nav.export${fmt.charAt(0).toUpperCase() + fmt.slice(1)}`)}
+                    </ExpOpt>
+                  ))}
+                  <MenuDivider />
+                  <ExpOpt
+                    onClick={() => {
+                      setMenuOpen(false);
+                      fileRef.current?.click();
+                    }}
+                  >
+                    {t('nav.import')}
+                  </ExpOpt>
+                </ExpMenu>
+              </>
+            )}
+          </ExpWrap>
+        </Actions>
+        {fileInput}
+      </Nav>
+    );
   }
 
   return (

@@ -1,5 +1,12 @@
+// Breakpoints (px). Theme-independent — shared across dark/light. Below `tablet`
+// the app switches to the mobile shell (see useIsMobile). `MOBILE_QUERY` is the
+// single source of truth for that switch.
+export const bp = { mobile: 480, tablet: 768, desktop: 1024 };
+export const MOBILE_QUERY = `(max-width: ${bp.tablet - 1}px)`;
+
 export const darkTheme = {
   name: 'dark',
+  bp,
   bg: '#020817',
   surface: '#0f172a',
   s2: '#0d1b2a',
@@ -26,6 +33,7 @@ export const darkTheme = {
 
 export const lightTheme = {
   name: 'light',
+  bp,
   bg: '#f1f5f9',
   surface: '#ffffff',
   s2: '#f8fafc',
