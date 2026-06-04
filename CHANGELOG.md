@@ -16,7 +16,9 @@
   **locking the page on mobile** (`html, body { height: 100%; overflow: hidden;
 overscroll-behavior: none }` below 768px) so the body can never scroll; the shell keeps
   `height: 100dvh` (which tracks the visible viewport as the toolbars show/hide), and only
-  the inner content/sheets scroll, keeping the nav pinned to the visible bottom.
+  the inner content/sheets scroll, keeping the nav pinned to the visible bottom. `html`/`body`
+  are sized with `100dvh` too (not `100%`) so they resolve to the same height as the shell on
+  iOS, leaving no dead strip below the nav.
 
 - **Mobile: KPI section headers slid off-screen** — when scrolling the comparison table
   horizontally, the section-header rows (COÛTS & FINANCEMENT, etc.) slid away with the

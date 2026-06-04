@@ -37,7 +37,8 @@ export const GlobalStyles = createGlobalStyle`
      detaches from the bottom edge. The shell itself uses 100dvh (cf. MobileShell). */
   @media (max-width: 767px) {
     html, body {
-      height: 100%;
+      height: 100vh;
+      height: 100dvh;
       min-height: 0;
       overflow: hidden;
       overscroll-behavior: none;
