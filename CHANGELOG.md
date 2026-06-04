@@ -10,6 +10,13 @@
 
 ### Fixed
 
+- **Mobile: dead strip below the bottom nav (home-indicator area)** — the viewport meta tag
+  lacked `viewport-fit=cover`, so iOS inset the whole page above the home-indicator safe
+  area, leaving an unusable strip at the bottom (and `env(safe-area-inset-*)` returned 0).
+  Added `viewport-fit=cover`: the app now extends edge-to-edge, the bottom nav's background
+  fills down to the screen edge, and its existing `env(safe-area-inset-bottom)` padding now
+  correctly keeps the nav labels above the home indicator.
+
 - **Mobile: bottom nav detached from the bottom edge on scroll** — at the top of the page
   (iOS Safari toolbars expanded) the body grew past the visible area and became scrollable,
   so the whole mobile shell — bottom nav included — scrolled up off the bottom. Fixed by
