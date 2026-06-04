@@ -31,6 +31,49 @@ const SubTitle = styled.div`
   letter-spacing: 0.5px;
 `;
 
+/* Mobile: the detail table (5 columns with nested sale-price/ETF-pocket lines) is
+   far wider than a phone — scroll horizontally with the Year column pinned. */
+const Scroll = styled.div`
+  @media (max-width: 767px) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+`;
+const DTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  @media (max-width: 767px) {
+    min-width: 640px;
+  }
+`;
+const YearTh = styled.th`
+  text-align: left;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  @media (max-width: 767px) {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--bg);
+    box-shadow: inset -1px 0 0 var(--border);
+  }
+`;
+const YearTd = styled.td`
+  padding: 6px 8px;
+  font-weight: 700;
+  background: ${({ $bg }) => $bg};
+  @media (max-width: 767px) {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    box-shadow: inset -1px 0 0 var(--border);
+  }
+`;
+
 const X_LABELS = Array.from({ length: 30 }, (_, i) => String(i + 1));
 const KEY_YEARS = [5, 10, 15, 20, 25, 30];
 
@@ -115,26 +158,29 @@ export default function ReventeTab() {
 
       <SubTitle dangerouslySetInnerHTML={{ __html: t('charts.resaleDetail') }} />
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-        <thead>
-          <tr>
-            <th
-              style={{
-                textAlign: 'left',
-                padding: '5px 8px',
-                borderBottom: '1px solid var(--border)',
-                fontSize: 10,
-                fontWeight: 600,
-                color: 'var(--muted)',
-              }}
-            >
-              Year
-            </th>
-            {activeKeys.map(k => (
+      <Scroll>
+        <DTable>
+          <thead>
+            <tr>
+              <YearTh>Year</YearTh>
+              {activeKeys.map(k => (
+                <th
+                  key={k}
+                  style={{
+                    color: COL[k],
+                    textAlign: 'right',
+                    padding: '5px 8px',
+                    borderBottom: '1px solid var(--border)',
+                    fontWeight: 800,
+                    fontSize: 10,
+                  }}
+                >
+                  {sims[k].label}
+                </th>
+              ))}
               <th
-                key={k}
                 style={{
-                  color: COL[k],
+                  color: '#94a3b8',
                   textAlign: 'right',
                   padding: '5px 8px',
                   borderBottom: '1px solid var(--border)',
@@ -142,55 +188,48 @@ export default function ReventeTab() {
                   fontSize: 10,
                 }}
               >
-                {sims[k].label}
+                Pure ETF
               </th>
-            ))}
-            <th
-              style={{
-                color: '#94a3b8',
-                textAlign: 'right',
-                padding: '5px 8px',
-                borderBottom: '1px solid var(--border)',
-                fontWeight: 800,
-                fontSize: 10,
-              }}
-            >
-              Pure ETF
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {KEY_YEARS.map((yr, ri) => {
-            const etf = etfScenarioGlobal[yr - 1];
-            const bg = ri % 2 === 0 ? 'var(--s2)' : 'transparent';
-            return (
-              <tr key={yr}>
-                <td style={{ padding: '6px 8px', background: bg, fontWeight: 700 }}>
-                  {t('resale.yr', { n: yr })}
-                </td>
-                {activeKeys.map(k => {
-                  const f = RES[k].flows[yr - 1];
-                  return (
-                    <td key={k} style={{ padding: '6px 8px', textAlign: 'right', background: bg }}>
-                      <div style={{ color: COL[k], fontWeight: 700 }}>{fmtE(f?.totalBalance)}</div>
-                      <div style={{ fontSize: 9, color: 'var(--muted)', marginTop: 2 }}>
-                        {t('resale.salePrice')} {fmtK(f?.netResaleProceeds)}
-                        {' · '}
-                        {t('resale.etfPocket')} {fmtK(f?.etfPocket)}
-                      </div>
-                    </td>
-                  );
-                })}
-                <td style={{ padding: '6px 8px', textAlign: 'right', background: bg }}>
-                  {etf && (
-                    <div style={{ color: '#94a3b8', fontWeight: 700 }}>{fmtE(etf.capNet)}</div>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            </tr>
+          </thead>
+          <tbody>
+            {KEY_YEARS.map((yr, ri) => {
+              const etf = etfScenarioGlobal[yr - 1];
+              // var(--bg) (not transparent) on odd rows so the sticky Year cell is
+              // opaque over horizontally-scrolled content on mobile.
+              const bg = ri % 2 === 0 ? 'var(--s2)' : 'var(--bg)';
+              return (
+                <tr key={yr}>
+                  <YearTd $bg={bg}>{t('resale.yr', { n: yr })}</YearTd>
+                  {activeKeys.map(k => {
+                    const f = RES[k].flows[yr - 1];
+                    return (
+                      <td
+                        key={k}
+                        style={{ padding: '6px 8px', textAlign: 'right', background: bg }}
+                      >
+                        <div style={{ color: COL[k], fontWeight: 700 }}>
+                          {fmtE(f?.totalBalance)}
+                        </div>
+                        <div style={{ fontSize: 9, color: 'var(--muted)', marginTop: 2 }}>
+                          {t('resale.salePrice')} {fmtK(f?.netResaleProceeds)}
+                          {' · '}
+                          {t('resale.etfPocket')} {fmtK(f?.etfPocket)}
+                        </div>
+                      </td>
+                    );
+                  })}
+                  <td style={{ padding: '6px 8px', textAlign: 'right', background: bg }}>
+                    {etf && (
+                      <div style={{ color: '#94a3b8', fontWeight: 700 }}>{fmtE(etf.capNet)}</div>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </DTable>
+      </Scroll>
     </Wrap>
   );
 }

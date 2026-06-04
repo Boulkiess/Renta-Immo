@@ -38,6 +38,15 @@
   sheets (the desktop tree is not mounted below 768px), so desktop is untouched. Phase 3
   (responsive tables) remains.
 
+- **Mobile/smartphone layout — Phase 3 (responsive comparison tables)** — the two wide
+  multi-column tables now stay usable on a phone. The KPI comparison table
+  (`KpisTab/KpiTable.jsx` + styles) and the ReventeTab detail table (`ReventeTab.jsx`) get a
+  horizontal-scroll wrapper with a `min-width` so columns stay readable, and their first
+  column (Indicator / Year) is pinned via `position: sticky` so each row stays identifiable
+  while scrolling the sim + ETF columns sideways. Gated behind `@media (max-width: 767px)`;
+  desktop tables unchanged. Completes the 3-phase mobile adaptation; DocPanel was already
+  responsive and verified at 390px.
+
 - **Cumulative cash flow at horizon (KpisTab)** — new row in the **Yields & Cashflow**
   section (right after "CF réel/mois", `kpisTable.cumulativeCashFlowHz`) showing `flows[horizon-1].cumulativeCashFlow`,
   the operational "flows" component of `resaleBalance`. Helps explain why **Net sale profit

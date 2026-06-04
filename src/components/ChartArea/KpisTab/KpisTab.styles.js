@@ -12,6 +12,39 @@ export const TableWrap = styled.div`
   padding: 12px 12px 0;
 `;
 
+/* Mobile: the 5-column table is wider than a phone — scroll it horizontally
+   while the indicator column stays pinned (sticky) so rows stay identifiable. */
+export const TableScroll = styled.div`
+  @media (max-width: 767px) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+`;
+
+export const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  @media (max-width: 767px) {
+    min-width: 520px;
+  }
+`;
+
+export const IndicatorTh = styled.th`
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid ${({ theme }) => theme.border};
+  font-size: 10px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.muted};
+  @media (max-width: 767px) {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: ${({ theme }) => theme.bg};
+    box-shadow: inset -1px 0 0 ${({ theme }) => theme.border};
+  }
+`;
+
 export const TableTitle = styled.div`
   font-size: 13px;
   font-weight: 700;
@@ -53,6 +86,13 @@ export const LabelCell = styled.td`
   font-size: 11px;
   border-bottom: 1px solid ${({ theme }) => theme.border};
   color: ${({ $muted, theme }) => ($muted ? theme.muted : 'inherit')};
+  @media (max-width: 767px) {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: ${({ theme }) => theme.bg};
+    box-shadow: inset -1px 0 0 ${({ theme }) => theme.border};
+  }
 `;
 
 /* ── Summary cards ── */
