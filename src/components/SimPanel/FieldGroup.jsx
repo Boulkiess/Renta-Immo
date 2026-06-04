@@ -54,7 +54,7 @@ function NumInput({ field, val, isAuto, onChange }) {
 }
 
 function DraggableUnit({ field, val, isAuto, onChange }) {
-  const { onMouseDown } = useDraggableValue({
+  const { onPointerDown } = useDraggableValue({
     val,
     min: field.mn,
     max: field.mx,
@@ -63,7 +63,7 @@ function DraggableUnit({ field, val, isAuto, onChange }) {
   });
 
   return (
-    <Unit onMouseDown={onMouseDown} style={{ opacity: isAuto ? 0.6 : undefined }}>
+    <Unit onPointerDown={onPointerDown} style={{ opacity: isAuto ? 0.6 : undefined }}>
       {unitFor(field.tp)}
     </Unit>
   );

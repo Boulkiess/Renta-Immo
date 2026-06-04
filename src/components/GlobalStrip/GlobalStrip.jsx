@@ -36,8 +36,8 @@ const GearIcon = () => (
 );
 
 function DraggableUnit({ min, max, step, val, onChange, children }) {
-  const { onMouseDown } = useDraggableValue({ val, min, max, step, onChange });
-  return <Unit onMouseDown={onMouseDown}>{children}</Unit>;
+  const { onPointerDown } = useDraggableValue({ val, min, max, step, onChange });
+  return <Unit onPointerDown={onPointerDown}>{children}</Unit>;
 }
 
 export default function GlobalStrip() {

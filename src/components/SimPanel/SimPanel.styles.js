@@ -117,6 +117,8 @@ export const DisabledTag = styled.span`
 `;
 
 /* ── Full panel ── */
+/* Below 768px this only renders inside the mobile sheet (the desktop SimsPane is
+   not mounted there), so the mobile overrides below are sheet-only. */
 export const Panel = styled.div`
   flex: 0 0 ${PANEL_W}px;
   width: ${PANEL_W}px;
@@ -124,6 +126,11 @@ export const Panel = styled.div`
   flex-direction: column;
   border-right: 1px solid ${({ theme }) => theme.border};
   overflow: hidden;
+  @media (max-width: 767px) {
+    flex: none;
+    width: 100%;
+    border-right: none;
+  }
 `;
 
 export const Header = styled.div`
@@ -135,6 +142,10 @@ export const Header = styled.div`
   flex-direction: column;
   gap: 7px;
   flex-shrink: 0;
+  @media (max-width: 767px) {
+    padding: 12px 16px 16px;
+    gap: 12px;
+  }
 `;
 
 export const TopRow = styled.div`
@@ -165,6 +176,10 @@ export const LabelInput = styled.input`
   &:focus {
     border-bottom-color: ${({ theme }) => theme.a};
   }
+  /* 16px keeps iOS Safari from zooming the page on focus. */
+  @media (max-width: 767px) {
+    font-size: 16px;
+  }
 `;
 
 export const IconBtn = styled.button`
@@ -181,6 +196,10 @@ export const IconBtn = styled.button`
   &:hover {
     background: ${({ theme }) => theme.s2};
     color: ${({ theme }) => theme.text};
+  }
+  @media (max-width: 767px) {
+    width: 36px;
+    height: 36px;
   }
 `;
 
@@ -209,12 +228,19 @@ export const ModeBtn = styled.button`
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
+  @media (max-width: 767px) {
+    font-size: 13px;
+    padding: 9px 4px;
+  }
 `;
 
 export const KpiRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px;
+  @media (max-width: 767px) {
+    gap: 8px;
+  }
 `;
 
 export const KpiChip = styled.div`
@@ -225,6 +251,10 @@ export const KpiChip = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1px;
+  @media (max-width: 767px) {
+    padding: 8px 10px;
+    gap: 3px;
+  }
 `;
 export const KpiLabel = styled.span`
   font-size: 8.5px;
@@ -232,12 +262,18 @@ export const KpiLabel = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  @media (max-width: 767px) {
+    font-size: 11px;
+  }
 `;
 export const KpiVal = styled.span`
   font-size: 11px;
   color: ${({ $col }) => $col};
   font-weight: 700;
   font-family: ${({ theme }) => theme.mono};
+  @media (max-width: 767px) {
+    font-size: 15px;
+  }
 `;
 
 export const ScrollBody = styled.div`

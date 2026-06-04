@@ -26,6 +26,18 @@
   chart. New i18n keys `nav.menu`, `mobile.settings`, `mobile.settingsTitle` (fr/en).
   Desktop layout unchanged. (Phases 2–3: touch-friendly inputs + responsive tables.)
 
+- **Mobile/smartphone layout — Phase 2 (full-width sheets + touch inputs)** — inside the
+  mobile sheets, the sim panel (`SimPanel.styles.js`) and global settings
+  (`GlobalStrip.styles.js`) now drop their fixed desktop widths for full-width fluid
+  layouts with larger fonts and ≥36px tap targets (16px inputs to avoid iOS focus zoom);
+  the `GlobalStrip` horizontal strip becomes a scrollable vertical form. `useDraggableValue`
+  was rewritten from mouse-only `requestPointerLock` to **Pointer Events** with
+  `setPointerCapture`, so dragging a unit to scrub a value works on touch as well as mouse
+  (the `Unit` triggers set `touch-action: none`); consumers updated to `onPointerDown`. All
+  mobile styling is gated behind `@media (max-width: 767px)`, which only applies inside the
+  sheets (the desktop tree is not mounted below 768px), so desktop is untouched. Phase 3
+  (responsive tables) remains.
+
 - **Cumulative cash flow at horizon (KpisTab)** — new row in the **Yields & Cashflow**
   section (right after "CF réel/mois", `kpisTable.cumulativeCashFlowHz`) showing `flows[horizon-1].cumulativeCashFlow`,
   the operational "flows" component of `resaleBalance`. Helps explain why **Net sale profit

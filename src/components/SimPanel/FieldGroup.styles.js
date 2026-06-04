@@ -22,6 +22,10 @@ export const GrpHead = styled.button`
   &:hover {
     background: ${({ theme }) => theme.border};
   }
+  @media (max-width: 767px) {
+    font-size: 13px;
+    padding: 12px 16px;
+  }
 `;
 
 export const Body = styled.div`
@@ -29,12 +33,19 @@ export const Body = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
+  @media (max-width: 767px) {
+    padding: 8px 16px 14px;
+    gap: 12px;
+  }
 `;
 
 export const FieldWrap = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2px;
+  @media (max-width: 767px) {
+    gap: 5px;
+  }
 `;
 
 export const LabelRow = styled.div`
@@ -51,12 +62,18 @@ export const FieldLabel = styled.span`
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
+  @media (max-width: 767px) {
+    font-size: 13px;
+  }
 `;
 
 export const InputRow = styled.div`
   display: flex;
   align-items: center;
   gap: 5px;
+  @media (max-width: 767px) {
+    gap: 10px;
+  }
 `;
 
 export const RangeWrap = styled.div`
@@ -82,6 +99,12 @@ export const NumIn = styled.input`
   &:focus {
     border-color: ${({ theme }) => theme.a};
   }
+  /* 16px keeps iOS Safari from zooming on focus. */
+  @media (max-width: 767px) {
+    width: 66px;
+    font-size: 16px;
+    padding: 6px 6px;
+  }
 `;
 
 export const Unit = styled.span`
@@ -92,8 +115,15 @@ export const Unit = styled.span`
   text-align: left;
   cursor: ns-resize;
   user-select: none;
+  touch-action: none;
   &:hover {
     opacity: 1;
+  }
+  @media (max-width: 767px) {
+    font-size: 15px;
+    width: 22px;
+    text-align: center;
+    padding: 6px 0;
   }
 `;
 

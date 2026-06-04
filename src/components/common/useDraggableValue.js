@@ -22,57 +22,68 @@ export function nextDragValue(currentVal, movementY, step, shiftKey, min, max, d
 }
 
 /**
- * Vertical-drag (pointer-lock) logic to adjust a numeric value.
- * Shares the code that was duplicated between FieldGroup and GlobalStrip.
- * Returns `{ onMouseDown }` to wire onto the trigger element (e.g. the unit).
+ * Vertical-drag logic to adjust a numeric value, on **Pointer Events** so it
+ * works with both mouse and touch (the previous mouse-only `requestPointerLock`
+ * implementation did nothing on a phone). Drag distance is the per-event delta
+ * of `clientY`, captured to the trigger via `setPointerCapture` so the gesture
+ * keeps tracking outside the element. Shares the code between FieldGroup and
+ * GlobalStrip. Returns `{ onPointerDown }` to wire onto the trigger (the unit).
+ *
+ * The trigger sets `touch-action: none` (see the `Unit` styled components) so a
+ * vertical drag scrubs the value instead of scrolling the page on touch.
  */
 export function useDraggableValue({ val, min, max, step, onChange }) {
   const dragRef = useRef(null);
   const dec = stepDecimals(step);
 
-  const onMouseDown = e => {
+  const onPointerDown = e => {
     e.preventDefault();
     const el = e.currentTarget;
-    dragRef.current = { currentVal: val };
-    el.requestPointerLock();
+    const { pointerId } = e;
+    dragRef.current = { currentVal: val, lastY: e.clientY };
+    try {
+      el.setPointerCapture(pointerId);
+    } catch {
+      /* capture unsupported — listeners on the element still work for mouse */
+    }
     document.body.style.userSelect = 'none';
 
     const handleMove = mv => {
-      if (!mv.movementY) return;
+      const d = dragRef.current;
+      if (!d) return;
+      const movementY = mv.clientY - d.lastY;
+      d.lastY = mv.clientY;
+      if (!movementY) return;
       const { raw, clamped } = nextDragValue(
-        dragRef.current.currentVal,
-        mv.movementY,
+        d.currentVal,
+        movementY,
         step,
         mv.shiftKey,
         min,
         max,
         dec
       );
-      dragRef.current.currentVal = raw;
+      d.currentVal = raw;
       onChange(clamped);
     };
 
     const cleanup = () => {
-      document.removeEventListener('mousemove', handleMove);
-      document.removeEventListener('mouseup', handleUp);
-      document.removeEventListener('pointerlockchange', onLockChange);
+      el.removeEventListener('pointermove', handleMove);
+      el.removeEventListener('pointerup', cleanup);
+      el.removeEventListener('pointercancel', cleanup);
+      try {
+        el.releasePointerCapture(pointerId);
+      } catch {
+        /* already released */
+      }
       document.body.style.userSelect = '';
       dragRef.current = null;
     };
 
-    const handleUp = () => {
-      document.exitPointerLock();
-      cleanup();
-    };
-
-    const onLockChange = () => {
-      if (!document.pointerLockElement) cleanup();
-    };
-
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('mouseup', handleUp);
-    document.addEventListener('pointerlockchange', onLockChange);
+    el.addEventListener('pointermove', handleMove);
+    el.addEventListener('pointerup', cleanup);
+    el.addEventListener('pointercancel', cleanup);
   };
 
-  return { onMouseDown };
+  return { onPointerDown };
 }
