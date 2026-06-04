@@ -492,6 +492,9 @@
       "desc": "Bilan en cash si vous revendez cette année, sur la même base que le TRI/VAN : revente nette + flux cumulés + loyer économisé (RP) ou − loyer payé (LOC) − apport. Le passage à zéro (marqueur vertical) = durée de détention minimale pour ne pas être perdant. Valeurs <b>nominales</b>, hors coût d'opportunité (vs ETF). <code>cashBalance = netResaleProceeds + Σ(netCashFlow + loyerPerso) − apport</code>"
     },
     "resaleDetail": "Détail par année clé",
+    "etfPure": "ETF pur",
+    "etfPureReal": "ETF pur (réel)",
+    "etfPureNet": "ETF pur (net)",
     "amortization": {
       "title": "Décomposition annuelle du prêt",
       "desc": "Au début la majorité part en intérêts, puis la part en capital augmente progressivement."
@@ -546,6 +549,7 @@
     "gt30y": "> 30 ans"
   },
   "resale": {
+    "year": "Année",
     "salePrice": "Revente :",
     "etfPocket": "ETF poche :",
     "yr": "An {{n}}",

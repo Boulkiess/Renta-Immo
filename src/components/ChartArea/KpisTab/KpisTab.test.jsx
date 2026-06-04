@@ -18,7 +18,8 @@ const tdValues = container =>
 describe('KpisTab (jsdom, real providers)', () => {
   it('renders the table with the pure ETF column', () => {
     renderWithProviders(<KpisTab />);
-    expect(screen.getByText('Pure ETF')).toBeInTheDocument();
+    // Default i18n language is French (cf. i18n/index.js) → "ETF pur".
+    expect(screen.getByText('ETF pur')).toBeInTheDocument();
   });
 
   it('displays the real total cost computed by compute() for sim A', () => {

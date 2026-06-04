@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext.jsx';
 import { COL, KEYS } from '../../state/definitions.js';
 import Legend from '../Legend/Legend.jsx';
@@ -68,11 +69,12 @@ const Tab = styled.button`
   }
 `;
 
+// Labels come from i18n (tabs.<id>) so they follow the language switch.
 const TABS = [
-  { id: 'charts', label: 'Graphiques', Icon: ChartIcon },
-  { id: 'kpis', label: 'Comparaison', Icon: ScaleIcon },
-  { id: 'revente', label: 'Revente', Icon: TagIcon },
-  { id: 'amort', label: 'Amortissement', Icon: BarsIcon },
+  { id: 'charts', Icon: ChartIcon },
+  { id: 'kpis', Icon: ScaleIcon },
+  { id: 'revente', Icon: TagIcon },
+  { id: 'amort', Icon: BarsIcon },
 ];
 
 function ChartIcon() {
@@ -151,16 +153,17 @@ const Content = styled.div`
 `;
 
 export default function ChartArea() {
+  const { t } = useTranslation();
   const { curTab, setCurTab } = useApp();
 
   return (
     <Area>
       <TabBar>
         <TabGroup>
-          {TABS.map(({ id, label, Icon }) => (
+          {TABS.map(({ id, Icon }) => (
             <Tab key={id} $active={curTab === id} onClick={() => setCurTab(id)}>
               <Icon />
-              {label}
+              {t(`tabs.${id}`)}
             </Tab>
           ))}
         </TabGroup>

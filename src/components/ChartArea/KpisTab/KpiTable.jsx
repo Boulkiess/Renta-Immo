@@ -11,7 +11,7 @@ const headTh = {
 };
 
 /** The full KPI comparison table: header (sims + ETF column) + grouped sections. */
-export default function KpiTable({ sections, sims, activeKeys, indicatorLabel }) {
+export default function KpiTable({ sections, sims, activeKeys, indicatorLabel, etfLabel }) {
   return (
     <TableScroll>
       <Table>
@@ -41,7 +41,7 @@ export default function KpiTable({ sections, sims, activeKeys, indicatorLabel })
                 </span>
               </th>
             ))}
-            <th style={{ ...headTh, color: '#94a3b8' }}>Pure ETF</th>
+            <th style={{ ...headTh, color: '#94a3b8' }}>{etfLabel}</th>
           </tr>
         </thead>
         <tbody>

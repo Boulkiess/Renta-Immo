@@ -37,6 +37,7 @@ export default function KpisTab() {
           sims={sims}
           activeKeys={activeKeys}
           indicatorLabel={t('kpisTable.indicator')}
+          etfLabel={t('charts.etfPure')}
         />
       </TableWrap>
 

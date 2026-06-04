@@ -96,7 +96,7 @@ export default function ReventeTab() {
     ds.push({
       color: '#94a3b8',
       dashed: true,
-      label: 'Pure ETF (net)',
+      label: t('charts.etfPureNet'),
       data: etfScenarioGlobal.map((e, i) => dfl(e.capNet, i)),
     });
     return ds;
@@ -162,7 +162,7 @@ export default function ReventeTab() {
         <DTable>
           <thead>
             <tr>
-              <YearTh>Year</YearTh>
+              <YearTh>{t('resale.year')}</YearTh>
               {activeKeys.map(k => (
                 <th
                   key={k}
@@ -188,7 +188,7 @@ export default function ReventeTab() {
                   fontSize: 10,
                 }}
               >
-                Pure ETF
+                {t('charts.etfPure')}
               </th>
             </tr>
           </thead>

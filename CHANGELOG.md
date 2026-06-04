@@ -10,6 +10,16 @@
 
 ### Fixed
 
+- **Untranslated labels on language switch** — several user-facing strings were hardcoded
+  and stayed in one language when toggling FR/EN: the chart tab bar
+  (Graphiques/Comparaison/Revente/Amortissement → now `t('tabs.<id>')`, keys already
+  existed), the "Pure ETF" comparison/resale column headers, the resale table "Year" header,
+  and the "Pure ETF / Pure ETF (real) / (net)" chart dataset labels. Added i18n keys
+  `charts.etfPure` / `charts.etfPureReal` / `charts.etfPureNet` and `resale.year` (fr/en),
+  and wired them through `ChartArea`, `ChartsTab`, `ReventeTab`, and `KpiTable` (ETF label
+  passed as a prop like `indicatorLabel`). Test updated (default i18n language is French, so
+  the ETF column now reads "ETF pur").
+
 - **Mobile: dead strip below the bottom nav (home-indicator area)** — the viewport meta tag
   lacked `viewport-fit=cover`, so iOS inset the whole page above the home-indicator safe
   area, leaving an unusable strip at the bottom (and `env(safe-area-inset-*)` returned 0).

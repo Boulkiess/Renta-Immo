@@ -87,7 +87,7 @@ export default function ChartsTab() {
     ds.push({
       color: '#94a3b8',
       dashed: true,
-      label: 'Pure ETF',
+      label: t('charts.etfPure'),
       data: etfScenarioGlobal.map((e, i) => dfl(e.cap, i)),
     });
     // In nominal mode only, add a secondary dashed line for the real ETF value.
@@ -96,7 +96,7 @@ export default function ChartsTab() {
       ds.push({
         color: '#94a3b840',
         dashed: true,
-        label: 'Pure ETF (real)',
+        label: t('charts.etfPureReal'),
         data: etfScenarioGlobal.map((e, i) => e.cap / Math.pow(1 + infl, i + 1)),
       });
     }

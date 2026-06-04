@@ -492,6 +492,9 @@
       "desc": "Cash balance if you resell this year, on the same basis as IRR/NPV: net resale + cumulative flows + saved rent (primary) or − paid rent (rental) − down payment. The zero crossing (vertical marker) = minimum holding period to avoid a loss. <b>Nominal</b> values, excluding opportunity cost (vs ETF). <code>cashBalance = netResaleProceeds + Σ(netCashFlow + rent) − down payment</code>"
     },
     "resaleDetail": "Detail by key year",
+    "etfPure": "Pure ETF",
+    "etfPureReal": "Pure ETF (real)",
+    "etfPureNet": "Pure ETF (net)",
     "amortization": {
       "title": "Annual loan breakdown",
       "desc": "At the start most goes to interest, then the capital portion increases progressively."
@@ -546,6 +549,7 @@
     "gt30y": "> 30 yrs"
   },
   "resale": {
+    "year": "Year",
     "salePrice": "Sale price:",
     "etfPocket": "ETF pocket:",
     "yr": "Yr {{n}}",
