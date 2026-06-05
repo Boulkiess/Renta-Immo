@@ -22,6 +22,21 @@ import {
 
 const unitFor = tp => (tp === 'e' ? '€' : tp === '%' ? '%' : '');
 
+/**
+ * When a field's slider is dragged while a *different* field's numeric input is
+ * focused (mobile: the soft keyboard is already open on that other field), move
+ * focus to this field's own input so the keyboard follows the parameter being
+ * edited instead of staying on the previous one. Guarded on "a decimal input is
+ * already focused" so a plain slider drag never pops the keyboard on its own.
+ * `preventScroll` avoids iOS yanking the view while dragging.
+ */
+function followFocusToField(rangeEl) {
+  const ae = document.activeElement;
+  if (!ae || ae.tagName !== 'INPUT' || ae.inputMode !== 'decimal') return;
+  const mine = rangeEl.closest('[data-field-row]')?.querySelector('input[inputmode="decimal"]');
+  if (mine && mine !== ae) mine.focus({ preventScroll: true });
+}
+
 function NumInput({ field, val, isAuto, onChange }) {
   const dec = stepDecimals(field.st);
   // null = show formatted value; string = user is actively typing
@@ -135,7 +150,7 @@ export default function FieldGroup({ simKey, group, open, onToggle }) {
                     </AutoBadgeBtn>
                   )}
                 </LabelRow>
-                <InputRow>
+                <InputRow data-field-row>
                   <RangeWrap>
                     <input
                       type="range"
@@ -145,7 +160,10 @@ export default function FieldGroup({ simKey, group, open, onToggle }) {
                       value={val}
                       style={{ width: '100%', opacity: isAuto ? 0.35 : 1 }}
                       disabled={isAuto}
-                      onChange={e => handleChange(+e.target.value)}
+                      onChange={e => {
+                        handleChange(+e.target.value);
+                        followFocusToField(e.currentTarget);
+                      }}
                     />
                   </RangeWrap>
                   <NumInput field={field} val={val} isAuto={isAuto} onChange={handleChange} />

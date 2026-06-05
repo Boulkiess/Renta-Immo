@@ -10,6 +10,13 @@
 
 ### Fixed
 
+- **Mobile: keyboard stayed on the previously edited field** — after typing in one
+  parameter's input (soft keyboard open) and then dragging another parameter's slider, the
+  keyboard/focus stayed on the first field (dragging a range input doesn't move text focus on
+  iOS). The slider's `onChange` now moves focus to that field's own input — but only when a
+  numeric field input is already focused (keyboard already up), so a plain slider drag never
+  pops the keyboard on its own. `FieldGroup.jsx` (`followFocusToField`, `data-field-row`).
+
 - **Untranslated labels on language switch** — several user-facing strings were hardcoded
   and stayed in one language when toggling FR/EN: the chart tab bar
   (Graphiques/Comparaison/Revente/Amortissement → now `t('tabs.<id>')`, keys already
