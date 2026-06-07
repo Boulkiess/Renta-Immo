@@ -13,7 +13,6 @@ const Bar = styled.nav`
   flex-shrink: 0;
   border-top: 1px solid ${({ theme }) => theme.border};
   background: ${({ theme }) => theme.surface};
-  padding-bottom: env(safe-area-inset-bottom, 0);
 `;
 
 const Item = styled.button`
