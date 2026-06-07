@@ -180,25 +180,68 @@ export function attachHover(canvas) {
     tip.style.top = ty + 'px';
   };
 
+  // Touch: the tooltip only appears after a stationary press of HOLD_MS, so a
+  // swipe to scroll past the chart never triggers it. Moving more than MOVE_TOL
+  // px before the hold completes cancels it (it's a scroll/scrub, not a press).
+  // Once armed, the finger scrubs the tooltip. Mouse keeps instant hover.
+  const HOLD_MS = 500;
+  const MOVE_TOL = 10;
   let down = false;
+  let armed = false;
+  let pressTimer = null;
+  let startX = 0;
+  let startY = 0;
+  let lastX = 0;
+  let lastY = 0;
+  const clearPress = () => {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+  };
+
   canvas.addEventListener('pointerdown', e => {
-    down = true;
     if (hideTimer) {
       clearTimeout(hideTimer);
       hideTimer = null;
     }
-    showAt(e.clientX, e.clientY);
+    if (e.pointerType === 'mouse') {
+      down = true;
+      armed = true;
+      showAt(e.clientX, e.clientY);
+      return;
+    }
+    down = true;
+    armed = false;
+    startX = lastX = e.clientX;
+    startY = lastY = e.clientY;
+    clearPress();
+    pressTimer = setTimeout(() => {
+      armed = true;
+      showAt(lastX, lastY);
+    }, HOLD_MS);
   });
   canvas.addEventListener('pointermove', e => {
-    // Mouse: hover anytime. Touch/pen: only while pressed (scrubbing).
-    if (e.pointerType !== 'mouse' && !down) return;
-    showAt(e.clientX, e.clientY);
+    if (e.pointerType === 'mouse') {
+      showAt(e.clientX, e.clientY);
+      return;
+    }
+    if (!down) return;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    if (armed) {
+      showAt(e.clientX, e.clientY);
+    } else if (Math.abs(e.clientX - startX) > MOVE_TOL || Math.abs(e.clientY - startY) > MOVE_TOL) {
+      clearPress();
+    }
   });
   const release = e => {
     down = false;
-    // Touch: keep the readout up briefly so it can be read after lifting.
+    clearPress();
+    // Touch: keep the readout up briefly after lifting, then hide.
     if (e && e.pointerType !== 'mouse') {
-      hideTimer = setTimeout(hide, 1500);
+      if (armed) hideTimer = setTimeout(hide, 1200);
+      armed = false;
     }
   };
   canvas.addEventListener('pointerup', release);

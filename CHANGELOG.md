@@ -8,6 +8,14 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Chart tooltips require a 0.5s press on touch** — on touch devices the chart hover
+  bubble now appears only after a **stationary press of 500ms** (`attachHover`), so a swipe to
+  scroll past a chart no longer pops a tooltip. Moving more than 10px before the hold
+  completes cancels it (treated as a scroll/scrub); once shown, the finger scrubs it and it
+  hides shortly after lifting. Mouse keeps instant hover.
+
 ### Fixed
 
 - **Mobile: settings sheet ignored the theme** — the global-settings content (`GlobalStrip`)
