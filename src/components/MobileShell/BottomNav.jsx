@@ -53,24 +53,6 @@ const Dot = styled.span`
   opacity: ${({ $on }) => ($on ? 1 : 0.4)};
 `;
 
-function ChartIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 4v16h16" />
-      <path d="M7 14l3-4 3 3 4-6" />
-    </svg>
-  );
-}
-
 function GearIcon() {
   return (
     <svg
@@ -95,10 +77,6 @@ export default function BottomNav({ active, onSelect }) {
 
   return (
     <Bar>
-      <Item $active={active === 'chart'} onClick={() => onSelect('chart')}>
-        <ChartIcon />
-        <Label>{t('tabs.charts')}</Label>
-      </Item>
       {KEYS.map(k => (
         <Item
           key={k}

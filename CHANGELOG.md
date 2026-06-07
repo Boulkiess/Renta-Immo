@@ -10,6 +10,11 @@
 
 ### Changed
 
+- **Mobile: removed the redundant "Graphiques" bottom-nav button** — the chart area is always
+  visible behind the sheets, and an open sheet's backdrop covers the bottom nav, so the
+  Charts button was only reachable while already on the chart view, where it did nothing. The
+  bottom nav is now A · B · C · Settings; sheets close via their ✕ or backdrop tap.
+
 - **Chart tooltips require a 0.5s press on touch** — on touch devices the chart hover
   bubble now appears only after a **stationary press of 500ms** (`attachHover`), so a swipe to
   scroll past a chart no longer pops a tooltip. Moving more than 10px before the hold
