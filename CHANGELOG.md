@@ -10,6 +10,13 @@
 
 ### Fixed
 
+- **Mobile: settings sheet ignored the theme** — the global-settings content (`GlobalStrip`)
+  used hardcoded dark colors (`#0c1830`, etc.), so inside the mobile settings sheet it stayed
+  dark even in light theme, clashing with the themed sheet header. The `GlobalStrip` now
+  follows the theme **on mobile only** (`@media max-width:767px` overrides: background,
+  labels, units, values, select, separators use theme tokens); the desktop always-dark chrome
+  bar is unchanged.
+
 - **Mobile: keyboard stayed on the previously edited field** — after typing in one
   parameter's input (soft keyboard open) and then dragging another parameter's slider, the
   keyboard/focus stayed on the first field (dragging a range input doesn't move text focus on

@@ -17,10 +17,13 @@ export const Strip = styled.div`
   flex-wrap: wrap;
   font-size: 11px;
   flex-shrink: 0;
+  /* Mobile lives inside the themed settings sheet, so follow the theme there
+     (desktop keeps the always-dark chrome bar). */
   @media (max-width: 767px) {
     flex-direction: column;
     align-items: stretch;
     border-bottom: none;
+    background: ${({ theme }) => theme.bg};
   }
 `;
 
@@ -76,8 +79,9 @@ export const HypoBand = styled.div`
     line-height: 1.5;
     padding: 12px 16px;
     border-left: none;
-    border-top: 1px solid ${SEP_COL};
+    border-top: 1px solid ${({ theme }) => theme.border};
     font-size: 12px;
+    color: ${({ theme }) => theme.muted};
   }
 `;
 
@@ -95,7 +99,7 @@ export const Field = styled.div`
     padding: 10px 16px;
     gap: 10px;
     border-right: none;
-    border-bottom: 1px solid ${SEP_COL};
+    border-bottom: 1px solid ${({ theme }) => theme.border};
   }
 `;
 
@@ -107,6 +111,7 @@ export const Label = styled.span`
     flex: 1;
     min-width: 0;
     white-space: normal;
+    color: ${({ theme }) => theme.text};
   }
 `;
 
@@ -126,6 +131,7 @@ export const NumInput = styled.input`
     font-size: 16px;
     min-width: 72px;
     width: auto;
+    color: ${({ theme }) => theme.inputColor};
   }
 `;
 
@@ -141,6 +147,7 @@ export const Unit = styled.span`
   @media (max-width: 767px) {
     font-size: 15px;
     padding: 6px 2px;
+    color: ${({ theme }) => theme.muted};
   }
 `;
 
@@ -158,5 +165,8 @@ export const Select = styled.select`
   @media (max-width: 767px) {
     font-size: 16px;
     padding: 8px 10px;
+    background: ${({ theme }) => theme.s2};
+    border-color: ${({ theme }) => theme.border};
+    color: ${({ theme }) => theme.inputColor};
   }
 `;
